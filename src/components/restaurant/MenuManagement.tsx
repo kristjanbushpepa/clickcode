@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,7 +72,8 @@ export function MenuManagement() {
     queryKey: ['categories'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        const restaurantSupabase = getRestaurantSupabase();
+        const { data, error } = await restaurantSupabase
           .from('categories')
           .select('*')
           .order('display_order');
@@ -95,7 +96,8 @@ export function MenuManagement() {
     queryKey: ['menu_items', selectedCategory],
     queryFn: async () => {
       try {
-        let query = supabase.from('menu_items').select('*').order('display_order');
+        const restaurantSupabase = getRestaurantSupabase();
+        let query = restaurantSupabase.from('menu_items').select('*').order('display_order');
         
         if (selectedCategory) {
           query = query.eq('category_id', selectedCategory);
@@ -147,7 +149,8 @@ export function MenuManagement() {
   // Category mutations
   const createCategoryMutation = useMutation({
     mutationFn: async (category: Partial<Category>) => {
-      const { data, error } = await supabase
+      const restaurantSupabase = getRestaurantSupabase();
+      const { data, error } = await restaurantSupabase
         .from('categories')
         .insert([category])
         .select()
@@ -169,7 +172,8 @@ export function MenuManagement() {
 
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Category> & { id: string }) => {
-      const { data, error } = await supabase
+      const restaurantSupabase = getRestaurantSupabase();
+      const { data, error } = await restaurantSupabase
         .from('categories')
         .update(updates)
         .eq('id', id)
@@ -192,7 +196,8 @@ export function MenuManagement() {
 
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const restaurantSupabase = getRestaurantSupabase();
+      const { error } = await restaurantSupabase
         .from('categories')
         .delete()
         .eq('id', id);
@@ -211,7 +216,8 @@ export function MenuManagement() {
   // Menu item mutations
   const createItemMutation = useMutation({
     mutationFn: async (item: Partial<MenuItem>) => {
-      const { data, error } = await supabase
+      const restaurantSupabase = getRestaurantSupabase();
+      const { data, error } = await restaurantSupabase
         .from('menu_items')
         .insert([item])
         .select()
@@ -233,7 +239,8 @@ export function MenuManagement() {
 
   const updateItemMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<MenuItem> & { id: string }) => {
-      const { data, error } = await supabase
+      const restaurantSupabase = getRestaurantSupabase();
+      const { data, error } = await restaurantSupabase
         .from('menu_items')
         .update(updates)
         .eq('id', id)
@@ -256,7 +263,8 @@ export function MenuManagement() {
 
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const restaurantSupabase = getRestaurantSupabase();
+      const { error } = await restaurantSupabase
         .from('menu_items')
         .delete()
         .eq('id', id);

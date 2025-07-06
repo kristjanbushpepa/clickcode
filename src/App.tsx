@@ -28,7 +28,7 @@ function App() {
               <Route path="/admin/*" element={<AdminDashboard />} />
               <Route path="/restaurant/login" element={<RestaurantLogin />} />
               <Route path="/restaurant/dashboard/*" element={<RestaurantDashboard />} />
-              <Route path="/menu/:restaurantId" element={<Menu />} />
+              <Route path="/menu/:restaurantName" element={<Menu />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

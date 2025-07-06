@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -48,16 +47,16 @@ interface RestaurantProfile {
 }
 
 const Menu = () => {
-  const { restaurantId } = useParams();
+  const { restaurantName } = useParams();
   const [searchParams] = useSearchParams();
   const layout = searchParams.get('layout') || 'categories';
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Fetch restaurant info first
+  // Fetch restaurant info by name instead of ID
   const { data: restaurantInfo } = useQuery({
-    queryKey: ['restaurant-info', restaurantId],
+    queryKey: ['restaurant-info', restaurantName],
     queryFn: async () => {
-      if (!restaurantId) throw new Error('Restaurant ID is required');
+      if (!restaurantName) throw new Error('Restaurant name is required');
       
       // This would typically come from your main admin database
       const mainSupabase = createClient(
@@ -65,10 +64,13 @@ const Menu = () => {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppamZibnViemZvbnB4bmdtcXF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjQwMjcsImV4cCI6MjA2NzQwMDAyN30.8Xa-6lpOYD15W4JLU0BqGBdr1zZF3wL2vjR07yJJZKQ'
       );
 
+      // Convert restaurant name to URL-friendly format for comparison
+      const urlFriendlyName = restaurantName.toLowerCase().replace(/\s+/g, '-');
+
       const { data: restaurant, error } = await mainSupabase
         .from('restaurants')
-        .select('supabase_url, supabase_anon_key, name')
-        .eq('id', restaurantId)
+        .select('id, supabase_url, supabase_anon_key, name')
+        .ilike('name', `%${restaurantName.replace(/-/g, ' ')}%`)
         .single();
 
       if (error || !restaurant) {
@@ -77,7 +79,7 @@ const Menu = () => {
 
       return restaurant;
     },
-    enabled: !!restaurantId
+    enabled: !!restaurantName
   });
 
   // Create restaurant-specific supabase client
@@ -88,7 +90,7 @@ const Menu = () => {
 
   // Fetch restaurant profile
   const { data: profile } = useQuery({
-    queryKey: ['restaurant-profile', restaurantId],
+    queryKey: ['restaurant-profile', restaurantName],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) throw new Error('Restaurant database not available');
@@ -106,7 +108,7 @@ const Menu = () => {
 
   // Fetch categories
   const { data: categories = [] } = useQuery({
-    queryKey: ['categories', restaurantId],
+    queryKey: ['categories', restaurantName],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) return [];
@@ -128,7 +130,7 @@ const Menu = () => {
 
   // Fetch menu items
   const { data: menuItems = [] } = useQuery({
-    queryKey: ['menu-items', restaurantId, selectedCategory],
+    queryKey: ['menu-items', restaurantName, selectedCategory],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) return [];
@@ -154,7 +156,7 @@ const Menu = () => {
     enabled: !!restaurantInfo
   });
 
-  if (!restaurantId) {
+  if (!restaurantName) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

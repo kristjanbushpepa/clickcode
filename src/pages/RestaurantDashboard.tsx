@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { RestaurantSidebar } from '@/components/restaurant/RestaurantSidebar';
 import { ProfileManagement } from '@/components/restaurant/ProfileManagement';
 import { MenuManagement } from '@/components/restaurant/MenuManagement';
+import { QRCodeGenerator } from '@/components/restaurant/QRCodeGenerator';
 
 const RestaurantDashboard = () => {
   return (
@@ -24,6 +25,7 @@ const RestaurantDashboard = () => {
             <Routes>
               <Route path="/" element={<ProfileManagement />} />
               <Route path="/menu" element={<MenuManagement />} />
+              <Route path="/qr-generator" element={<QRCodeGenerator />} />
               <Route path="/analytics" element={<div>Analytics (Coming Soon)</div>} />
               <Route path="/customization" element={<div>Customization (Coming Soon)</div>} />
               <Route path="/settings" element={<div>Settings (Coming Soon)</div>} />

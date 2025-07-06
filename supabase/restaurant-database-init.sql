@@ -123,6 +123,35 @@ CREATE TRIGGER update_menu_items_updated_at
   BEFORE UPDATE ON public.menu_items
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Create menu customization settings table
+CREATE TABLE public.menu_customization (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  layout VARCHAR(50) DEFAULT 'categories' CHECK (layout IN ('categories', 'all-items')),
+  primary_color VARCHAR(7) DEFAULT '#8B5CF6',
+  secondary_color VARCHAR(7) DEFAULT '#A855F7',
+  background_color VARCHAR(7) DEFAULT '#FFFFFF',
+  text_color VARCHAR(7) DEFAULT '#1F2937',
+  accent_color VARCHAR(7) DEFAULT '#EC4899',
+  font_family VARCHAR(100) DEFAULT 'Inter',
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Enable RLS on menu_customization
+ALTER TABLE public.menu_customization ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for menu_customization
+CREATE POLICY "Public can view menu customization" ON public.menu_customization
+  FOR SELECT USING (true);
+
+CREATE POLICY "Authenticated users can manage menu customization" ON public.menu_customization
+  FOR ALL TO authenticated USING (true);
+
+-- Create trigger for menu_customization updated_at
+CREATE TRIGGER update_menu_customization_updated_at 
+  BEFORE UPDATE ON public.menu_customization
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Create user profiles table for restaurant staff
 CREATE TABLE public.user_profiles (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -186,3 +215,69 @@ INSERT INTO public.categories (name, name_sq, description, description_sq, displ
   ('Desserts', 'Ëmbëlsirat', 'Sweet endings to your meal', 'Mbarimi i ëmbël i vaktit tuaj', 3),
   ('Beverages', 'Pijet', 'Refreshing drinks and beverages', 'Pije fresknguese dhe të tjera', 4)
 ON CONFLICT DO NOTHING;
+
+-- Insert default menu customization settings
+INSERT INTO public.menu_customization (layout, primary_color, secondary_color, background_color, text_color, accent_color, font_family)
+SELECT 'categories', '#8B5CF6', '#A855F7', '#FFFFFF', '#1F2937', '#EC4899', 'Inter'
+WHERE NOT EXISTS (SELECT 1 FROM public.menu_customization);
+
+-- Insert sample menu items for demonstration
+INSERT INTO public.menu_items (category_id, name, name_sq, description, description_sq, price, currency, is_available, display_order) 
+SELECT 
+  c.id,
+  'Bruschetta Tradicionale',
+  'Brusketa Tradicionale',
+  'Crispy bread topped with fresh tomatoes, basil, and garlic',
+  'Bukë e krokur me domate të freskëta, borzilok dhe hudër',
+  850.00,
+  'ALL',
+  true,
+  1
+FROM public.categories c
+WHERE c.name = 'Appetizers'
+LIMIT 1;
+
+INSERT INTO public.menu_items (category_id, name, name_sq, description, description_sq, price, currency, is_available, display_order) 
+SELECT 
+  c.id,
+  'Pasta Carbonara',
+  'Pasta Karbonara',
+  'Classic Italian pasta with eggs, cheese, pancetta, and black pepper',
+  'Pasta klasike italiane me vezë, djathë, panceta dhe piper të zi',
+  1450.00,
+  'ALL',
+  true,
+  1
+FROM public.categories c
+WHERE c.name = 'Main Courses'
+LIMIT 1;
+
+INSERT INTO public.menu_items (category_id, name, name_sq, description, description_sq, price, currency, is_available, display_order) 
+SELECT 
+  c.id,
+  'Tiramisu',
+  'Tiramisu',
+  'Traditional Italian dessert with coffee-soaked ladyfingers and mascarpone',
+  'Ëmbëlsirë tradicionale italiane me gishta zonje të lagur me kafe dhe maskarpone',
+  750.00,
+  'ALL',
+  true,
+  1
+FROM public.categories c
+WHERE c.name = 'Desserts'
+LIMIT 1;
+
+INSERT INTO public.menu_items (category_id, name, name_sq, description, description_sq, price, currency, is_available, display_order) 
+SELECT 
+  c.id,
+  'Espresso',
+  'Espreso',
+  'Strong Italian coffee served in a small cup',
+  'Kafe e fortë italiane e shërbyer në filxhan të vogël',
+  200.00,
+  'ALL',
+  true,
+  1
+FROM public.categories c
+WHERE c.name = 'Beverages'
+LIMIT 1;

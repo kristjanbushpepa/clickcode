@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@supabase/supabase-js';
-import { Building2, Clock, MapPin, Phone, Mail, Instagram, Facebook, Upload } from 'lucide-react';
+import { Building2, Clock, Instagram, Facebook, Upload, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface RestaurantProfile {
   id?: string;
@@ -40,16 +41,30 @@ interface RestaurantProfile {
 export function ProfileManagement() {
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<RestaurantProfile | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<RestaurantProfile>();
 
-  // Get restaurant info from session storage
+  // Get restaurant info from session storage and create client
   const getRestaurantClient = () => {
-    const restaurantInfo = sessionStorage.getItem('restaurant_info');
-    if (!restaurantInfo) return null;
-    
-    const info = JSON.parse(restaurantInfo);
-    return createClient(info.supabase_url, info.supabase_anon_key);
+    try {
+      const restaurantInfo = sessionStorage.getItem('restaurant_info');
+      if (!restaurantInfo) {
+        setConnectionError('Restaurant connection not found. Please login again.');
+        return null;
+      }
+      
+      const info = JSON.parse(restaurantInfo);
+      if (!info.supabase_url || !info.supabase_anon_key) {
+        setConnectionError('Invalid restaurant connection data. Please login again.');
+        return null;
+      }
+      
+      return createClient(info.supabase_url, info.supabase_anon_key);
+    } catch (error) {
+      setConnectionError('Failed to parse restaurant connection data. Please login again.');
+      return null;
+    }
   };
 
   // Load profile data
@@ -59,16 +74,10 @@ export function ProfileManagement() {
 
   const loadProfile = async () => {
     const supabase = getRestaurantClient();
-    if (!supabase) {
-      toast({
-        title: "Error",
-        description: "Restaurant connection not found. Please login again.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!supabase) return;
 
     try {
+      setConnectionError(null);
       const { data, error } = await supabase
         .from('restaurant_profile')
         .select('*')
@@ -84,6 +93,7 @@ export function ProfileManagement() {
       }
     } catch (error: any) {
       console.error('Error loading profile:', error);
+      setConnectionError('Failed to load restaurant profile from your database.');
       toast({
         title: "Error",
         description: "Failed to load restaurant profile.",
@@ -98,6 +108,7 @@ export function ProfileManagement() {
 
     setIsLoading(true);
     try {
+      setConnectionError(null);
       const profileData = {
         ...data,
         working_hours: data.working_hours || {},
@@ -120,12 +131,13 @@ export function ProfileManagement() {
 
       toast({
         title: "Success",
-        description: "Restaurant profile updated successfully!",
+        description: "Restaurant profile updated successfully in your database!",
       });
 
       loadProfile();
     } catch (error: any) {
       console.error('Error saving profile:', error);
+      setConnectionError('Failed to save profile to your restaurant database.');
       toast({
         title: "Error",
         description: "Failed to save restaurant profile.",
@@ -138,12 +150,35 @@ export function ProfileManagement() {
 
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+  if (connectionError) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {connectionError}
+          </AlertDescription>
+        </Alert>
+        <Button onClick={() => window.location.href = '/restaurant/login'}>
+          Return to Login
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Building2 className="h-6 w-6 text-primary" />
         <h1 className="text-2xl font-bold">Restaurant Profile</h1>
       </div>
+
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          This data is stored in your individual restaurant database and is completely separate from the admin system.
+        </AlertDescription>
+      </Alert>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}

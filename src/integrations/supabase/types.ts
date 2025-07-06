@@ -9,7 +9,201 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          action: string
+          admin_user_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          restaurant_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          restaurant_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          restaurant_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_logs_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      currencies: {
+        Row: {
+          code: string
+          is_active: boolean | null
+          is_base_currency: boolean | null
+          name: string
+          symbol: string
+        }
+        Insert: {
+          code: string
+          is_active?: boolean | null
+          is_base_currency?: boolean | null
+          name: string
+          symbol: string
+        }
+        Update: {
+          code?: string
+          is_active?: boolean | null
+          is_base_currency?: boolean | null
+          name?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
+      languages: {
+        Row: {
+          code: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          name: string
+          native_name: string
+        }
+        Insert: {
+          code: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          name: string
+          native_name: string
+        }
+        Update: {
+          code?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          name?: string
+          native_name?: string
+        }
+        Relationships: []
+      }
+      restaurants: {
+        Row: {
+          address: string | null
+          business_registration_country: string | null
+          business_registration_number: string | null
+          city: string | null
+          connection_status: string | null
+          country: string | null
+          created_at: string
+          id: string
+          last_connected_at: string | null
+          name: string
+          owner_email: string
+          owner_full_name: string
+          owner_phone: string | null
+          postal_code: string | null
+          supabase_anon_key: string
+          supabase_service_role_key: string | null
+          supabase_url: string
+          timezone: string | null
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_registration_country?: string | null
+          business_registration_number?: string | null
+          city?: string | null
+          connection_status?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+          name: string
+          owner_email: string
+          owner_full_name: string
+          owner_phone?: string | null
+          postal_code?: string | null
+          supabase_anon_key: string
+          supabase_service_role_key?: string | null
+          supabase_url: string
+          timezone?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_registration_country?: string | null
+          business_registration_number?: string | null
+          city?: string | null
+          connection_status?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+          name?: string
+          owner_email?: string
+          owner_full_name?: string
+          owner_phone?: string | null
+          postal_code?: string | null
+          supabase_anon_key?: string
+          supabase_service_role_key?: string | null
+          supabase_url?: string
+          timezone?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -11,8 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Eye, EyeOff, Languages, Utensils, Tag } from 'lucide-react';
+import { Plus, Edit, Trash2, EyeOff, Tag, Utensils } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface Category {
@@ -68,41 +67,88 @@ export function MenuManagement() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
-  // Fetch categories
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+  // Fetch categories with error handling
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('display_order');
-      
-      if (error) throw error;
-      return data as Category[];
-    }
+      try {
+        const { data, error } = await supabase
+          .from('categories' as any)
+          .select('*')
+          .order('display_order');
+        
+        if (error) {
+          console.error('Categories fetch error:', error);
+          throw error;
+        }
+        return data as Category[];
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+        return [];
+      }
+    },
+    retry: false
   });
 
-  // Fetch menu items
-  const { data: menuItems = [], isLoading: itemsLoading } = useQuery({
+  // Fetch menu items with error handling
+  const { data: menuItems = [], isLoading: itemsLoading, error: itemsError } = useQuery({
     queryKey: ['menu_items', selectedCategory],
     queryFn: async () => {
-      let query = supabase.from('menu_items').select('*').order('display_order');
-      
-      if (selectedCategory) {
-        query = query.eq('category_id', selectedCategory);
+      try {
+        let query = supabase.from('menu_items' as any).select('*').order('display_order');
+        
+        if (selectedCategory) {
+          query = query.eq('category_id', selectedCategory);
+        }
+        
+        const { data, error } = await query;
+        if (error) {
+          console.error('Menu items fetch error:', error);
+          throw error;
+        }
+        return data as MenuItem[];
+      } catch (error) {
+        console.error('Failed to fetch menu items:', error);
+        return [];
       }
-      
-      const { data, error } = await query;
-      if (error) throw error;
-      return data as MenuItem[];
-    }
+    },
+    retry: false
   });
+
+  // Show error message if tables don't exist
+  if (categoriesError || itemsError) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Menaxhimi i Menusë</h1>
+            <p className="text-muted-foreground">Menaxho kategoritë dhe artikujt e menusë së restorantit tuaj</p>
+          </div>
+        </div>
+        
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">Databaza e menusë nuk është e disponueshme</h3>
+              <p className="text-muted-foreground mb-4">
+                Duket se tabelet e menusë nuk janë krijuar ende në databazën tuaj. 
+                Kontaktoni administratorin për të konfiguruar databazën e restorantit.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Gabim: {categoriesError?.message || itemsError?.message}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Category mutations
   const createCategoryMutation = useMutation({
     mutationFn: async (category: Partial<Category>) => {
       const { data, error } = await supabase
-        .from('categories')
+        .from('categories' as any)
         .insert([category])
         .select()
         .single();
@@ -114,17 +160,17 @@ export function MenuManagement() {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       setShowCategoryDialog(false);
       setEditingCategory(null);
-      toast({ title: 'Category created successfully' });
+      toast({ title: 'Kategoria u krijua me sukses' });
     },
-    onError: (error) => {
-      toast({ title: 'Error creating category', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast({ title: 'Gabim në krijimin e kategorisë', description: error.message, variant: 'destructive' });
     }
   });
 
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Category> & { id: string }) => {
       const { data, error } = await supabase
-        .from('categories')
+        .from('categories' as any)
         .update(updates)
         .eq('id', id)
         .select()
@@ -137,17 +183,17 @@ export function MenuManagement() {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       setShowCategoryDialog(false);
       setEditingCategory(null);
-      toast({ title: 'Category updated successfully' });
+      toast({ title: 'Kategoria u përditësua me sukses' });
     },
-    onError: (error) => {
-      toast({ title: 'Error updating category', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast({ title: 'Gabim në përditësimin e kategorisë', description: error.message, variant: 'destructive' });
     }
   });
 
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('categories')
+        .from('categories' as any)
         .delete()
         .eq('id', id);
       
@@ -155,10 +201,10 @@ export function MenuManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast({ title: 'Category deleted successfully' });
+      toast({ title: 'Kategoria u fshi me sukses' });
     },
-    onError: (error) => {
-      toast({ title: 'Error deleting category', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast({ title: 'Gabim në fshirjen e kategorisë', description: error.message, variant: 'destructive' });
     }
   });
 
@@ -166,7 +212,7 @@ export function MenuManagement() {
   const createItemMutation = useMutation({
     mutationFn: async (item: Partial<MenuItem>) => {
       const { data, error } = await supabase
-        .from('menu_items')
+        .from('menu_items' as any)
         .insert([item])
         .select()
         .single();
@@ -178,17 +224,17 @@ export function MenuManagement() {
       queryClient.invalidateQueries({ queryKey: ['menu_items'] });
       setShowItemDialog(false);
       setEditingItem(null);
-      toast({ title: 'Menu item created successfully' });
+      toast({ title: 'Artikulli i menusë u krijua me sukses' });
     },
-    onError: (error) => {
-      toast({ title: 'Error creating menu item', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast({ title: 'Gabim në krijimin e artikullit', description: error.message, variant: 'destructive' });
     }
   });
 
   const updateItemMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<MenuItem> & { id: string }) => {
       const { data, error } = await supabase
-        .from('menu_items')
+        .from('menu_items' as any)
         .update(updates)
         .eq('id', id)
         .select()
@@ -201,17 +247,17 @@ export function MenuManagement() {
       queryClient.invalidateQueries({ queryKey: ['menu_items'] });
       setShowItemDialog(false);
       setEditingItem(null);
-      toast({ title: 'Menu item updated successfully' });
+      toast({ title: 'Artikulli i menusë u përditësua me sukses' });
     },
-    onError: (error) => {
-      toast({ title: 'Error updating menu item', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast({ title: 'Gabim në përditësimin e artikullit', description: error.message, variant: 'destructive' });
     }
   });
 
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('menu_items')
+        .from('menu_items' as any)
         .delete()
         .eq('id', id);
       
@@ -219,17 +265,19 @@ export function MenuManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menu_items'] });
-      toast({ title: 'Menu item deleted successfully' });
+      toast({ title: 'Artikulli i menusë u fshi me sukses' });
     },
-    onError: (error) => {
-      toast({ title: 'Error deleting menu item', description: error.message, variant: 'destructive' });
+    onError: (error: any) => {
+      toast({ title: 'Gabim në fshirjen e artikullit', description: error.message, variant: 'destructive' });
     }
   });
 
   const handleCategorySubmit = (formData: FormData) => {
     const categoryData: Partial<Category> = {
       name: formData.get('name') as string,
+      name_sq: formData.get('name_sq') as string,
       description: formData.get('description') as string,
+      description_sq: formData.get('description_sq') as string,
       display_order: parseInt(formData.get('display_order') as string) || 0,
       is_active: formData.get('is_active') === 'on'
     };
@@ -245,9 +293,11 @@ export function MenuManagement() {
     const itemData: Partial<MenuItem> = {
       category_id: formData.get('category_id') as string,
       name: formData.get('name') as string,
+      name_sq: formData.get('name_sq') as string,
       description: formData.get('description') as string,
+      description_sq: formData.get('description_sq') as string,
       price: parseFloat(formData.get('price') as string),
-      currency: formData.get('currency') as string || 'EUR',
+      currency: 'ALL', // Albanian Lek as default
       is_available: formData.get('is_available') === 'on',
       is_featured: formData.get('is_featured') === 'on',
       allergens: (formData.get('allergens') as string)?.split(',').map(a => a.trim()).filter(Boolean) || [],
@@ -263,22 +313,22 @@ export function MenuManagement() {
   };
 
   if (categoriesLoading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return <div className="flex justify-center p-8">Duke ngarkuar...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Menu Management</h1>
-          <p className="text-muted-foreground">Manage your restaurant's menu categories and items</p>
+          <h1 className="text-3xl font-bold">Menaxhimi i Menusë</h1>
+          <p className="text-muted-foreground">Menaxho kategoritë dhe artikujt e menusë së restorantit tuaj</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingCategory(null)}>
                 <Tag className="h-4 w-4 mr-2" />
-                Add Category
+                Shto Kategori
               </Button>
             </DialogTrigger>
             <CategoryDialog
@@ -292,7 +342,7 @@ export function MenuManagement() {
             <DialogTrigger asChild>
               <Button onClick={() => setEditingItem(null)}>
                 <Utensils className="h-4 w-4 mr-2" />
-                Add Menu Item
+                Shto Artikull
               </Button>
             </DialogTrigger>
             <MenuItemDialog
@@ -311,7 +361,7 @@ export function MenuManagement() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Tag className="h-5 w-5" />
-              Categories
+              Kategoritë
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -320,7 +370,7 @@ export function MenuManagement() {
               className="w-full justify-start"
               onClick={() => setSelectedCategory(null)}
             >
-              All Items
+              Të gjitha artikujt
             </Button>
             {categories.map((category) => (
               <div key={category.id} className="flex items-center gap-2">
@@ -329,7 +379,7 @@ export function MenuManagement() {
                   className="flex-1 justify-start"
                   onClick={() => setSelectedCategory(category.id)}
                 >
-                  {category.name}
+                  {category.name_sq || category.name}
                   {!category.is_active && <EyeOff className="h-4 w-4 ml-2" />}
                 </Button>
                 <Button
@@ -357,18 +407,18 @@ export function MenuManagement() {
         {/* Menu Items */}
         <div className="lg:col-span-3 space-y-4">
           {itemsLoading ? (
-            <div className="flex justify-center p-8">Loading menu items...</div>
+            <div className="flex justify-center p-8">Duke ngarkuar artikujt e menusë...</div>
           ) : menuItems.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Utensils className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No menu items yet</h3>
+                <h3 className="text-lg font-semibold mb-2">Ende pa artikuj menuje</h3>
                 <p className="text-muted-foreground text-center mb-4">
-                  Start building your menu by adding your first item
+                  Filloni të ndërtoni menunë tuaj duke shtuar artikullin e parë
                 </p>
                 <Button onClick={() => setShowItemDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Menu Item
+                  Shto Artikull Menuje
                 </Button>
               </CardContent>
             </Card>
@@ -408,26 +458,63 @@ function CategoryDialog({
     <DialogContent className="max-w-2xl">
       <DialogHeader>
         <DialogTitle>
-          {category ? 'Edit Category' : 'Add New Category'}
+          {category ? 'Ndrysho Kategorinë' : 'Shto Kategori të Re'}
         </DialogTitle>
         <DialogDescription>
-          {category ? 'Update category information' : 'Create a new menu category'}
+          {category ? 'Përditëso informacionin e kategorisë' : 'Krijo një kategori të re menuje'}
         </DialogDescription>
       </DialogHeader>
       
       <form action={onSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name (English)</Label>
+            <Label htmlFor="name_sq">Emri (Shqip)</Label>
+            <Input
+              id="name_sq"
+              name="name_sq"
+              defaultValue={category?.name_sq || ''}
+              required
+              placeholder="Emri në shqip"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="name">Emri (Anglisht)</Label>
             <Input
               id="name"
               name="name"
               defaultValue={category?.name || ''}
               required
+              placeholder="Emri në anglisht"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="description_sq">Përshkrimi (Shqip)</Label>
+            <Textarea
+              id="description_sq"
+              name="description_sq"
+              defaultValue={category?.description_sq || ''}
+              rows={3}
+              placeholder="Përshkrimi në shqip"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="display_order">Display Order</Label>
+            <Label htmlFor="description">Përshkrimi (Anglisht)</Label>
+            <Textarea
+              id="description"
+              name="description"
+              defaultValue={category?.description || ''}
+              rows={3}
+              placeholder="Përshkrimi në anglisht"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="display_order">Renditja</Label>
             <Input
               id="display_order"
               name="display_order"
@@ -435,33 +522,22 @@ function CategoryDialog({
               defaultValue={category?.display_order || 0}
             />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description">Description (English)</Label>
-          <Textarea
-            id="description"
-            name="description"
-            defaultValue={category?.description || ''}
-            rows={3}
-          />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="is_active"
-            name="is_active"
-            defaultChecked={category?.is_active ?? true}
-          />
-          <Label htmlFor="is_active">Active</Label>
+          <div className="flex items-center space-x-2 pt-6">
+            <Switch
+              id="is_active"
+              name="is_active"
+              defaultChecked={category?.is_active ?? true}
+            />
+            <Label htmlFor="is_active">Aktive</Label>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            Anulo
           </Button>
           <Button type="submit">
-            {category ? 'Update' : 'Create'} Category
+            {category ? 'Përditëso' : 'Krijo'} Kategorinë
           </Button>
         </div>
       </form>
@@ -485,54 +561,32 @@ function MenuItemDialog({
     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>
-          {item ? 'Edit Menu Item' : 'Add New Menu Item'}
+          {item ? 'Ndrysho Artikullin' : 'Shto Artikull të Ri'}
         </DialogTitle>
         <DialogDescription>
-          {item ? 'Update menu item information' : 'Create a new menu item'}
+          {item ? 'Përditëso informacionin e artikullit' : 'Krijo një artikull të ri menuje'}
         </DialogDescription>
       </DialogHeader>
       
       <form action={onSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="category_id">Category</Label>
+            <Label htmlFor="category_id">Kategoria</Label>
             <Select name="category_id" defaultValue={item?.category_id || ''} required>
               <SelectTrigger>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Zgjidh kategorinë" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
-                    {category.name}
+                    {category.name_sq || category.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="name">Name (English)</Label>
-            <Input
-              id="name"
-              name="name"
-              defaultValue={item?.name || ''}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description">Description (English)</Label>
-          <Textarea
-            id="description"
-            name="description"
-            defaultValue={item?.description || ''}
-            rows={3}
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="price">Price</Label>
+            <Label htmlFor="price">Çmimi (ALL)</Label>
             <Input
               id="price"
               name="price"
@@ -540,40 +594,77 @@ function MenuItemDialog({
               step="0.01"
               defaultValue={item?.price || ''}
               required
+              placeholder="0.00"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="name_sq">Emri (Shqip)</Label>
+            <Input
+              id="name_sq"
+              name="name_sq"
+              defaultValue={item?.name_sq || ''}
+              required
+              placeholder="Emri në shqip"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="currency">Currency</Label>
-            <Select name="currency" defaultValue={item?.currency || 'EUR'}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="EUR">EUR</SelectItem>
-                <SelectItem value="USD">USD</SelectItem>
-                <SelectItem value="ALL">ALL</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="name">Emri (Anglisht)</Label>
+            <Input
+              id="name"
+              name="name"
+              defaultValue={item?.name || ''}
+              required
+              placeholder="Emri në anglisht"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="description_sq">Përshkrimi (Shqip)</Label>
+            <Textarea
+              id="description_sq"
+              name="description_sq"
+              defaultValue={item?.description_sq || ''}
+              rows={3}
+              placeholder="Përshkrimi në shqip"
+            />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="preparation_time">Prep Time (min)</Label>
+            <Label htmlFor="description">Përshkrimi (Anglisht)</Label>
+            <Textarea
+              id="description"
+              name="description"
+              defaultValue={item?.description || ''}
+              rows={3}
+              placeholder="Përshkrimi në anglisht"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="allergens">Alergjenet (të ndara me presje)</Label>
+            <Input
+              id="allergens"
+              name="allergens"
+              defaultValue={item?.allergens?.join(', ') || ''}
+              placeholder="gluten, qumësht, arra, etj."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="preparation_time">Koha e përgatitjes (min)</Label>
             <Input
               id="preparation_time"
               name="preparation_time"
               type="number"
               defaultValue={item?.preparation_time || ''}
+              placeholder="15"
             />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="allergens">Allergens (comma-separated)</Label>
-          <Input
-            id="allergens"
-            name="allergens"
-            defaultValue={item?.allergens?.join(', ') || ''}
-            placeholder="gluten, dairy, nuts, etc."
-          />
         </div>
 
         <div className="grid grid-cols-3 gap-4">
@@ -583,7 +674,7 @@ function MenuItemDialog({
               name="is_available"
               defaultChecked={item?.is_available ?? true}
             />
-            <Label htmlFor="is_available">Available</Label>
+            <Label htmlFor="is_available">E disponueshme</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
@@ -591,10 +682,10 @@ function MenuItemDialog({
               name="is_featured"
               defaultChecked={item?.is_featured ?? false}
             />
-            <Label htmlFor="is_featured">Featured</Label>
+            <Label htmlFor="is_featured">E veçantë</Label>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="display_order">Display Order</Label>
+            <Label htmlFor="display_order">Renditja</Label>
             <Input
               id="display_order"
               name="display_order"
@@ -606,10 +697,10 @@ function MenuItemDialog({
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            Anulo
           </Button>
           <Button type="submit">
-            {item ? 'Update' : 'Create'} Menu Item
+            {item ? 'Përditëso' : 'Krijo'} Artikullin
           </Button>
         </div>
       </form>
@@ -637,14 +728,14 @@ function MenuItemCard({
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold">{item.name}</h3>
-              {item.is_featured && <Badge variant="secondary">Featured</Badge>}
-              {!item.is_available && <Badge variant="destructive">Unavailable</Badge>}
+              <h3 className="font-semibold">{item.name_sq || item.name}</h3>
+              {item.is_featured && <Badge variant="secondary">E veçantë</Badge>}
+              {!item.is_available && <Badge variant="destructive">Jo e disponueshme</Badge>}
             </div>
-            <p className="text-sm text-muted-foreground mb-2">{category?.name}</p>
-            <p className="text-sm mb-2">{item.description}</p>
+            <p className="text-sm text-muted-foreground mb-2">{category?.name_sq || category?.name}</p>
+            <p className="text-sm mb-2">{item.description_sq || item.description}</p>
             <div className="flex items-center gap-4 text-sm">
-              <span className="font-medium">{item.price} {item.currency}</span>
+              <span className="font-medium">{item.price} ALL</span>
               {item.preparation_time && (
                 <span className="text-muted-foreground">{item.preparation_time} min</span>
               )}

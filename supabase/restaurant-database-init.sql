@@ -47,13 +47,13 @@ CREATE TRIGGER update_restaurant_profile_updated_at
 CREATE TABLE public.categories (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  name_sq VARCHAR(255), -- Albanian translation
+  name_sq VARCHAR(255), -- Albanian translation (primary)
   name_it VARCHAR(255), -- Italian translation
   name_de VARCHAR(255), -- German translation
   name_fr VARCHAR(255), -- French translation
   name_zh VARCHAR(255), -- Chinese translation
   description TEXT,
-  description_sq TEXT,
+  description_sq TEXT, -- Albanian description (primary)
   description_it TEXT,
   description_de TEXT,
   description_fr TEXT,
@@ -84,19 +84,19 @@ CREATE TABLE public.menu_items (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   category_id UUID REFERENCES public.categories(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
-  name_sq VARCHAR(255), -- Albanian translation
+  name_sq VARCHAR(255), -- Albanian translation (primary)
   name_it VARCHAR(255), -- Italian translation
   name_de VARCHAR(255), -- German translation
   name_fr VARCHAR(255), -- French translation
   name_zh VARCHAR(255), -- Chinese translation
   description TEXT,
-  description_sq TEXT,
+  description_sq TEXT, -- Albanian description (primary)
   description_it TEXT,
   description_de TEXT,
   description_fr TEXT,
   description_zh TEXT,
   price DECIMAL(10,2) NOT NULL,
-  currency VARCHAR(3) DEFAULT 'EUR',
+  currency VARCHAR(3) DEFAULT 'ALL', -- Albanian Lek as default currency
   image_url TEXT,
   is_available BOOLEAN DEFAULT true,
   is_featured BOOLEAN DEFAULT false,
@@ -176,13 +176,13 @@ CREATE POLICY "Authenticated users can manage analytics" ON public.analytics_eve
 
 -- Insert default profile if none exists
 INSERT INTO public.restaurant_profile (name, description) 
-SELECT 'My Restaurant', 'Welcome to our restaurant!'
+SELECT 'Restoranti Im', 'Mirësevini në restorantin tonë!'
 WHERE NOT EXISTS (SELECT 1 FROM public.restaurant_profile);
 
--- Insert default categories
-INSERT INTO public.categories (name, description, display_order) VALUES
-  ('Appetizers', 'Start your meal with our delicious appetizers', 1),
-  ('Main Courses', 'Our signature main dishes', 2),
-  ('Desserts', 'Sweet endings to your meal', 3),
-  ('Beverages', 'Refreshing drinks and beverages', 4)
+-- Insert default categories with Albanian as primary language
+INSERT INTO public.categories (name, name_sq, description, description_sq, display_order) VALUES
+  ('Appetizers', 'Antipastet', 'Start your meal with our delicious appetizers', 'Filloni vaktin tuaj me antipastet tona të shijshme', 1),
+  ('Main Courses', 'Pjatat Kryesore', 'Our signature main dishes', 'Pjatat tona kryesore të veçanta', 2),
+  ('Desserts', 'Ëmbëlsirat', 'Sweet endings to your meal', 'Mbarimi i ëmbël i vaktit tuaj', 3),
+  ('Beverages', 'Pijet', 'Refreshing drinks and beverages', 'Pije fresknguese dhe të tjera', 4)
 ON CONFLICT DO NOTHING;

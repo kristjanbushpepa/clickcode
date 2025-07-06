@@ -1,4 +1,5 @@
 
+
 -- SQL to initialize a new restaurant's individual Supabase database
 -- This file should be run when setting up a new restaurant's database
 
@@ -11,7 +12,31 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create restaurant profile table
+-- Drop existing tables that are not part of our schema (cleanup)
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    -- Get all tables in public schema that are not in our allowed list
+    FOR r IN (
+        SELECT tablename 
+        FROM pg_tables 
+        WHERE schemaname = 'public' 
+        AND tablename NOT IN (
+            'restaurant_profile',
+            'categories', 
+            'menu_items',
+            'menu_customization',
+            'user_profiles',
+            'analytics_events'
+        )
+    ) LOOP
+        EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END $$;
+
+-- Create or replace restaurant profile table
+DROP TABLE IF EXISTS public.restaurant_profile CASCADE;
 CREATE TABLE public.restaurant_profile (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
@@ -31,6 +56,10 @@ CREATE TABLE public.restaurant_profile (
 -- Enable RLS on restaurant_profile
 ALTER TABLE public.restaurant_profile ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Authenticated users can view restaurant profile" ON public.restaurant_profile;
+DROP POLICY IF EXISTS "Authenticated users can manage restaurant profile" ON public.restaurant_profile;
+
 -- Create policies for restaurant profile
 CREATE POLICY "Authenticated users can view restaurant profile" ON public.restaurant_profile
   FOR SELECT TO authenticated USING (true);
@@ -38,12 +67,16 @@ CREATE POLICY "Authenticated users can view restaurant profile" ON public.restau
 CREATE POLICY "Authenticated users can manage restaurant profile" ON public.restaurant_profile
   FOR ALL TO authenticated USING (true);
 
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS update_restaurant_profile_updated_at ON public.restaurant_profile;
+
 -- Create trigger for updated_at
 CREATE TRIGGER update_restaurant_profile_updated_at 
   BEFORE UPDATE ON public.restaurant_profile
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Create categories table for menu organization
+-- Create or replace categories table for menu organization
+DROP TABLE IF EXISTS public.categories CASCADE;
 CREATE TABLE public.categories (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
@@ -67,6 +100,10 @@ CREATE TABLE public.categories (
 -- Enable RLS on categories
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Public can view active categories" ON public.categories;
+DROP POLICY IF EXISTS "Authenticated users can manage categories" ON public.categories;
+
 -- Create policies for categories (public read access for menu API)
 CREATE POLICY "Public can view active categories" ON public.categories
   FOR SELECT USING (is_active = true);
@@ -74,12 +111,16 @@ CREATE POLICY "Public can view active categories" ON public.categories
 CREATE POLICY "Authenticated users can manage categories" ON public.categories
   FOR ALL TO authenticated USING (true);
 
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS update_categories_updated_at ON public.categories;
+
 -- Create trigger for categories updated_at
 CREATE TRIGGER update_categories_updated_at 
   BEFORE UPDATE ON public.categories
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Create menu items table
+-- Create or replace menu items table
+DROP TABLE IF EXISTS public.menu_items CASCADE;
 CREATE TABLE public.menu_items (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   category_id UUID REFERENCES public.categories(id) ON DELETE CASCADE,
@@ -111,6 +152,10 @@ CREATE TABLE public.menu_items (
 -- Enable RLS on menu_items
 ALTER TABLE public.menu_items ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Public can view available menu items" ON public.menu_items;
+DROP POLICY IF EXISTS "Authenticated users can manage menu items" ON public.menu_items;
+
 -- Create policies for menu_items (public read access for menu API)
 CREATE POLICY "Public can view available menu items" ON public.menu_items
   FOR SELECT USING (is_available = true);
@@ -118,12 +163,16 @@ CREATE POLICY "Public can view available menu items" ON public.menu_items
 CREATE POLICY "Authenticated users can manage menu items" ON public.menu_items
   FOR ALL TO authenticated USING (true);
 
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS update_menu_items_updated_at ON public.menu_items;
+
 -- Create trigger for menu_items updated_at
 CREATE TRIGGER update_menu_items_updated_at 
   BEFORE UPDATE ON public.menu_items
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Create menu customization settings table
+-- Create or replace menu customization settings table
+DROP TABLE IF EXISTS public.menu_customization CASCADE;
 CREATE TABLE public.menu_customization (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   layout VARCHAR(50) DEFAULT 'categories' CHECK (layout IN ('categories', 'all-items')),
@@ -140,6 +189,10 @@ CREATE TABLE public.menu_customization (
 -- Enable RLS on menu_customization
 ALTER TABLE public.menu_customization ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Public can view menu customization" ON public.menu_customization;
+DROP POLICY IF EXISTS "Authenticated users can manage menu customization" ON public.menu_customization;
+
 -- Create policies for menu_customization
 CREATE POLICY "Public can view menu customization" ON public.menu_customization
   FOR SELECT USING (true);
@@ -147,12 +200,16 @@ CREATE POLICY "Public can view menu customization" ON public.menu_customization
 CREATE POLICY "Authenticated users can manage menu customization" ON public.menu_customization
   FOR ALL TO authenticated USING (true);
 
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS update_menu_customization_updated_at ON public.menu_customization;
+
 -- Create trigger for menu_customization updated_at
 CREATE TRIGGER update_menu_customization_updated_at 
   BEFORE UPDATE ON public.menu_customization
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Create user profiles table for restaurant staff
+-- Create or replace user profiles table for restaurant staff
+DROP TABLE IF EXISTS public.user_profiles CASCADE;
 CREATE TABLE public.user_profiles (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -168,6 +225,12 @@ CREATE TABLE public.user_profiles (
 -- Enable RLS on user_profiles
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Authenticated users can view all profiles" ON public.user_profiles;
+DROP POLICY IF EXISTS "Authenticated users can manage profiles" ON public.user_profiles;
+
 -- Create policies for user_profiles
 CREATE POLICY "Users can view their own profile" ON public.user_profiles
   FOR SELECT USING (auth.uid() = user_id);
@@ -181,12 +244,16 @@ CREATE POLICY "Authenticated users can view all profiles" ON public.user_profile
 CREATE POLICY "Authenticated users can manage profiles" ON public.user_profiles
   FOR ALL TO authenticated USING (true);
 
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON public.user_profiles;
+
 -- Create trigger for user_profiles updated_at
 CREATE TRIGGER update_user_profiles_updated_at 
   BEFORE UPDATE ON public.user_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Create analytics table for basic tracking
+-- Create or replace analytics table for basic tracking
+DROP TABLE IF EXISTS public.analytics_events CASCADE;
 CREATE TABLE public.analytics_events (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   event_type VARCHAR(100) NOT NULL,
@@ -198,6 +265,9 @@ CREATE TABLE public.analytics_events (
 
 -- Enable RLS on analytics_events
 ALTER TABLE public.analytics_events ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Authenticated users can manage analytics" ON public.analytics_events;
 
 -- Create policies for analytics_events
 CREATE POLICY "Authenticated users can manage analytics" ON public.analytics_events
@@ -281,3 +351,4 @@ SELECT
 FROM public.categories c
 WHERE c.name = 'Beverages'
 LIMIT 1;
+

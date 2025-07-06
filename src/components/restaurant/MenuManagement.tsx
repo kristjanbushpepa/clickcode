@@ -67,13 +67,13 @@ export function MenuManagement() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
-  // Fetch categories with error handling
+  // Fetch categories with proper error handling
   const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       try {
         const { data, error } = await supabase
-          .from('categories' as any)
+          .from('categories')
           .select('*')
           .order('display_order');
         
@@ -81,7 +81,7 @@ export function MenuManagement() {
           console.error('Categories fetch error:', error);
           throw error;
         }
-        return data as Category[];
+        return data || [];
       } catch (error) {
         console.error('Failed to fetch categories:', error);
         return [];
@@ -90,12 +90,12 @@ export function MenuManagement() {
     retry: false
   });
 
-  // Fetch menu items with error handling
+  // Fetch menu items with proper error handling
   const { data: menuItems = [], isLoading: itemsLoading, error: itemsError } = useQuery({
     queryKey: ['menu_items', selectedCategory],
     queryFn: async () => {
       try {
-        let query = supabase.from('menu_items' as any).select('*').order('display_order');
+        let query = supabase.from('menu_items').select('*').order('display_order');
         
         if (selectedCategory) {
           query = query.eq('category_id', selectedCategory);
@@ -106,7 +106,7 @@ export function MenuManagement() {
           console.error('Menu items fetch error:', error);
           throw error;
         }
-        return data as MenuItem[];
+        return data || [];
       } catch (error) {
         console.error('Failed to fetch menu items:', error);
         return [];
@@ -148,7 +148,7 @@ export function MenuManagement() {
   const createCategoryMutation = useMutation({
     mutationFn: async (category: Partial<Category>) => {
       const { data, error } = await supabase
-        .from('categories' as any)
+        .from('categories')
         .insert([category])
         .select()
         .single();
@@ -170,7 +170,7 @@ export function MenuManagement() {
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Category> & { id: string }) => {
       const { data, error } = await supabase
-        .from('categories' as any)
+        .from('categories')
         .update(updates)
         .eq('id', id)
         .select()
@@ -193,7 +193,7 @@ export function MenuManagement() {
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('categories' as any)
+        .from('categories')
         .delete()
         .eq('id', id);
       
@@ -212,7 +212,7 @@ export function MenuManagement() {
   const createItemMutation = useMutation({
     mutationFn: async (item: Partial<MenuItem>) => {
       const { data, error } = await supabase
-        .from('menu_items' as any)
+        .from('menu_items')
         .insert([item])
         .select()
         .single();
@@ -234,7 +234,7 @@ export function MenuManagement() {
   const updateItemMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<MenuItem> & { id: string }) => {
       const { data, error } = await supabase
-        .from('menu_items' as any)
+        .from('menu_items')
         .update(updates)
         .eq('id', id)
         .select()
@@ -257,7 +257,7 @@ export function MenuManagement() {
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('menu_items' as any)
+        .from('menu_items')
         .delete()
         .eq('id', id);
       
@@ -272,7 +272,10 @@ export function MenuManagement() {
     }
   });
 
-  const handleCategorySubmit = (formData: FormData) => {
+  const handleCategorySubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
     const categoryData: Partial<Category> = {
       name: formData.get('name') as string,
       name_sq: formData.get('name_sq') as string,
@@ -289,7 +292,10 @@ export function MenuManagement() {
     }
   };
 
-  const handleItemSubmit = (formData: FormData) => {
+  const handleItemSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
     const itemData: Partial<MenuItem> = {
       category_id: formData.get('category_id') as string,
       name: formData.get('name') as string,
@@ -451,7 +457,7 @@ function CategoryDialog({
   onClose 
 }: { 
   category: Category | null; 
-  onSubmit: (data: FormData) => void; 
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; 
   onClose: () => void; 
 }) {
   return (
@@ -465,7 +471,7 @@ function CategoryDialog({
         </DialogDescription>
       </DialogHeader>
       
-      <form action={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name_sq">Emri (Shqip)</Label>
@@ -554,7 +560,7 @@ function MenuItemDialog({
 }: { 
   item: MenuItem | null; 
   categories: Category[]; 
-  onSubmit: (data: FormData) => void; 
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; 
   onClose: () => void; 
 }) {
   return (
@@ -568,7 +574,7 @@ function MenuItemDialog({
         </DialogDescription>
       </DialogHeader>
       
-      <form action={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="category_id">Kategoria</Label>

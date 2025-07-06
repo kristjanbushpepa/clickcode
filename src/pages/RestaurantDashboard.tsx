@@ -1,39 +1,36 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2 } from 'lucide-react';
+import { Routes, Route } from 'react-router-dom';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { RestaurantSidebar } from '@/components/restaurant/RestaurantSidebar';
+import { ProfileManagement } from '@/components/restaurant/ProfileManagement';
 
 const RestaurantDashboard = () => {
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <Building2 className="h-12 w-12 text-green-600" />
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <RestaurantSidebar />
+        
+        <div className="flex-1 flex flex-col">
+          <header className="h-14 flex items-center border-b bg-background px-4">
+            <SidebarTrigger />
+            <div className="ml-4">
+              <h1 className="text-lg font-semibold">Restaurant Dashboard</h1>
             </div>
-            <CardTitle className="text-2xl font-bold">Restaurant Dashboard</CardTitle>
-            <CardDescription>
-              Manage your digital menu and restaurant profile
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center py-8">
-            <p className="text-gray-600 mb-4">
-              Restaurant dashboard features will be implemented in the next phase:
-            </p>
-            <ul className="text-left max-w-md mx-auto space-y-2 text-sm text-gray-600">
-              <li>• Menu management (CRUD operations)</li>
-              <li>• Profile settings and customization</li>
-              <li>• Multi-language content management</li>
-              <li>• Currency exchange settings</li>
-              <li>• QR code generation</li>
-              <li>• Analytics and reporting</li>
-              <li>• Gamification tools (spin-the-wheel)</li>
-            </ul>
-          </CardContent>
-        </Card>
+          </header>
+          
+          <main className="flex-1 p-6">
+            <Routes>
+              <Route path="/" element={<ProfileManagement />} />
+              <Route path="/menu" element={<div>Menu Management (Coming Soon)</div>} />
+              <Route path="/analytics" element={<div>Analytics (Coming Soon)</div>} />
+              <Route path="/customization" element={<div>Customization (Coming Soon)</div>} />
+              <Route path="/settings" element={<div>Settings (Coming Soon)</div>} />
+            </Routes>
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

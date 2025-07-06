@@ -135,6 +135,54 @@ export type Database = {
         }
         Relationships: []
       }
+      restaurant_profile: {
+        Row: {
+          address: string | null
+          banner_url: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          google_reviews_embed: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          phone: string | null
+          social_media_links: Json | null
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          banner_url?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          google_reviews_embed?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          social_media_links?: Json | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          banner_url?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          google_reviews_embed?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          social_media_links?: Json | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: []
+      }
       restaurants: {
         Row: {
           address: string | null

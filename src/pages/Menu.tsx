@@ -46,88 +46,49 @@ interface RestaurantProfile {
   banner_url?: string;
 }
 
+interface ConnectionConfig {
+  url: string;
+  key: string;
+}
+
 const Menu = () => {
-  const { restaurantName } = useParams();
+  const { connectionData } = useParams();
   const [searchParams] = useSearchParams();
   const layout = searchParams.get('layout') || 'categories';
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  console.log('Menu component loaded with restaurantName:', restaurantName);
+  console.log('Menu component loaded with connectionData:', connectionData);
 
-  // Fetch restaurant info by name from main admin database
-  const { data: restaurantInfo, isLoading: restaurantLoading, error: restaurantError } = useQuery({
-    queryKey: ['restaurant-info', restaurantName],
-    queryFn: async () => {
-      if (!restaurantName) {
-        throw new Error('Restaurant name is required');
-      }
-      
-      console.log('Fetching restaurant info for:', restaurantName);
-      
-      // Main admin database
-      const mainSupabase = createClient(
-        'https://zijfbnubzfonpxngmqqz.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppamZibnViemZvbnB4bmdtcXF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjQwMjcsImV4cCI6MjA2NzQwMDAyN30.8Xa-6lpOYD15W4JLU0BqGBdr1zZF3wL2vjR07yJJZKQ'
-      );
+  // Decode connection data from URL parameter
+  const getConnectionConfig = (): ConnectionConfig | null => {
+    if (!connectionData) {
+      console.error('No connection data provided in URL');
+      return null;
+    }
 
-      // Try multiple search strategies to find the restaurant
-      const searchStrategies = [
-        restaurantName,
-        restaurantName.replace(/-/g, ' '),
-        restaurantName.replace(/-/g, ' ').toLowerCase(),
-        decodeURIComponent(restaurantName),
-        decodeURIComponent(restaurantName.replace(/-/g, ' ')),
-        restaurantName.toLowerCase(),
-        restaurantName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-      ];
+    try {
+      const decoded = atob(connectionData);
+      const config = JSON.parse(decoded) as ConnectionConfig;
+      console.log('Decoded connection config:', { url: config.url, hasKey: !!config.key });
+      return config;
+    } catch (error) {
+      console.error('Failed to decode connection data:', error);
+      return null;
+    }
+  };
 
-      console.log('Trying search strategies:', searchStrategies);
-
-      let restaurant = null;
-      
-      for (const searchTerm of searchStrategies) {
-        try {
-          const { data, error } = await mainSupabase
-            .from('restaurants')
-            .select('id, supabase_url, supabase_anon_key, name')
-            .or(`name.ilike.%${searchTerm}%,name.eq.${searchTerm}`)
-            .limit(1);
-
-          console.log(`Search for "${searchTerm}":`, { data, error });
-
-          if (data && data.length > 0) {
-            restaurant = data[0];
-            console.log('Found restaurant with strategy:', searchTerm, restaurant);
-            break;
-          }
-        } catch (searchError) {
-          console.log(`Search strategy "${searchTerm}" failed:`, searchError);
-          continue;
-        }
-      }
-
-      if (!restaurant) {
-        console.error('Restaurant not found with any search strategy');
-        throw new Error(`Restaurant "${restaurantName}" not found`);
-      }
-
-      console.log('Final restaurant found:', restaurant);
-      return restaurant;
-    },
-    enabled: !!restaurantName,
-    retry: 1
-  });
+  const connectionConfig = getConnectionConfig();
 
   // Create restaurant-specific supabase client
   const getRestaurantSupabase = () => {
-    if (!restaurantInfo) return null;
-    console.log('Creating restaurant supabase client with URL:', restaurantInfo.supabase_url);
-    return createClient(restaurantInfo.supabase_url, restaurantInfo.supabase_anon_key);
+    if (!connectionConfig) return null;
+    console.log('Creating restaurant supabase client with URL:', connectionConfig.url);
+    return createClient(connectionConfig.url, connectionConfig.key);
   };
 
   // Fetch restaurant profile from individual database
   const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ['restaurant-profile', restaurantInfo?.id],
+    queryKey: ['restaurant-profile', connectionConfig?.url],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) throw new Error('Restaurant database not available');
@@ -146,13 +107,13 @@ const Menu = () => {
       console.log('Profile data:', data);
       return data as RestaurantProfile;
     },
-    enabled: !!restaurantInfo,
+    enabled: !!connectionConfig,
     retry: 1
   });
 
   // Fetch categories from individual database
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
-    queryKey: ['categories', restaurantInfo?.id],
+    queryKey: ['categories', connectionConfig?.url],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) return [];
@@ -172,13 +133,13 @@ const Menu = () => {
       console.log('Categories data:', data);
       return data as Category[];
     },
-    enabled: !!restaurantInfo,
+    enabled: !!connectionConfig,
     retry: 1
   });
 
   // Fetch menu items from individual database
   const { data: menuItems = [], isLoading: itemsLoading } = useQuery({
-    queryKey: ['menu-items', restaurantInfo?.id, selectedCategory],
+    queryKey: ['menu-items', connectionConfig?.url, selectedCategory],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) return [];
@@ -204,7 +165,7 @@ const Menu = () => {
       console.log('Menu items data:', data);
       return data as MenuItem[];
     },
-    enabled: !!restaurantInfo,
+    enabled: !!connectionConfig,
     retry: 1
   });
 
@@ -213,40 +174,26 @@ const Menu = () => {
   };
 
   // Loading states
-  if (!restaurantName) {
+  if (!connectionData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Invalid Restaurant Link</h1>
-          <p className="text-muted-foreground">This menu link is not valid.</p>
+          <h1 className="text-2xl font-bold mb-4">Invalid Menu Link</h1>
+          <p className="text-muted-foreground">This menu link is not valid or has expired.</p>
         </div>
       </div>
     );
   }
 
-  if (restaurantLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Finding restaurant...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (restaurantError || !restaurantInfo) {
+  if (!connectionConfig) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Restaurant Not Found</h1>
-          <p className="text-muted-foreground mb-4">
-            The restaurant "{restaurantName}" could not be found.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Error: {restaurantError?.message}
+          <h1 className="text-2xl font-bold mb-4">Invalid Menu Link</h1>
+          <p className="text-muted-foreground">
+            The menu link could not be decoded. Please check the QR code or URL.
           </p>
         </div>
       </div>
@@ -278,7 +225,7 @@ const Menu = () => {
                 className="h-16 w-16 mx-auto mb-4 rounded-full object-cover"
               />
             )}
-            <h1 className="text-3xl font-bold mb-2">{profile?.name || restaurantInfo.name}</h1>
+            <h1 className="text-3xl font-bold mb-2">{profile?.name || 'Restaurant Menu'}</h1>
             {profile?.description && (
               <p className="text-primary-foreground/80 max-w-2xl mx-auto">{profile.description}</p>
             )}
@@ -367,7 +314,7 @@ const Menu = () => {
               className="h-12 w-12 mx-auto mb-2 rounded-full object-cover"
             />
           )}
-          <h1 className="text-2xl font-bold mb-1">{profile?.name || restaurantInfo.name}</h1>
+          <h1 className="text-2xl font-bold mb-1">{profile?.name || 'Restaurant Menu'}</h1>
           {profile?.description && (
             <p className="text-primary-foreground/80 text-sm">{profile.description}</p>
           )}

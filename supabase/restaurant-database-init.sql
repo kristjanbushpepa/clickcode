@@ -1,5 +1,4 @@
 
-
 -- SQL to initialize a new restaurant's individual Supabase database
 -- This file should be run when setting up a new restaurant's database
 
@@ -28,12 +27,39 @@ BEGIN
             'menu_items',
             'menu_customization',
             'user_profiles',
-            'analytics_events'
+            'analytics_events',
+            'connection_config'
         )
     ) LOOP
         EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
     END LOOP;
 END $$;
+
+-- Create connection configuration table to store Supabase connection details
+DROP TABLE IF EXISTS public.connection_config CASCADE;
+CREATE TABLE public.connection_config (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  supabase_url VARCHAR(500) NOT NULL,
+  supabase_anon_key TEXT NOT NULL,
+  restaurant_id VARCHAR(255), -- Optional reference to main admin database
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Enable RLS on connection_config
+ALTER TABLE public.connection_config ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for connection_config (public read access for menu API)
+CREATE POLICY "Public can view connection config" ON public.connection_config
+  FOR SELECT USING (true);
+
+CREATE POLICY "Authenticated users can manage connection config" ON public.connection_config
+  FOR ALL TO authenticated USING (true);
+
+-- Create trigger for connection_config updated_at
+CREATE TRIGGER update_connection_config_updated_at 
+  BEFORE UPDATE ON public.connection_config
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Create or replace restaurant profile table
 DROP TABLE IF EXISTS public.restaurant_profile CASCADE;
@@ -273,6 +299,11 @@ DROP POLICY IF EXISTS "Authenticated users can manage analytics" ON public.analy
 CREATE POLICY "Authenticated users can manage analytics" ON public.analytics_events
   FOR ALL TO authenticated USING (true);
 
+-- Insert default connection config (will need to be updated manually with actual values)
+INSERT INTO public.connection_config (supabase_url, supabase_anon_key, restaurant_id) 
+SELECT 'https://your-restaurant-project.supabase.co', 'your-anon-key-here', 'restaurant-id-here'
+WHERE NOT EXISTS (SELECT 1 FROM public.connection_config);
+
 -- Insert default profile if none exists
 INSERT INTO public.restaurant_profile (name, description) 
 SELECT 'Restoranti Im', 'Mirësevini në restorantin tonë!'
@@ -351,4 +382,3 @@ SELECT
 FROM public.categories c
 WHERE c.name = 'Beverages'
 LIMIT 1;
-

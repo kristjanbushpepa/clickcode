@@ -1,98 +1,105 @@
+
 import React, { useState, useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { QrCode, Download, ExternalLink } from 'lucide-react';
-import QRCodeLib from 'qrcode';
-import { createClient } from '@supabase/supabase-js';
+import { QrCode, Download, ExternalLink, Copy, Check } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { getRestaurantInfo } from '@/utils/restaurantDatabase';
 
 export function QRCodeGenerator() {
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [layout, setLayout] = useState('categories');
-  const [restaurantName, setRestaurantName] = useState('');
-  const [menuUrl, setMenuUrl] = useState('');
-
-  // Get restaurant info from session storage
-  const getRestaurantInfo = () => {
-    try {
-      const restaurantInfo = sessionStorage.getItem('restaurant_info');
-      if (!restaurantInfo) return null;
-      return JSON.parse(restaurantInfo);
-    } catch (error) {
-      console.error('Error parsing restaurant info:', error);
-      return null;
-    }
+  const [layout, setLayout] = useState<'categories' | 'all-items'>('categories');
+  const [size, setSize] = useState(256);
+  const [includeMargin, setIncludeMargin] = useState(true);
+  const [copied, setCopied] = useState(false);
+  
+  const restaurantInfo = getRestaurantInfo();
+  
+  // Convert restaurant name to URL-friendly format
+  const getUrlFriendlyName = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
   };
 
-  // Load restaurant profile to get the name
-  useEffect(() => {
-    const loadRestaurantProfile = async () => {
-      const restaurantInfo = getRestaurantInfo();
-      if (!restaurantInfo) return;
+  const urlFriendlyName = restaurantInfo?.name ? getUrlFriendlyName(restaurantInfo.name) : '';
+  const menuUrl = `${window.location.origin}/menu/${urlFriendlyName}${layout !== 'categories' ? `?layout=${layout}` : ''}`;
 
-      try {
-        const supabase = createClient(restaurantInfo.supabase_url, restaurantInfo.supabase_anon_key);
-        
-        const { data: profile, error } = await supabase
-          .from('restaurant_profile')
-          .select('name')
-          .single();
+  const downloadQR = () => {
+    const svg = document.getElementById('qr-code');
+    if (!svg) return;
 
-        if (error) {
-          console.error('Error loading restaurant profile:', error);
-          // Fallback to restaurant info name
-          setRestaurantName(restaurantInfo.name || 'restaurant');
-          return;
-        }
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
 
-        const name = profile?.name || restaurantInfo.name || 'restaurant';
-        setRestaurantName(name);
-      } catch (error) {
-        console.error('Error:', error);
-        // Fallback to restaurant info name
-        const restaurantInfo = getRestaurantInfo();
-        setRestaurantName(restaurantInfo?.name || 'restaurant');
-      }
+    canvas.width = size;
+    canvas.height = size;
+
+    img.onload = () => {
+      ctx?.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL('image/png');
+      
+      const downloadLink = document.createElement('a');
+      downloadLink.download = `menu-qr-${urlFriendlyName}.png`;
+      downloadLink.href = pngFile;
+      downloadLink.click();
     };
 
-    loadRestaurantProfile();
-  }, []);
-
-  // Generate menu URL with restaurant name
-  useEffect(() => {
-    if (restaurantName) {
-      // Convert restaurant name to URL-friendly format
-      const urlFriendlyName = restaurantName.toLowerCase().replace(/\s+/g, '-');
-      const baseUrl = window.location.origin;
-      const url = `${baseUrl}/menu/${urlFriendlyName}${layout !== 'categories' ? `?layout=${layout}` : ''}`;
-      setMenuUrl(url);
-    }
-  }, [restaurantName, layout]);
-
-  const generateQRCode = () => {
-    QRCodeLib.toDataURL(menuUrl, {
-      errorCorrectionLevel: 'H'
-    }, (err, url) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      setQrCodeUrl(url);
-    });
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
   };
 
-  const downloadQRCode = () => {
-    if (qrCodeUrl) {
-      const link = document.createElement('a');
-      link.href = qrCodeUrl;
-      link.download = 'menu_qrcode.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(menuUrl);
+      setCopied(true);
+      toast({
+        title: "URL copied to clipboard",
+        description: "Menu URL has been copied successfully."
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: "Failed to copy URL",
+        description: "Please copy the URL manually.",
+        variant: "destructive"
+      });
     }
   };
+
+  const openMenu = () => {
+    window.open(menuUrl, '_blank');
+  };
+
+  if (!restaurantInfo) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <QrCode className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold">QR Code Generator</h1>
+        </div>
+        
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">Restaurant information not found</h3>
+              <p className="text-muted-foreground">
+                Please ensure you're logged in and have restaurant data configured.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -101,78 +108,148 @@ export function QRCodeGenerator() {
         <h1 className="text-2xl font-bold">QR Code Generator</h1>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* QR Code Display */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Menu QR Code</CardTitle>
+            <CardDescription>
+              QR code for {restaurantInfo.name} menu
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-center">
+              <div className="p-4 bg-white rounded-lg border">
+                <QRCodeSVG
+                  id="qr-code"
+                  value={menuUrl}
+                  size={size}
+                  level="M"
+                  includeMargin={includeMargin}
+                  className="border rounded"
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button onClick={downloadQR} className="flex-1">
+                <Download className="h-4 w-4 mr-2" />
+                Download PNG
+              </Button>
+              <Button onClick={openMenu} variant="outline" className="flex-1">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Preview Menu
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle>QR Code Settings</CardTitle>
+            <CardDescription>
+              Customize your QR code appearance and menu layout
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="layout">Menu Layout</Label>
+              <Select value={layout} onValueChange={(value: 'categories' | 'all-items') => setLayout(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="categories">Categories View</SelectItem>
+                  <SelectItem value="all-items">All Items View</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="size">Size (pixels)</Label>
+              <Select value={size.toString()} onValueChange={(value) => setSize(parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="128">128x128</SelectItem>
+                  <SelectItem value="256">256x256</SelectItem>
+                  <SelectItem value="512">512x512</SelectItem>
+                  <SelectItem value="1024">1024x1024</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Menu URL</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  value={menuUrl}
+                  readOnly
+                  className="flex-1 text-sm"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={copyUrl}
+                  className="shrink-0"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <h4 className="font-medium mb-2">Preview Details</h4>
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <p><strong>Restaurant:</strong> {restaurantInfo.name}</p>
+                <p><strong>URL:</strong> /menu/{urlFriendlyName}</p>
+                <p><strong>Layout:</strong> {layout === 'categories' ? 'Categories' : 'All Items'}</p>
+                <p><strong>Size:</strong> {size}x{size}px</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Instructions */}
       <Card>
         <CardHeader>
-          <CardTitle>Menu URL</CardTitle>
+          <CardTitle>How to Use</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="restaurant-name">Restaurant Name</Label>
-            <Input
-              id="restaurant-name"
-              type="text"
-              value={restaurantName}
-              onChange={(e) => setRestaurantName(e.target.value)}
-              placeholder="Enter restaurant name"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="layout">Layout</Label>
-            <Select value={layout} onValueChange={setLayout}>
-              <SelectTrigger id="layout">
-                <SelectValue placeholder="Select layout" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="categories">Categories</SelectItem>
-                <SelectItem value="all">All Items</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Menu URL</Label>
-            <div className="flex items-center">
-              <Input
-                type="text"
-                value={menuUrl}
-                readOnly
-                className="cursor-not-allowed"
-              />
-              <Button variant="ghost" size="sm" onClick={() => window.open(menuUrl, '_blank')}>
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open
-              </Button>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+                <QrCode className="h-6 w-6 text-primary" />
+              </div>
+              <h4 className="font-medium mb-1">1. Generate</h4>
+              <p className="text-sm text-muted-foreground">
+                Customize and download your QR code
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+                <Download className="h-6 w-6 text-primary" />
+              </div>
+              <h4 className="font-medium mb-1">2. Print</h4>
+              <p className="text-sm text-muted-foreground">
+                Add to table tents, posters, or receipts
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+                <ExternalLink className="h-6 w-6 text-primary" />
+              </div>
+              <h4 className="font-medium mb-1">3. Share</h4>
+              <p className="text-sm text-muted-foreground">
+                Customers scan to view your digital menu
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>QR Code</CardTitle>
-        </CardHeader>
-        <CardContent className="grid place-items-center">
-          {qrCodeUrl ? (
-            <img src={qrCodeUrl} alt="QR Code" />
-          ) : (
-            <p className="text-muted-foreground">Generate a QR code to display here</p>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end gap-2">
-        <Button onClick={generateQRCode}>
-          <QrCode className="h-4 w-4 mr-2" />
-          Generate QR Code
-        </Button>
-        {qrCodeUrl && (
-          <Button variant="secondary" onClick={downloadQRCode}>
-            <Download className="h-4 w-4 mr-2" />
-            Download QR Code
-          </Button>
-        )}
-      </div>
     </div>
   );
 }

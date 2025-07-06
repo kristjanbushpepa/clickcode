@@ -54,7 +54,7 @@ const Menu = () => {
 
   console.log('Menu component loaded with restaurantName:', restaurantName);
 
-  // Fetch restaurant info by name
+  // Fetch restaurant info by name from main admin database
   const { data: restaurantInfo, isLoading: restaurantLoading, error: restaurantError } = useQuery({
     queryKey: ['restaurant-info', restaurantName],
     queryFn: async () => {
@@ -71,39 +71,47 @@ const Menu = () => {
       );
 
       // Try multiple search strategies to find the restaurant
-      const searchTerms = [
+      const searchStrategies = [
         restaurantName,
         restaurantName.replace(/-/g, ' '),
         restaurantName.replace(/-/g, ' ').toLowerCase(),
         decodeURIComponent(restaurantName),
-        decodeURIComponent(restaurantName.replace(/-/g, ' '))
+        decodeURIComponent(restaurantName.replace(/-/g, ' ')),
+        restaurantName.toLowerCase(),
+        restaurantName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
       ];
 
-      console.log('Trying search terms:', searchTerms);
+      console.log('Trying search strategies:', searchStrategies);
 
       let restaurant = null;
       
-      for (const term of searchTerms) {
-        const { data, error } = await mainSupabase
-          .from('restaurants')
-          .select('id, supabase_url, supabase_anon_key, name')
-          .or(`name.ilike.%${term}%,name.eq.${term}`)
-          .limit(1);
+      for (const searchTerm of searchStrategies) {
+        try {
+          const { data, error } = await mainSupabase
+            .from('restaurants')
+            .select('id, supabase_url, supabase_anon_key, name')
+            .or(`name.ilike.%${searchTerm}%,name.eq.${searchTerm}`)
+            .limit(1);
 
-        console.log(`Search for "${term}":`, { data, error });
+          console.log(`Search for "${searchTerm}":`, { data, error });
 
-        if (data && data.length > 0) {
-          restaurant = data[0];
-          break;
+          if (data && data.length > 0) {
+            restaurant = data[0];
+            console.log('Found restaurant with strategy:', searchTerm, restaurant);
+            break;
+          }
+        } catch (searchError) {
+          console.log(`Search strategy "${searchTerm}" failed:`, searchError);
+          continue;
         }
       }
 
       if (!restaurant) {
-        console.error('Restaurant not found with any search term');
+        console.error('Restaurant not found with any search strategy');
         throw new Error(`Restaurant "${restaurantName}" not found`);
       }
 
-      console.log('Found restaurant:', restaurant);
+      console.log('Final restaurant found:', restaurant);
       return restaurant;
     },
     enabled: !!restaurantName,
@@ -117,14 +125,14 @@ const Menu = () => {
     return createClient(restaurantInfo.supabase_url, restaurantInfo.supabase_anon_key);
   };
 
-  // Fetch restaurant profile
+  // Fetch restaurant profile from individual database
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['restaurant-profile', restaurantInfo?.id],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) throw new Error('Restaurant database not available');
 
-      console.log('Fetching restaurant profile...');
+      console.log('Fetching restaurant profile from individual database...');
       const { data, error } = await supabase
         .from('restaurant_profile')
         .select('*')
@@ -142,14 +150,14 @@ const Menu = () => {
     retry: 1
   });
 
-  // Fetch categories
+  // Fetch categories from individual database
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories', restaurantInfo?.id],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) return [];
 
-      console.log('Fetching categories...');
+      console.log('Fetching categories from individual database...');
       const { data, error } = await supabase
         .from('categories')
         .select('*')
@@ -168,14 +176,14 @@ const Menu = () => {
     retry: 1
   });
 
-  // Fetch menu items
+  // Fetch menu items from individual database
   const { data: menuItems = [], isLoading: itemsLoading } = useQuery({
     queryKey: ['menu-items', restaurantInfo?.id, selectedCategory],
     queryFn: async () => {
       const supabase = getRestaurantSupabase();
       if (!supabase) return [];
 
-      console.log('Fetching menu items for category:', selectedCategory);
+      console.log('Fetching menu items from individual database for category:', selectedCategory);
       let query = supabase
         .from('menu_items')
         .select('*')
@@ -260,7 +268,7 @@ const Menu = () => {
   if (layout === 'categories') {
     return (
       <div className="min-h-screen bg-background">
-        {/* Header */}
+        {/* Header with restaurant profile data */}
         <div className="bg-primary text-primary-foreground py-8">
           <div className="container mx-auto px-4 text-center">
             {profile?.logo_url && (
@@ -274,10 +282,16 @@ const Menu = () => {
             {profile?.description && (
               <p className="text-primary-foreground/80 max-w-2xl mx-auto">{profile.description}</p>
             )}
+            {profile?.address && (
+              <p className="text-primary-foreground/60 mt-2">{profile.address}</p>
+            )}
+            {profile?.phone && (
+              <p className="text-primary-foreground/60 mt-1">{profile.phone}</p>
+            )}
           </div>
         </div>
 
-        {/* Categories */}
+        {/* Categories Grid */}
         <div className="container mx-auto px-4 py-8">
           {categories.length === 0 ? (
             <div className="text-center py-12">
@@ -343,7 +357,7 @@ const Menu = () => {
   // All items layout
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Header with restaurant profile data */}
       <div className="bg-primary text-primary-foreground py-6">
         <div className="container mx-auto px-4 text-center">
           {profile?.logo_url && (

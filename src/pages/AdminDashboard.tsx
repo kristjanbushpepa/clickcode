@@ -1,14 +1,14 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminLogin from '@/components/admin/AdminLogin';
+import AdminSetup from '@/components/admin/AdminSetup';
 import RestaurantList from '@/components/admin/RestaurantList';
 import AddRestaurantDialog from '@/components/admin/AddRestaurantDialog';
 import { Button } from '@/components/ui/button';
 import { Plus, LogOut, Users, Building2, Activity } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const { user, isAdmin, signOut, loading } = useAuth();
+  const { user, isAdmin, hasAdminUsers, signOut, loading } = useAuth();
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   if (loading) {
@@ -19,7 +19,18 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!user || !isAdmin) {
+  // Show setup page if no admin users exist and user is not authenticated
+  if (!hasAdminUsers && !user) {
+    return <AdminSetup />;
+  }
+
+  // Show login if user is not authenticated but admins exist
+  if (!user) {
+    return <AdminLogin />;
+  }
+
+  // Show login if user is authenticated but not an admin
+  if (!isAdmin) {
     return <AdminLogin />;
   }
 

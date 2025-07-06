@@ -47,7 +47,17 @@ CREATE TRIGGER update_restaurant_profile_updated_at
 CREATE TABLE public.categories (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  name_sq VARCHAR(255), -- Albanian translation
+  name_it VARCHAR(255), -- Italian translation
+  name_de VARCHAR(255), -- German translation
+  name_fr VARCHAR(255), -- French translation
+  name_zh VARCHAR(255), -- Chinese translation
   description TEXT,
+  description_sq TEXT,
+  description_it TEXT,
+  description_de TEXT,
+  description_fr TEXT,
+  description_zh TEXT,
   display_order INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
@@ -57,7 +67,10 @@ CREATE TABLE public.categories (
 -- Enable RLS on categories
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
--- Create policies for categories
+-- Create policies for categories (public read access for menu API)
+CREATE POLICY "Public can view active categories" ON public.categories
+  FOR SELECT USING (is_active = true);
+
 CREATE POLICY "Authenticated users can manage categories" ON public.categories
   FOR ALL TO authenticated USING (true);
 
@@ -71,7 +84,17 @@ CREATE TABLE public.menu_items (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   category_id UUID REFERENCES public.categories(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
+  name_sq VARCHAR(255), -- Albanian translation
+  name_it VARCHAR(255), -- Italian translation
+  name_de VARCHAR(255), -- German translation
+  name_fr VARCHAR(255), -- French translation
+  name_zh VARCHAR(255), -- Chinese translation
   description TEXT,
+  description_sq TEXT,
+  description_it TEXT,
+  description_de TEXT,
+  description_fr TEXT,
+  description_zh TEXT,
   price DECIMAL(10,2) NOT NULL,
   currency VARCHAR(3) DEFAULT 'EUR',
   image_url TEXT,
@@ -88,7 +111,7 @@ CREATE TABLE public.menu_items (
 -- Enable RLS on menu_items
 ALTER TABLE public.menu_items ENABLE ROW LEVEL SECURITY;
 
--- Create policies for menu_items
+-- Create policies for menu_items (public read access for menu API)
 CREATE POLICY "Public can view available menu items" ON public.menu_items
   FOR SELECT USING (is_available = true);
 
@@ -162,4 +185,4 @@ INSERT INTO public.categories (name, description, display_order) VALUES
   ('Main Courses', 'Our signature main dishes', 2),
   ('Desserts', 'Sweet endings to your meal', 3),
   ('Beverages', 'Refreshing drinks and beverages', 4)
-WHERE NOT EXISTS (SELECT 1 FROM public.categories);
+ON CONFLICT DO NOTHING;

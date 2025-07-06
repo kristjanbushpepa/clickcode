@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { RestaurantSidebar } from '@/components/restaurant/RestaurantSidebar';
 import { ProfileManagement } from '@/components/restaurant/ProfileManagement';
+import { MenuManagement } from '@/components/restaurant/MenuManagement';
 
 const RestaurantDashboard = () => {
   return (
@@ -22,7 +23,7 @@ const RestaurantDashboard = () => {
           <main className="flex-1 p-6">
             <Routes>
               <Route path="/" element={<ProfileManagement />} />
-              <Route path="/menu" element={<div>Menu Management (Coming Soon)</div>} />
+              <Route path="/menu" element={<MenuManagement />} />
               <Route path="/analytics" element={<div>Analytics (Coming Soon)</div>} />
               <Route path="/customization" element={<div>Customization (Coming Soon)</div>} />
               <Route path="/settings" element={<div>Settings (Coming Soon)</div>} />

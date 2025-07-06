@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -46,55 +47,62 @@ interface RestaurantProfile {
   banner_url?: string;
 }
 
-interface ConnectionConfig {
-  url: string;
-  key: string;
+interface Restaurant {
+  id: string;
+  name: string;
+  supabase_url: string;
+  supabase_anon_key: string;
 }
 
 const Menu = () => {
-  const { connectionData } = useParams();
+  const { restaurantName } = useParams();
   const [searchParams] = useSearchParams();
   const layout = searchParams.get('layout') || 'categories';
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  console.log('Menu component loaded with connectionData:', connectionData);
+  console.log('Menu component loaded with restaurantName:', restaurantName);
 
-  // Decode connection data from URL parameter
-  const getConnectionConfig = (): ConnectionConfig | null => {
-    if (!connectionData) {
-      console.error('No connection data provided in URL');
-      return null;
-    }
+  // Fetch restaurant connection details from main admin database
+  const { data: restaurant, isLoading: restaurantLoading, error: restaurantError } = useQuery({
+    queryKey: ['restaurant-lookup', restaurantName],
+    queryFn: async () => {
+      if (!restaurantName) throw new Error('Restaurant name not provided');
+      
+      console.log('Looking up restaurant in admin database:', restaurantName);
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('id, name, supabase_url, supabase_anon_key')
+        .eq('name', restaurantName)
+        .single();
 
-    try {
-      const decoded = atob(connectionData);
-      const config = JSON.parse(decoded) as ConnectionConfig;
-      console.log('Decoded connection config:', { url: config.url, hasKey: !!config.key });
-      return config;
-    } catch (error) {
-      console.error('Failed to decode connection data:', error);
-      return null;
-    }
-  };
-
-  const connectionConfig = getConnectionConfig();
+      if (error) {
+        console.error('Restaurant lookup error:', error);
+        throw error;
+      }
+      
+      console.log('Found restaurant:', data);
+      return data as Restaurant;
+    },
+    enabled: !!restaurantName,
+    retry: 1
+  });
 
   // Create restaurant-specific supabase client
   const getRestaurantSupabase = () => {
-    if (!connectionConfig) return null;
-    console.log('Creating restaurant supabase client with URL:', connectionConfig.url);
-    return createClient(connectionConfig.url, connectionConfig.key);
+    if (!restaurant) return null;
+    console.log('Creating restaurant supabase client with URL:', restaurant.supabase_url);
+    return createClient(restaurant.supabase_url, restaurant.supabase_anon_key);
   };
 
   // Fetch restaurant profile from individual database
   const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ['restaurant-profile', connectionConfig?.url],
+    queryKey: ['restaurant-profile', restaurant?.supabase_url],
     queryFn: async () => {
-      const supabase = getRestaurantSupabase();
-      if (!supabase) throw new Error('Restaurant database not available');
+      const restaurantSupabase = getRestaurantSupabase();
+      if (!restaurantSupabase) throw new Error('Restaurant database not available');
 
       console.log('Fetching restaurant profile from individual database...');
-      const { data, error } = await supabase
+      const { data, error } = await restaurantSupabase
         .from('restaurant_profile')
         .select('*')
         .single();
@@ -107,19 +115,19 @@ const Menu = () => {
       console.log('Profile data:', data);
       return data as RestaurantProfile;
     },
-    enabled: !!connectionConfig,
+    enabled: !!restaurant,
     retry: 1
   });
 
   // Fetch categories from individual database
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
-    queryKey: ['categories', connectionConfig?.url],
+    queryKey: ['categories', restaurant?.supabase_url],
     queryFn: async () => {
-      const supabase = getRestaurantSupabase();
-      if (!supabase) return [];
+      const restaurantSupabase = getRestaurantSupabase();
+      if (!restaurantSupabase) return [];
 
       console.log('Fetching categories from individual database...');
-      const { data, error } = await supabase
+      const { data, error } = await restaurantSupabase
         .from('categories')
         .select('*')
         .eq('is_active', true)
@@ -133,19 +141,19 @@ const Menu = () => {
       console.log('Categories data:', data);
       return data as Category[];
     },
-    enabled: !!connectionConfig,
+    enabled: !!restaurant,
     retry: 1
   });
 
   // Fetch menu items from individual database
   const { data: menuItems = [], isLoading: itemsLoading } = useQuery({
-    queryKey: ['menu-items', connectionConfig?.url, selectedCategory],
+    queryKey: ['menu-items', restaurant?.supabase_url, selectedCategory],
     queryFn: async () => {
-      const supabase = getRestaurantSupabase();
-      if (!supabase) return [];
+      const restaurantSupabase = getRestaurantSupabase();
+      if (!restaurantSupabase) return [];
 
       console.log('Fetching menu items from individual database for category:', selectedCategory);
-      let query = supabase
+      let query = restaurantSupabase
         .from('menu_items')
         .select('*')
         .eq('is_available', true)
@@ -165,7 +173,7 @@ const Menu = () => {
       console.log('Menu items data:', data);
       return data as MenuItem[];
     },
-    enabled: !!connectionConfig,
+    enabled: !!restaurant,
     retry: 1
   });
 
@@ -174,7 +182,7 @@ const Menu = () => {
   };
 
   // Loading states
-  if (!connectionData) {
+  if (!restaurantName) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -186,14 +194,25 @@ const Menu = () => {
     );
   }
 
-  if (!connectionConfig) {
+  if (restaurantLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Looking up restaurant...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (restaurantError || !restaurant) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Invalid Menu Link</h1>
+          <h1 className="text-2xl font-bold mb-4">Restaurant Not Found</h1>
           <p className="text-muted-foreground">
-            The menu link could not be decoded. Please check the QR code or URL.
+            Could not find restaurant "{restaurantName}". Please check the URL or contact the restaurant.
           </p>
         </div>
       </div>

@@ -19,23 +19,23 @@ export function QRCodeGenerator() {
   
   const restaurantInfo = getRestaurantInfo();
   
-  // Create encoded connection string for URL
-  const getEncodedConnection = () => {
-    if (!restaurantInfo?.supabase_url || !restaurantInfo?.supabase_anon_key) {
+  // Create restaurant-friendly URL using restaurant name
+  const getRestaurantUrlName = () => {
+    if (!restaurantInfo?.name) {
       return '';
     }
     
-    const connectionData = {
-      url: restaurantInfo.supabase_url,
-      key: restaurantInfo.supabase_anon_key
-    };
-    
-    // Base64 encode the connection data for URL
-    return btoa(JSON.stringify(connectionData));
+    // Convert restaurant name to URL-friendly format
+    return restaurantInfo.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
   };
 
-  const encodedConnection = getEncodedConnection();
-  const menuUrl = `${window.location.origin}/menu/${encodedConnection}${layout !== 'categories' ? `?layout=${layout}` : ''}`;
+  const restaurantUrlName = getRestaurantUrlName();
+  const menuUrl = `${window.location.origin}/menu/${restaurantUrlName}${layout !== 'categories' ? `?layout=${layout}` : ''}`;
 
   const downloadQR = () => {
     const svg = document.getElementById('qr-code');
@@ -106,7 +106,7 @@ export function QRCodeGenerator() {
     );
   }
 
-  if (!encodedConnection) {
+  if (!restaurantUrlName) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-2">
@@ -117,9 +117,9 @@ export function QRCodeGenerator() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Database connection not configured</h3>
+              <h3 className="text-lg font-semibold mb-2">Restaurant name not configured</h3>
               <p className="text-muted-foreground">
-                Please configure your restaurant's Supabase connection details to generate QR codes.
+                Please configure your restaurant's name to generate QR codes.
               </p>
             </div>
           </CardContent>
@@ -231,7 +231,7 @@ export function QRCodeGenerator() {
               <h4 className="font-medium mb-2">Preview Details</h4>
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p><strong>Restaurant:</strong> {restaurantInfo.name}</p>
-                <p><strong>Database:</strong> {restaurantInfo.supabase_url}</p>
+                <p><strong>URL Name:</strong> {restaurantUrlName}</p>
                 <p><strong>Layout:</strong> {layout === 'categories' ? 'Categories' : 'All Items'}</p>
                 <p><strong>Size:</strong> {size}x{size}px</p>
               </div>

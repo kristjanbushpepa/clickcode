@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Facebook, MessageCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Facebook, MessageCircle, ArrowLeft } from 'lucide-react';
 import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameConversion';
 
 interface Category {
@@ -362,6 +363,101 @@ const Menu = () => {
 
   // Categories layout (similar to left image in reference)
   if (layout === 'categories') {
+    // If a category is selected, show its items
+    if (selectedCategory) {
+      const currentCategory = categories.find(cat => cat.id === selectedCategory);
+      
+      return (
+        <div className="min-h-screen" style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}>
+          {/* Header */}
+          <div className="relative">
+            {/* Background Image/Banner */}
+            {profile?.banner_url && (
+              <div 
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${profile.banner_url})` }}
+              >
+                <div className="absolute inset-0 bg-black/40"></div>
+              </div>
+            )}
+            
+            <div 
+              className="relative px-4 py-6"
+              style={{ 
+                backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
+                color: 'white' 
+              }}
+            >
+              <div className="max-w-md mx-auto">
+                {/* Back button and category title */}
+                <div className="flex items-center gap-3 mb-4">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSelectedCategory(null)}
+                    className="text-white hover:bg-white/20 p-2"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                  <h1 className="text-xl font-bold uppercase tracking-wide">
+                    {currentCategory?.name_sq || currentCategory?.name}
+                  </h1>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Menu Items */}
+          <div className="px-4 py-4">
+            <div className="max-w-md mx-auto space-y-4">
+              {filteredMenuItems.length === 0 ? (
+                <div className="text-center py-12">
+                  <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No items found in this category.</p>
+                </div>
+              ) : (
+                filteredMenuItems.map((item) => (
+                  <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-base mb-1" style={{ color: customTheme?.textColor }}>
+                          {item.name_sq || item.name}
+                        </h3>
+                        {(item.description_sq || item.description) && (
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {item.description_sq || item.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">
+                            {formatPrice(item.price, item.currency)}
+                          </Badge>
+                          {item.preparation_time && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {item.preparation_time}min
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {item.image_url && (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name_sq || item.name}
+                          className="w-16 h-16 rounded-lg object-cover ml-4"
+                        />
+                      )}
+                    </div>
+                  </Card>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Show categories grid
     return (
       <div className="min-h-screen" style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}>
       {/* Header */}
@@ -465,6 +561,7 @@ const Menu = () => {
                       key={category.id} 
                       className="hover:shadow-md transition-all cursor-pointer h-32"
                       style={{ borderColor: customTheme?.accentColor }}
+                      onClick={() => setSelectedCategory(category.id)}
                     >
                       <CardContent className="p-4 h-full flex flex-col">
                         <div className="flex-1">
@@ -491,7 +588,7 @@ const Menu = () => {
     );
   }
 
-  // Items layout (similar to right image in reference)
+  // Items layout - Lista e artikujve (list of items with category tabs)
   return (
     <div className="min-h-screen" style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}>
       {/* Header */}
@@ -563,56 +660,135 @@ const Menu = () => {
         </div>
       </div>
 
-      {/* Categories Title */}
+      {/* Tabbed Categories and Items */}
       <div className="px-4 py-4">
         <div className="max-w-md mx-auto">
-          <h2 className="text-lg font-semibold text-center" style={{ color: customTheme?.textColor }}>
-            Categories
-          </h2>
-        </div>
-      </div>
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4" style={{ 
+              backgroundColor: customTheme?.secondaryColor + '20' || undefined,
+              borderColor: customTheme?.accentColor || undefined 
+            }}>
+              <TabsTrigger value="all" className="text-xs">
+                All
+              </TabsTrigger>
+              {filteredCategories.slice(0, 3).map((category) => (
+                <TabsTrigger key={category.id} value={category.id} className="text-xs">
+                  {(category.name_sq || category.name).length > 10 
+                    ? (category.name_sq || category.name).substring(0, 10) + '...'
+                    : (category.name_sq || category.name)
+                  }
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-      {/* Categories List */}
-      <div className="px-4 pb-8">
-        <div className="max-w-md mx-auto space-y-3">
-          {filteredCategories.length === 0 ? (
-            <div className="text-center py-12">
-              <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Menu Coming Soon</h3>
-              <p className="text-muted-foreground">The menu is being prepared and will be available shortly.</p>
-            </div>
-          ) : (
-            filteredCategories.map((category) => {
+            {/* All Items Tab */}
+            <TabsContent value="all" className="space-y-3">
+              <h3 className="text-lg font-semibold mb-4" style={{ color: customTheme?.textColor }}>
+                Lista e Artikujve
+              </h3>
+              {menuItems.length === 0 ? (
+                <div className="text-center py-12">
+                  <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No items available.</p>
+                </div>
+              ) : (
+                filteredMenuItems.map((item) => (
+                  <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-1">
+                          <h3 className="font-semibold text-base" style={{ color: customTheme?.textColor }}>
+                            {item.name_sq || item.name}
+                          </h3>
+                          <Badge variant="secondary" className="ml-2">
+                            {formatPrice(item.price, item.currency)}
+                          </Badge>
+                        </div>
+                        {(item.description_sq || item.description) && (
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {item.description_sq || item.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {categories.find(cat => cat.id === item.category_id)?.name_sq || 
+                             categories.find(cat => cat.id === item.category_id)?.name}
+                          </Badge>
+                          {item.preparation_time && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {item.preparation_time}min
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {item.image_url && (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name_sq || item.name}
+                          className="w-16 h-16 rounded-lg object-cover ml-4"
+                        />
+                      )}
+                    </div>
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+
+            {/* Category-specific tabs */}
+            {filteredCategories.slice(0, 3).map((category) => {
               const categoryItems = menuItems.filter(item => item.category_id === category.id);
               
               return (
-                <div key={category.id} className="border rounded-lg p-4 bg-white shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center">
-                        <Tag className="h-4 w-4 text-gray-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium" style={{ color: customTheme?.textColor }}>
-                          {category.name_sq || category.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
-                        </p>
-                      </div>
+                <TabsContent key={category.id} value={category.id} className="space-y-3">
+                  <h3 className="text-lg font-semibold mb-4" style={{ color: customTheme?.textColor }}>
+                    {category.name_sq || category.name}
+                  </h3>
+                  {categoryItems.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No items in this category.</p>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      <div className="flex gap-1">
-                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                      </div>
-                    </Button>
-                  </div>
-                </div>
+                  ) : (
+                    categoryItems.map((item) => (
+                      <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-1">
+                              <h3 className="font-semibold text-base" style={{ color: customTheme?.textColor }}>
+                                {item.name_sq || item.name}
+                              </h3>
+                              <Badge variant="secondary" className="ml-2">
+                                {formatPrice(item.price, item.currency)}
+                              </Badge>
+                            </div>
+                            {(item.description_sq || item.description) && (
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {item.description_sq || item.description}
+                              </p>
+                            )}
+                            {item.preparation_time && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {item.preparation_time}min
+                              </div>
+                            )}
+                          </div>
+                          {item.image_url && (
+                            <img 
+                              src={item.image_url} 
+                              alt={item.name_sq || item.name}
+                              className="w-16 h-16 rounded-lg object-cover ml-4"
+                            />
+                          )}
+                        </div>
+                      </Card>
+                    ))
+                  )}
+                </TabsContent>
               );
-            })
-          )}
+            })}
+          </Tabs>
         </div>
       </div>
     </div>

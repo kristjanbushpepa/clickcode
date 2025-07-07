@@ -1,5 +1,9 @@
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+// Cache for restaurant Supabase client to prevent multiple instances
+let restaurantSupabaseClient: SupabaseClient | null = null;
+let cachedRestaurantUrl: string | null = null;
 
 // Get restaurant database connection from session storage
 export const getRestaurantSupabase = () => {
@@ -10,13 +14,22 @@ export const getRestaurantSupabase = () => {
   
   const { supabase_url, supabase_anon_key } = JSON.parse(restaurantInfo);
   
-  return createClient(supabase_url, supabase_anon_key, {
+  // Return cached client if URL matches
+  if (restaurantSupabaseClient && cachedRestaurantUrl === supabase_url) {
+    return restaurantSupabaseClient;
+  }
+  
+  // Create new client and cache it
+  restaurantSupabaseClient = createClient(supabase_url, supabase_anon_key, {
     auth: {
       storage: sessionStorage,
       persistSession: true,
       autoRefreshToken: true,
     }
   });
+  
+  cachedRestaurantUrl = supabase_url;
+  return restaurantSupabaseClient;
 };
 
 export const getRestaurantInfo = () => {

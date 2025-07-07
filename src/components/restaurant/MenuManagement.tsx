@@ -10,9 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2, EyeOff, Tag, Utensils } from 'lucide-react';
+import { Plus, Edit, Trash2, EyeOff, Tag, Utensils, DollarSign, Languages } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { CurrencySettings } from './CurrencySettings';
+import { LanguageSettings } from './LanguageSettings';
 
 interface Category {
   id: string;
@@ -335,7 +338,7 @@ export function MenuManagement() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Menaxhimi i Menusë</h1>
-          <p className="text-muted-foreground">Menaxho kategoritë dhe artikujt e menusë së restorantit tuaj</p>
+          <p className="text-muted-foreground">Menaxho menunë, kategoritë, monedhën dhe gjuhët</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
@@ -369,7 +372,28 @@ export function MenuManagement() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <Tabs defaultValue="menu" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="menu" className="flex items-center gap-2">
+            <Utensils className="h-4 w-4" />
+            Artikujt e Menusë
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="flex items-center gap-2">
+            <Tag className="h-4 w-4" />
+            Kategoritë
+          </TabsTrigger>
+          <TabsTrigger value="currency" className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4" />
+            Monedha
+          </TabsTrigger>
+          <TabsTrigger value="language" className="flex items-center gap-2">
+            <Languages className="h-4 w-4" />
+            Gjuha
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="menu" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Categories Sidebar */}
         <Card className="lg:col-span-1">
           <CardHeader>
@@ -454,6 +478,89 @@ export function MenuManagement() {
           )}
         </div>
       </div>
+        </TabsContent>
+
+        <TabsContent value="categories" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Tag className="h-5 w-5" />
+                Menaxhimi i Kategorive
+              </CardTitle>
+              <CardDescription>
+                Krijoni dhe organizoni kategoritë e menusë së restorantit tuaj
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-end mb-4">
+                <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => setEditingCategory(null)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Shto Kategori të Re
+                    </Button>
+                  </DialogTrigger>
+                  <CategoryDialog
+                    category={editingCategory}
+                    onSubmit={handleCategorySubmit}
+                    onClose={() => setShowCategoryDialog(false)}
+                  />
+                </Dialog>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categories.map((category) => (
+                  <Card key={category.id} className="relative">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{category.name_sq || category.name}</h3>
+                          <p className="text-sm text-muted-foreground">{category.description_sq || category.description}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant={category.is_active ? "default" : "secondary"}>
+                              {category.is_active ? "Aktive" : "Jo aktive"}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              Renditja: {category.display_order}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 ml-2">
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => {
+                              setEditingCategory(category);
+                              setShowCategoryDialog(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => deleteCategoryMutation.mutate(category.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="currency">
+          <CurrencySettings />
+        </TabsContent>
+
+        <TabsContent value="language">
+          <LanguageSettings />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

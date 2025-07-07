@@ -364,37 +364,56 @@ const Menu = () => {
   if (layout === 'categories') {
     return (
       <div className="min-h-screen" style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}>
-        {/* Header */}
-        <div className="px-4 py-6" style={{ backgroundColor: customTheme?.primaryColor || '#1f2937', color: 'white' }}>
-          <div className="max-w-md mx-auto text-center">
-            {profile?.logo_url && (
-              <img 
-                src={profile.logo_url} 
-                alt={profile.name} 
-                className="h-12 w-12 mx-auto mb-3 rounded-full object-cover"
-              />
-            )}
-            <h1 className="text-xl font-bold mb-1">{profile?.name || 'Restaurant Menu'}</h1>
-            {profile?.address && (
-              <p className="text-sm opacity-80">{profile.address}</p>
-            )}
+      {/* Header */}
+      <div className="relative">
+        {/* Background Image/Banner */}
+        {profile?.banner_url && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${profile.banner_url})` }}
+          >
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+        )}
+        
+        <div 
+          className="relative px-4 py-6"
+          style={{ 
+            backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
+            color: 'white' 
+          }}
+        >
+          <div className="max-w-md mx-auto">
+            {/* Top section with logo */}
+            <div className="flex justify-between items-start mb-4">
+              {profile?.logo_url && (
+                <img 
+                  src={profile.logo_url} 
+                  alt={profile.name} 
+                  className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
+                />
+              )}
+              <div className="w-6 h-4 bg-white/20 rounded-sm flex items-center justify-center">
+                <div className="text-xs">🇦🇱</div>
+              </div>
+            </div>
             
-            {/* Social Media Icons */}
-            {profile?.social_media_links && (
-              <div className="flex justify-center gap-3 mt-3">
-                {profile.social_media_links.instagram && (
+            {/* Restaurant info centered */}
+            <div className="text-center">
+              <h1 className="text-xl font-bold mb-1 uppercase tracking-wide">
+                {profile?.name || 'Restaurant Menu'}
+              </h1>
+              {profile?.address && (
+                <p className="text-sm opacity-80 uppercase tracking-wide mb-3">
+                  {profile.address.split(',')[0] || profile.address}
+                </p>
+              )}
+              
+              {/* Social Media Icons */}
+              <div className="flex justify-center gap-4 mb-2">
+                {profile?.social_media_links?.instagram && (
                   <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer">
                     <Instagram className="h-5 w-5 opacity-80 hover:opacity-100" />
-                  </a>
-                )}
-                {profile.social_media_links.facebook && (
-                  <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
-                    <Facebook className="h-5 w-5 opacity-80 hover:opacity-100" />
-                  </a>
-                )}
-                {profile.social_media_links.whatsapp && (
-                  <a href={profile.social_media_links.whatsapp} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="h-5 w-5 opacity-80 hover:opacity-100" />
                   </a>
                 )}
                 {profile?.phone && (
@@ -402,10 +421,17 @@ const Menu = () => {
                     <Phone className="h-5 w-5 opacity-80 hover:opacity-100" />
                   </a>
                 )}
+                {profile?.social_media_links?.facebook && (
+                  <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
+                    <Facebook className="h-5 w-5 opacity-80 hover:opacity-100" />
+                  </a>
+                )}
+                <Globe className="h-5 w-5 opacity-80" />
               </div>
-            )}
+            </div>
           </div>
         </div>
+      </div>
 
         {/* Search Bar */}
         <div className="px-4 py-4">
@@ -469,45 +495,71 @@ const Menu = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}>
       {/* Header */}
-      <div className="px-4 py-6" style={{ backgroundColor: customTheme?.primaryColor || '#1f2937', color: 'white' }}>
-        <div className="max-w-md mx-auto text-center">
-          {profile?.logo_url && (
-            <img 
-              src={profile.logo_url} 
-              alt={profile.name} 
-              className="h-12 w-12 mx-auto mb-3 rounded-full object-cover"
-            />
-          )}
-          <h1 className="text-xl font-bold mb-1">{profile?.name || 'Restaurant Menu'}</h1>
-          {profile?.address && (
-            <p className="text-sm opacity-80">{profile.address}</p>
-          )}
-          
-          {/* Social Media Icons */}
-          {profile?.social_media_links && (
-            <div className="flex justify-center gap-3 mt-3">
-              {profile.social_media_links.instagram && (
-                <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer">
-                  <Instagram className="h-5 w-5 opacity-80 hover:opacity-100" />
-                </a>
+      <div className="relative">
+        {/* Background Image/Banner */}
+        {profile?.banner_url && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${profile.banner_url})` }}
+          >
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+        )}
+        
+        <div 
+          className="relative px-4 py-6"
+          style={{ 
+            backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
+            color: 'white' 
+          }}
+        >
+          <div className="max-w-md mx-auto">
+            {/* Top section with logo */}
+            <div className="flex justify-between items-start mb-4">
+              {profile?.logo_url && (
+                <img 
+                  src={profile.logo_url} 
+                  alt={profile.name} 
+                  className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
+                />
               )}
-              {profile.social_media_links.facebook && (
-                <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
-                  <Facebook className="h-5 w-5 opacity-80 hover:opacity-100" />
-                </a>
-              )}
-              {profile.social_media_links.whatsapp && (
-                <a href={profile.social_media_links.whatsapp} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="h-5 w-5 opacity-80 hover:opacity-100" />
-                </a>
-              )}
-              {profile?.phone && (
-                <a href={`tel:${profile.phone}`}>
-                  <Phone className="h-5 w-5 opacity-80 hover:opacity-100" />
-                </a>
-              )}
+              <div className="w-6 h-4 bg-white/20 rounded-sm flex items-center justify-center">
+                <div className="text-xs">🇦🇱</div>
+              </div>
             </div>
-          )}
+            
+            {/* Restaurant info centered */}
+            <div className="text-center">
+              <h1 className="text-xl font-bold mb-1 uppercase tracking-wide">
+                {profile?.name || 'Restaurant Menu'}
+              </h1>
+              {profile?.address && (
+                <p className="text-sm opacity-80 uppercase tracking-wide mb-3">
+                  {profile.address.split(',')[0] || profile.address}
+                </p>
+              )}
+              
+              {/* Social Media Icons */}
+              <div className="flex justify-center gap-4 mb-2">
+                {profile?.social_media_links?.instagram && (
+                  <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer">
+                    <Instagram className="h-5 w-5 opacity-80 hover:opacity-100" />
+                  </a>
+                )}
+                {profile?.phone && (
+                  <a href={`tel:${profile.phone}`}>
+                    <Phone className="h-5 w-5 opacity-80 hover:opacity-100" />
+                  </a>
+                )}
+                {profile?.social_media_links?.facebook && (
+                  <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
+                    <Facebook className="h-5 w-5 opacity-80 hover:opacity-100" />
+                  </a>
+                )}
+                <Globe className="h-5 w-5 opacity-80" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
@@ -7,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { QrCode, Download, ExternalLink, Copy, Check } from 'lucide-react';
+import { QrCode, Download, ExternalLink, Copy, Check, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { getRestaurantInfo } from '@/utils/restaurantDatabase';
+import { convertRestaurantNameToUrl, convertUrlToRestaurantName } from '@/utils/nameConversion';
 
 export function QRCodeGenerator() {
   const [layout, setLayout] = useState<'categories' | 'all-items'>('categories');
@@ -19,23 +19,34 @@ export function QRCodeGenerator() {
   
   const restaurantInfo = getRestaurantInfo();
   
-  // Create restaurant-friendly URL using restaurant name
+  // Create restaurant-friendly URL using consistent conversion logic
   const getRestaurantUrlName = () => {
     if (!restaurantInfo?.name) {
       return '';
     }
     
-    // Convert restaurant name to URL-friendly format
-    return restaurantInfo.name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single
-      .trim();
+    return convertRestaurantNameToUrl(restaurantInfo.name);
   };
 
   const restaurantUrlName = getRestaurantUrlName();
   const menuUrl = `${window.location.origin}/menu/${restaurantUrlName}${layout !== 'categories' ? `?layout=${layout}` : ''}`;
+
+  // Validate URL conversion
+  const validateUrlConversion = () => {
+    if (!restaurantInfo?.name || !restaurantUrlName) return null;
+    
+    const convertedBack = convertUrlToRestaurantName(restaurantUrlName);
+    const isExactMatch = convertedBack.toLowerCase() === restaurantInfo.name.toLowerCase();
+    
+    return {
+      original: restaurantInfo.name,
+      urlFriendly: restaurantUrlName,
+      convertedBack: convertedBack,
+      isExactMatch
+    };
+  };
+
+  const conversionValidation = validateUrlConversion();
 
   const downloadQR = () => {
     const svg = document.getElementById('qr-code');
@@ -135,6 +146,27 @@ export function QRCodeGenerator() {
         <h1 className="text-2xl font-bold">QR Code Generator</h1>
       </div>
 
+      {/* URL Conversion Validation Alert */}
+      {conversionValidation && !conversionValidation.isExactMatch && (
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-yellow-800">
+              <Info className="h-5 w-5" />
+              URL Conversion Notice
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Restaurant Name:</strong> {conversionValidation.original}</p>
+            <p><strong>URL Format:</strong> {conversionValidation.urlFriendly}</p>
+            <p><strong>Will Convert Back To:</strong> {conversionValidation.convertedBack}</p>
+            <p className="text-yellow-700">
+              The URL conversion may not perfectly match your restaurant name. 
+              Test the menu link to ensure it works correctly.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* QR Code Display */}
         <Card>
@@ -165,7 +197,7 @@ export function QRCodeGenerator() {
               </Button>
               <Button onClick={openMenu} variant="outline" className="flex-1">
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Preview Menu
+                Test Menu Link
               </Button>
             </div>
           </CardContent>
@@ -234,6 +266,13 @@ export function QRCodeGenerator() {
                 <p><strong>URL Name:</strong> {restaurantUrlName}</p>
                 <p><strong>Layout:</strong> {layout === 'categories' ? 'Categories' : 'All Items'}</p>
                 <p><strong>Size:</strong> {size}x{size}px</p>
+                {conversionValidation && (
+                  <p><strong>Conversion Test:</strong> 
+                    <span className={conversionValidation.isExactMatch ? 'text-green-600' : 'text-yellow-600'}>
+                      {conversionValidation.isExactMatch ? ' ✓ Perfect Match' : ' ⚠ Approximate Match'}
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -269,11 +308,19 @@ export function QRCodeGenerator() {
               <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
                 <ExternalLink className="h-6 w-6 text-primary" />
               </div>
-              <h4 className="font-medium mb-1">3. Share</h4>
+              <h4 className="font-medium mb-1">3. Test & Share</h4>
               <p className="text-sm text-muted-foreground">
-                Customers scan to view your digital menu
+                Test the link first, then customers can scan to view your menu
               </p>
             </div>
+          </div>
+          
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h5 className="font-medium text-blue-900 mb-2">Important: Test Your QR Code</h5>
+            <p className="text-sm text-blue-800">
+              Always click "Test Menu Link" to ensure your QR code works correctly before printing. 
+              The URL conversion process may need adjustment for certain restaurant names.
+            </p>
           </div>
         </CardContent>
       </Card>

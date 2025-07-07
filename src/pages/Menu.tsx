@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Tag, Utensils, AlertCircle } from 'lucide-react';
+import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameConversion';
 
 interface Category {
   id: string;
@@ -62,25 +62,73 @@ const Menu = () => {
 
   console.log('Menu component loaded with restaurantName:', restaurantName);
 
-  // Fetch restaurant connection details from main admin database
+  // Enhanced restaurant lookup with multiple matching strategies
   const { data: restaurant, isLoading: restaurantLoading, error: restaurantError } = useQuery({
     queryKey: ['restaurant-lookup', restaurantName],
     queryFn: async () => {
       if (!restaurantName) throw new Error('Restaurant name not provided');
       
       console.log('Looking up restaurant in admin database:', restaurantName);
+      
+      // Generate possible name variations
+      const possibleNames = generatePossibleNames(restaurantName);
+      console.log('Trying these name variations:', possibleNames);
+      
+      // First, try exact matches with all variations
+      for (const name of possibleNames) {
+        console.log('Trying exact match for:', name);
+        const { data, error } = await supabase
+          .from('restaurants')
+          .select('id, name, supabase_url, supabase_anon_key')
+          .eq('name', name)
+          .maybeSingle();
+
+        if (data && !error) {
+          console.log('Found restaurant with exact match:', data);
+          return data as Restaurant;
+        }
+      }
+      
+      // If no exact match, try case-insensitive search
+      console.log('No exact match found, trying case-insensitive search...');
+      const convertedName = convertUrlToRestaurantName(restaurantName);
+      console.log('Converted name for case-insensitive search:', convertedName);
+      
       const { data, error } = await supabase
         .from('restaurants')
         .select('id, name, supabase_url, supabase_anon_key')
-        .eq('name', restaurantName)
-        .single();
+        .ilike('name', `%${convertedName}%`)
+        .maybeSingle();
 
       if (error) {
         console.error('Restaurant lookup error:', error);
-        throw error;
+        
+        // Get all restaurants for debugging
+        const { data: allRestaurants } = await supabase
+          .from('restaurants')
+          .select('name')
+          .limit(10);
+        
+        console.log('Available restaurants in database:', allRestaurants?.map(r => r.name));
+        console.log('Searched for variations:', possibleNames);
+        
+        throw new Error(`Restaurant not found. Searched for: ${possibleNames.join(', ')}`);
       }
       
-      console.log('Found restaurant:', data);
+      if (!data) {
+        // Get all restaurants for debugging
+        const { data: allRestaurants } = await supabase
+          .from('restaurants')
+          .select('name')
+          .limit(10);
+        
+        console.log('Available restaurants in database:', allRestaurants?.map(r => r.name));
+        console.log('Searched for variations:', possibleNames);
+        
+        throw new Error(`Restaurant "${restaurantName}" not found in database`);
+      }
+      
+      console.log('Found restaurant with case-insensitive match:', data);
       return data as Restaurant;
     },
     enabled: !!restaurantName,
@@ -200,6 +248,9 @@ const Menu = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p>Looking up restaurant...</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Searching for: {convertUrlToRestaurantName(restaurantName)}
+          </p>
         </div>
       </div>
     );
@@ -208,12 +259,26 @@ const Menu = () => {
   if (restaurantError || !restaurant) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Restaurant Not Found</h1>
-          <p className="text-muted-foreground">
-            Could not find restaurant "{restaurantName}". Please check the URL or contact the restaurant.
+          <p className="text-muted-foreground mb-4">
+            Could not find restaurant matching "{restaurantName}".
           </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Searched for: {generatePossibleNames(restaurantName).join(', ')}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Please check the URL or contact the restaurant.
+          </p>
+          {restaurantError && (
+            <details className="mt-4 text-left">
+              <summary className="text-sm cursor-pointer">Error Details</summary>
+              <pre className="text-xs mt-2 p-2 bg-gray-100 rounded overflow-auto">
+                {restaurantError.message}
+              </pre>
+            </details>
+          )}
         </div>
       </div>
     );

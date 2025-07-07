@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Facebook, MessageCircle, ArrowLeft } from 'lucide-react';
 import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameConversion';
+import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
+import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
 
 interface Category {
   id: string;
@@ -77,6 +79,8 @@ const Menu = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [customTheme, setCustomTheme] = useState<MenuTheme | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState('sq');
+  const [currentCurrency, setCurrentCurrency] = useState('ALL');
 
   console.log('Menu component loaded with restaurantName:', restaurantName);
 
@@ -318,8 +322,51 @@ const Menu = () => {
     (category.name_sq || category.name).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const formatPrice = (price: number, currency: string) => {
-    return `${price.toFixed(2)} ${currency}`;
+  // Fetch currency settings for conversion
+  const { data: currencySettings } = useQuery({
+    queryKey: ['currency_settings_menu'],
+    queryFn: async () => {
+      const restaurantSupabase = getRestaurantSupabase();
+      if (!restaurantSupabase) return null;
+      
+      const { data, error } = await restaurantSupabase
+        .from('currency_settings')
+        .select('*')
+        .maybeSingle();
+      
+      if (error) return null;
+      return data;
+    },
+    enabled: !!restaurant
+  });
+
+  const formatPrice = (price: number, originalCurrency: string) => {
+    if (!currencySettings || currentCurrency === originalCurrency) {
+      return `${price.toFixed(2)} ${currentCurrency}`;
+    }
+    
+    const exchangeRates = currencySettings.exchange_rates || {};
+    const originalRate = exchangeRates[originalCurrency] || 1;
+    const targetRate = exchangeRates[currentCurrency] || 1;
+    
+    // Convert to base currency (ALL) first, then to target currency
+    const convertedPrice = (price / originalRate) * targetRate;
+    
+    const symbols: Record<string, string> = {
+      'ALL': 'L',
+      'EUR': '€',
+      'USD': '$',
+      'GBP': '£',
+      'CHF': 'CHF'
+    };
+    
+    const symbol = symbols[currentCurrency] || currentCurrency;
+    return `${convertedPrice.toFixed(2)} ${symbol}`;
+  };
+
+  const getLocalizedText = (item: any, field: string) => {
+    const languageField = `${field}_${currentLanguage}`;
+    return item[languageField] || item[field] || '';
   };
 
   // Loading states
@@ -427,7 +474,7 @@ const Menu = () => {
                     <ArrowLeft className="h-5 w-5" />
                   </Button>
                   <h1 className="text-xl font-bold uppercase tracking-wide">
-                    {currentCategory?.name_sq || currentCategory?.name}
+                    {getLocalizedText(currentCategory, 'name')}
                   </h1>
                 </div>
               </div>
@@ -448,11 +495,11 @@ const Menu = () => {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <h3 className="font-semibold text-base mb-1" style={{ color: customTheme?.textColor }}>
-                          {item.name_sq || item.name}
+                          {getLocalizedText(item, 'name')}
                         </h3>
-                        {(item.description_sq || item.description) && (
+                        {getLocalizedText(item, 'description') && (
                           <p className="text-sm text-muted-foreground mb-2">
-                            {item.description_sq || item.description}
+                            {getLocalizedText(item, 'description')}
                           </p>
                         )}
                         <div className="flex items-center gap-2">
@@ -516,8 +563,17 @@ const Menu = () => {
                   className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
                 />
               )}
-              <div className="w-6 h-4 bg-white/20 rounded-sm flex items-center justify-center">
-                <div className="text-xs">🇦🇱</div>
+              <div className="flex gap-2">
+                <LanguageSwitch 
+                  restaurantSupabase={getRestaurantSupabase()} 
+                  currentLanguage={currentLanguage}
+                  onLanguageChange={setCurrentLanguage}
+                />
+                <CurrencySwitch 
+                  restaurantSupabase={getRestaurantSupabase()} 
+                  currentCurrency={currentCurrency}
+                  onCurrencyChange={setCurrentCurrency}
+                />
               </div>
             </div>
             
@@ -593,10 +649,10 @@ const Menu = () => {
                       <CardContent className="p-4 h-full flex flex-col">
                         <div className="flex-1">
                           <h3 className="font-semibold text-sm mb-1" style={{ color: customTheme?.textColor }}>
-                            {category.name_sq || category.name}
+                            {getLocalizedText(category, 'name')}
                           </h3>
                           <p className="text-xs text-muted-foreground line-clamp-2">
-                            {categoryItems.slice(0, 2).map(item => item.name_sq || item.name).join(', ')}
+                            {categoryItems.slice(0, 2).map(item => getLocalizedText(item, 'name')).join(', ')}
                             {categoryItems.length > 2 && '...'}
                           </p>
                         </div>
@@ -647,8 +703,17 @@ const Menu = () => {
                   className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
                 />
               )}
-              <div className="w-6 h-4 bg-white/20 rounded-sm flex items-center justify-center">
-                <div className="text-xs">🇦🇱</div>
+              <div className="flex gap-2">
+                <LanguageSwitch 
+                  restaurantSupabase={getRestaurantSupabase()} 
+                  currentLanguage={currentLanguage}
+                  onLanguageChange={setCurrentLanguage}
+                />
+                <CurrencySwitch 
+                  restaurantSupabase={getRestaurantSupabase()} 
+                  currentCurrency={currentCurrency}
+                  onCurrencyChange={setCurrentCurrency}
+                />
               </div>
             </div>
             
@@ -725,15 +790,15 @@ const Menu = () => {
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-1">
                           <h3 className="font-semibold text-base" style={{ color: customTheme?.textColor }}>
-                            {item.name_sq || item.name}
+                            {getLocalizedText(item, 'name')}
                           </h3>
                           <Badge variant="secondary" className="ml-2">
                             {formatPrice(item.price, item.currency)}
                           </Badge>
                         </div>
-                        {(item.description_sq || item.description) && (
+                        {getLocalizedText(item, 'description') && (
                           <p className="text-sm text-muted-foreground mb-2">
-                            {item.description_sq || item.description}
+                            {getLocalizedText(item, 'description')}
                           </p>
                         )}
                         <div className="flex items-center gap-2">
@@ -769,7 +834,7 @@ const Menu = () => {
               return (
                 <TabsContent key={category.id} value={category.id} className="space-y-3">
                   <h3 className="text-lg font-semibold mb-4" style={{ color: customTheme?.textColor }}>
-                    {category.name_sq || category.name}
+                    {getLocalizedText(category, 'name')}
                   </h3>
                   {categoryItems.length === 0 ? (
                     <div className="text-center py-12">
@@ -783,15 +848,15 @@ const Menu = () => {
                           <div className="flex-1">
                             <div className="flex items-start justify-between mb-1">
                               <h3 className="font-semibold text-base" style={{ color: customTheme?.textColor }}>
-                                {item.name_sq || item.name}
+                                {getLocalizedText(item, 'name')}
                               </h3>
                               <Badge variant="secondary" className="ml-2">
                                 {formatPrice(item.price, item.currency)}
                               </Badge>
                             </div>
-                            {(item.description_sq || item.description) && (
+                            {getLocalizedText(item, 'description') && (
                               <p className="text-sm text-muted-foreground mb-2">
-                                {item.description_sq || item.description}
+                                {getLocalizedText(item, 'description')}
                               </p>
                             )}
                             {item.preparation_time && (

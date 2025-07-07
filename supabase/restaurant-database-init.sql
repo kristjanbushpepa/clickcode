@@ -26,6 +26,8 @@ BEGIN
             'categories', 
             'menu_items',
             'menu_customization',
+            'currency_settings',
+            'language_settings',
             'user_profiles',
             'analytics_events',
             'connection_config'
@@ -234,6 +236,66 @@ CREATE TRIGGER update_menu_customization_updated_at
   BEFORE UPDATE ON public.menu_customization
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Create or replace currency settings table
+DROP TABLE IF EXISTS public.currency_settings CASCADE;
+CREATE TABLE public.currency_settings (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  default_currency VARCHAR(3) DEFAULT 'ALL' NOT NULL,
+  supported_currencies JSONB DEFAULT '["ALL", "EUR", "USD", "GBP", "CHF"]'::jsonb,
+  exchange_rates JSONB DEFAULT '{
+    "ALL": 1.0,
+    "EUR": 0.0092,
+    "USD": 0.010,
+    "GBP": 0.0082,
+    "CHF": 0.0093
+  }'::jsonb,
+  last_updated TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Enable RLS on currency_settings
+ALTER TABLE public.currency_settings ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for currency_settings
+CREATE POLICY "Public can view currency settings" ON public.currency_settings
+  FOR SELECT USING (true);
+
+CREATE POLICY "Authenticated users can manage currency settings" ON public.currency_settings
+  FOR ALL TO authenticated USING (true);
+
+-- Create trigger for currency_settings updated_at
+CREATE TRIGGER update_currency_settings_updated_at 
+  BEFORE UPDATE ON public.currency_settings
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Create or replace language settings table
+DROP TABLE IF EXISTS public.language_settings CASCADE;
+CREATE TABLE public.language_settings (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  main_ui_language VARCHAR(5) DEFAULT 'sq' NOT NULL, -- Albanian as main
+  supported_ui_languages JSONB DEFAULT '["sq", "en", "it", "de", "fr", "zh"]'::jsonb,
+  content_languages JSONB DEFAULT '["sq", "en", "it", "de", "fr", "zh"]'::jsonb,
+  auto_translate BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Enable RLS on language_settings
+ALTER TABLE public.language_settings ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for language_settings
+CREATE POLICY "Public can view language settings" ON public.language_settings
+  FOR SELECT USING (true);
+
+CREATE POLICY "Authenticated users can manage language settings" ON public.language_settings
+  FOR ALL TO authenticated USING (true);
+
+-- Create trigger for language_settings updated_at
+CREATE TRIGGER update_language_settings_updated_at 
+  BEFORE UPDATE ON public.language_settings
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Create or replace user profiles table for restaurant staff
 DROP TABLE IF EXISTS public.user_profiles CASCADE;
 CREATE TABLE public.user_profiles (
@@ -321,6 +383,27 @@ ON CONFLICT DO NOTHING;
 INSERT INTO public.menu_customization (layout, primary_color, secondary_color, background_color, text_color, accent_color, font_family)
 SELECT 'categories', '#8B5CF6', '#A855F7', '#FFFFFF', '#1F2937', '#EC4899', 'Inter'
 WHERE NOT EXISTS (SELECT 1 FROM public.menu_customization);
+
+-- Insert default currency settings
+INSERT INTO public.currency_settings (default_currency, supported_currencies, exchange_rates)
+SELECT 'ALL', 
+       '["ALL", "EUR", "USD", "GBP", "CHF"]'::jsonb,
+       '{
+         "ALL": 1.0,
+         "EUR": 0.0092,
+         "USD": 0.010,
+         "GBP": 0.0082,
+         "CHF": 0.0093
+       }'::jsonb
+WHERE NOT EXISTS (SELECT 1 FROM public.currency_settings);
+
+-- Insert default language settings
+INSERT INTO public.language_settings (main_ui_language, supported_ui_languages, content_languages, auto_translate)
+SELECT 'sq',
+       '["sq", "en", "it", "de", "fr", "zh"]'::jsonb,
+       '["sq", "en", "it", "de", "fr", "zh"]'::jsonb,
+       true
+WHERE NOT EXISTS (SELECT 1 FROM public.language_settings);
 
 -- Insert sample menu items for demonstration
 INSERT INTO public.menu_items (category_id, name, name_sq, description, description_sq, price, currency, is_available, display_order) 

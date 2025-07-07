@@ -51,26 +51,27 @@ export function CurrencySettings() {
     mutationFn: async (updates: Partial<CurrencySettings>) => {
       const restaurantSupabase = getRestaurantSupabase();
       
-      if (currencySettings?.id) {
-        const { data, error } = await restaurantSupabase
-          .from('currency_settings')
-          .update({ ...updates, last_updated: new Date().toISOString() })
-          .eq('id', currencySettings.id)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return data;
-      } else {
-        const { data, error } = await restaurantSupabase
-          .from('currency_settings')
-          .insert([{ ...updates, last_updated: new Date().toISOString() }])
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return data;
+      // First try to update existing record
+      const { data: updateData, error: updateError } = await restaurantSupabase
+        .from('currency_settings')
+        .update({ ...updates, last_updated: new Date().toISOString() })
+        .eq('id', currencySettings?.id || '00000000-0000-0000-0000-000000000000')
+        .select()
+        .maybeSingle();
+      
+      if (updateData) {
+        return updateData;
       }
+      
+      // If no existing record, insert new one
+      const { data: insertData, error: insertError } = await restaurantSupabase
+        .from('currency_settings')
+        .insert([{ ...updates, last_updated: new Date().toISOString() }])
+        .select()
+        .maybeSingle();
+      
+      if (insertError) throw insertError;
+      return insertData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currency_settings'] });

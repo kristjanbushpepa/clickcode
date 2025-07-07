@@ -51,26 +51,27 @@ export function LanguageSettings() {
     mutationFn: async (updates: Partial<LanguageSettings>) => {
       const restaurantSupabase = getRestaurantSupabase();
       
-      if (languageSettings?.id) {
-        const { data, error } = await restaurantSupabase
-          .from('language_settings')
-          .update(updates)
-          .eq('id', languageSettings.id)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return data;
-      } else {
-        const { data, error } = await restaurantSupabase
-          .from('language_settings')
-          .insert([updates])
-          .select()
-          .single();
-        
-        if (error) throw error;
-        return data;
+      // First try to update existing record
+      const { data: updateData, error: updateError } = await restaurantSupabase
+        .from('language_settings')
+        .update(updates)
+        .eq('id', languageSettings?.id || '00000000-0000-0000-0000-000000000000')
+        .select()
+        .maybeSingle();
+      
+      if (updateData) {
+        return updateData;
       }
+      
+      // If no existing record, insert new one
+      const { data: insertData, error: insertError } = await restaurantSupabase
+        .from('language_settings')
+        .insert([updates])
+        .select()
+        .maybeSingle();
+      
+      if (insertError) throw insertError;
+      return insertData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['language_settings'] });

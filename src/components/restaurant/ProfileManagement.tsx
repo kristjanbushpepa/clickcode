@@ -92,19 +92,28 @@ export function ProfileManagement() {
         social_media_links: data.social_media_links || {},
       };
 
+      console.log('Attempting to save profile data:', profileData);
+
       let result;
       if (profile?.id) {
+        console.log('Updating existing profile with ID:', profile.id);
         result = await supabase
           .from('restaurant_profile')
           .update(profileData)
           .eq('id', profile.id);
       } else {
+        console.log('Inserting new profile');
         result = await supabase
           .from('restaurant_profile')
           .insert([profileData]);
       }
 
-      if (result.error) throw result.error;
+      console.log('Database result:', result);
+
+      if (result.error) {
+        console.error('Database error:', result.error);
+        throw result.error;
+      }
 
       toast({
         title: "Success",
@@ -113,11 +122,16 @@ export function ProfileManagement() {
 
       loadProfile();
     } catch (error: any) {
-      console.error('Error saving profile:', error);
-      setConnectionError('Failed to save profile to your restaurant database.');
+      console.error('Error saving profile - Full error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.details);
+      console.error('Error hint:', error.hint);
+      console.error('Error code:', error.code);
+      
+      setConnectionError(`Failed to save profile to your restaurant database. Error: ${error.message || 'Unknown error'}`);
       toast({
         title: "Error",
-        description: "Failed to save restaurant profile.",
+        description: `Failed to save restaurant profile: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {

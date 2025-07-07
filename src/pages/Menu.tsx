@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
@@ -6,7 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Tag, Utensils, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Facebook, MessageCircle } from 'lucide-react';
 import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameConversion';
 
 interface Category {
@@ -45,6 +46,20 @@ interface RestaurantProfile {
   email?: string;
   logo_url?: string;
   banner_url?: string;
+  social_media_links?: {
+    instagram?: string;
+    facebook?: string;
+    tiktok?: string;
+    whatsapp?: string;
+  };
+}
+
+interface MenuTheme {
+  primaryColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  textColor: string;
+  accentColor: string;
 }
 
 interface Restaurant {
@@ -59,6 +74,8 @@ const Menu = () => {
   const [searchParams] = useSearchParams();
   const layout = searchParams.get('layout') || 'categories';
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [customTheme, setCustomTheme] = useState<MenuTheme | null>(null);
 
   console.log('Menu component loaded with restaurantName:', restaurantName);
 
@@ -225,6 +242,54 @@ const Menu = () => {
     retry: 1
   });
 
+  // Fetch customization settings
+  const { data: customization } = useQuery({
+    queryKey: ['customization', restaurant?.supabase_url],
+    queryFn: async () => {
+      const restaurantSupabase = getRestaurantSupabase();
+      if (!restaurantSupabase) return null;
+
+      const { data, error } = await restaurantSupabase
+        .from('restaurant_customization')
+        .select('*')
+        .single();
+
+      if (error) {
+        console.log('No customization found, using defaults');
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!restaurant,
+    retry: 0
+  });
+
+  // Apply custom theme when available
+  useEffect(() => {
+    if (customization?.theme) {
+      setCustomTheme(customization.theme);
+      // Apply CSS custom properties for dynamic theming
+      const root = document.documentElement;
+      root.style.setProperty('--menu-primary', customization.theme.primaryColor);
+      root.style.setProperty('--menu-secondary', customization.theme.secondaryColor);
+      root.style.setProperty('--menu-background', customization.theme.backgroundColor);
+      root.style.setProperty('--menu-text', customization.theme.textColor);
+      root.style.setProperty('--menu-accent', customization.theme.accentColor);
+    }
+  }, [customization]);
+
+  // Filter menu items based on search
+  const filteredMenuItems = menuItems.filter(item => 
+    (item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Filter categories based on search
+  const filteredCategories = categories.filter(category =>
+    (category.name_sq || category.name).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const formatPrice = (price: number, currency: string) => {
     return `${price.toFixed(2)} ${currency}`;
   };
@@ -295,206 +360,208 @@ const Menu = () => {
     );
   }
 
-  // Categories layout
+  // Categories layout (similar to left image in reference)
   if (layout === 'categories') {
     return (
-      <div className="min-h-screen bg-background">
-        {/* Header with restaurant profile data */}
-        <div className="bg-primary text-primary-foreground py-8">
-          <div className="container mx-auto px-4 text-center">
+      <div className="min-h-screen" style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}>
+        {/* Header */}
+        <div className="px-4 py-6" style={{ backgroundColor: customTheme?.primaryColor || '#1f2937', color: 'white' }}>
+          <div className="max-w-md mx-auto text-center">
             {profile?.logo_url && (
               <img 
                 src={profile.logo_url} 
                 alt={profile.name} 
-                className="h-16 w-16 mx-auto mb-4 rounded-full object-cover"
+                className="h-12 w-12 mx-auto mb-3 rounded-full object-cover"
               />
             )}
-            <h1 className="text-3xl font-bold mb-2">{profile?.name || 'Restaurant Menu'}</h1>
-            {profile?.description && (
-              <p className="text-primary-foreground/80 max-w-2xl mx-auto">{profile.description}</p>
-            )}
+            <h1 className="text-xl font-bold mb-1">{profile?.name || 'Restaurant Menu'}</h1>
             {profile?.address && (
-              <p className="text-primary-foreground/60 mt-2">{profile.address}</p>
+              <p className="text-sm opacity-80">{profile.address}</p>
             )}
-            {profile?.phone && (
-              <p className="text-primary-foreground/60 mt-1">{profile.phone}</p>
+            
+            {/* Social Media Icons */}
+            {profile?.social_media_links && (
+              <div className="flex justify-center gap-3 mt-3">
+                {profile.social_media_links.instagram && (
+                  <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer">
+                    <Instagram className="h-5 w-5 opacity-80 hover:opacity-100" />
+                  </a>
+                )}
+                {profile.social_media_links.facebook && (
+                  <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
+                    <Facebook className="h-5 w-5 opacity-80 hover:opacity-100" />
+                  </a>
+                )}
+                {profile.social_media_links.whatsapp && (
+                  <a href={profile.social_media_links.whatsapp} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="h-5 w-5 opacity-80 hover:opacity-100" />
+                  </a>
+                )}
+                {profile?.phone && (
+                  <a href={`tel:${profile.phone}`}>
+                    <Phone className="h-5 w-5 opacity-80 hover:opacity-100" />
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="px-4 py-4">
+          <div className="max-w-md mx-auto relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search ingredients & dishes"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
         {/* Categories Grid */}
-        <div className="container mx-auto px-4 py-8">
-          {categories.length === 0 ? (
+        <div className="px-4 pb-8">
+          <div className="max-w-md mx-auto">
+            {filteredCategories.length === 0 ? (
+              <div className="text-center py-12">
+                <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Menu Coming Soon</h3>
+                <p className="text-muted-foreground">The menu is being prepared and will be available shortly.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {filteredCategories.map((category) => {
+                  const categoryItems = menuItems.filter(item => item.category_id === category.id);
+                  
+                  return (
+                    <Card 
+                      key={category.id} 
+                      className="hover:shadow-md transition-all cursor-pointer h-32"
+                      style={{ borderColor: customTheme?.accentColor }}
+                    >
+                      <CardContent className="p-4 h-full flex flex-col">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-sm mb-1" style={{ color: customTheme?.textColor }}>
+                            {category.name_sq || category.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {categoryItems.slice(0, 2).map(item => item.name_sq || item.name).join(', ')}
+                            {categoryItems.length > 2 && '...'}
+                          </p>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-2">
+                          {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Items layout (similar to right image in reference)
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}>
+      {/* Header */}
+      <div className="px-4 py-6" style={{ backgroundColor: customTheme?.primaryColor || '#1f2937', color: 'white' }}>
+        <div className="max-w-md mx-auto text-center">
+          {profile?.logo_url && (
+            <img 
+              src={profile.logo_url} 
+              alt={profile.name} 
+              className="h-12 w-12 mx-auto mb-3 rounded-full object-cover"
+            />
+          )}
+          <h1 className="text-xl font-bold mb-1">{profile?.name || 'Restaurant Menu'}</h1>
+          {profile?.address && (
+            <p className="text-sm opacity-80">{profile.address}</p>
+          )}
+          
+          {/* Social Media Icons */}
+          {profile?.social_media_links && (
+            <div className="flex justify-center gap-3 mt-3">
+              {profile.social_media_links.instagram && (
+                <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer">
+                  <Instagram className="h-5 w-5 opacity-80 hover:opacity-100" />
+                </a>
+              )}
+              {profile.social_media_links.facebook && (
+                <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
+                  <Facebook className="h-5 w-5 opacity-80 hover:opacity-100" />
+                </a>
+              )}
+              {profile.social_media_links.whatsapp && (
+                <a href={profile.social_media_links.whatsapp} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="h-5 w-5 opacity-80 hover:opacity-100" />
+                </a>
+              )}
+              {profile?.phone && (
+                <a href={`tel:${profile.phone}`}>
+                  <Phone className="h-5 w-5 opacity-80 hover:opacity-100" />
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Categories Title */}
+      <div className="px-4 py-4">
+        <div className="max-w-md mx-auto">
+          <h2 className="text-lg font-semibold text-center" style={{ color: customTheme?.textColor }}>
+            Categories
+          </h2>
+        </div>
+      </div>
+
+      {/* Categories List */}
+      <div className="px-4 pb-8">
+        <div className="max-w-md mx-auto space-y-3">
+          {filteredCategories.length === 0 ? (
             <div className="text-center py-12">
               <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Menu Coming Soon</h3>
               <p className="text-muted-foreground">The menu is being prepared and will be available shortly.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((category) => {
-                const categoryItems = menuItems.filter(item => item.category_id === category.id);
-                
-                return (
-                  <Card key={category.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Tag className="h-5 w-5" />
-                        {category.name_sq || category.name}
-                      </CardTitle>
-                      {(category.description_sq || category.description) && (
-                        <CardDescription>{category.description_sq || category.description}</CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {categoryItems.slice(0, 3).map((item) => (
-                          <div key={item.id} className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <h4 className="font-medium">{item.name_sq || item.name}</h4>
-                              {(item.description_sq || item.description) && (
-                                <p className="text-sm text-muted-foreground line-clamp-1">
-                                  {item.description_sq || item.description}
-                                </p>
-                              )}
-                            </div>
-                            <div className="text-right ml-2">
-                              <p className="font-semibold">{formatPrice(item.price, item.currency)}</p>
-                            </div>
-                          </div>
-                        ))}
-                        {categoryItems.length > 3 && (
-                          <p className="text-sm text-muted-foreground text-center">
-                            +{categoryItems.length - 3} më shumë artikuj
-                          </p>
-                        )}
-                        {categoryItems.length === 0 && (
-                          <p className="text-sm text-muted-foreground text-center italic">
-                            Asnjë artikull i disponueshëm
-                          </p>
-                        )}
+            filteredCategories.map((category) => {
+              const categoryItems = menuItems.filter(item => item.category_id === category.id);
+              
+              return (
+                <div key={category.id} className="border rounded-lg p-4 bg-white shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center">
+                        <Tag className="h-4 w-4 text-gray-600" />
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // All items layout
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header with restaurant profile data */}
-      <div className="bg-primary text-primary-foreground py-6">
-        <div className="container mx-auto px-4 text-center">
-          {profile?.logo_url && (
-            <img 
-              src={profile.logo_url} 
-              alt={profile.name} 
-              className="h-12 w-12 mx-auto mb-2 rounded-full object-cover"
-            />
-          )}
-          <h1 className="text-2xl font-bold mb-1">{profile?.name || 'Restaurant Menu'}</h1>
-          {profile?.description && (
-            <p className="text-primary-foreground/80 text-sm">{profile.description}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Category Filter */}
-      <div className="border-b bg-background sticky top-0 z-10">
-        <div className="container mx-auto px-4">
-          <div className="flex gap-2 py-4 overflow-x-auto">
-            <Button
-              variant={selectedCategory === null ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(null)}
-            >
-              Të gjitha
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category.id)}
-                className="whitespace-nowrap"
-              >
-                {category.name_sq || category.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Menu Items */}
-      <div className="container mx-auto px-4 py-6">
-        {itemsLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p>Loading items...</p>
-          </div>
-        ) : menuItems.length === 0 ? (
-          <div className="text-center py-12">
-            <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nuk ka artikuj të disponueshëm</h3>
-            <p className="text-muted-foreground">
-              {selectedCategory ? 'Nuk ka artikuj në këtë kategori.' : 'Menuja është ende në përgatitje.'}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {menuItems.map((item) => (
-              <Card key={item.id}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{item.name_sq || item.name}</h3>
-                        {item.is_featured && (
-                          <Badge variant="secondary" className="text-xs">E veçantë</Badge>
-                        )}
-                      </div>
-                      
-                      {(item.description_sq || item.description) && (
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {item.description_sq || item.description}
+                      <div>
+                        <h3 className="font-medium" style={{ color: customTheme?.textColor }}>
+                          {category.name_sq || category.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
                         </p>
-                      )}
-                      
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        {item.preparation_time && (
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {item.preparation_time} min
-                          </div>
-                        )}
                       </div>
-                      
-                      {item.allergens && item.allergens.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {item.allergens.map((allergen) => (
-                            <Badge key={allergen} variant="outline" className="text-xs">
-                              {allergen}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
                     </div>
-                    
-                    <div className="text-right">
-                      <p className="font-bold text-lg">{formatPrice(item.price, item.currency)}</p>
-                    </div>
+                    <Button variant="ghost" size="sm">
+                      <div className="flex gap-1">
+                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                        <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                      </div>
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { createClient } from '@supabase/supabase-js';
 import { Building2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BasicInformation } from './profile/BasicInformation';
@@ -11,6 +10,7 @@ import { WorkingHours } from './profile/WorkingHours';
 import { SocialMediaLinks } from './profile/SocialMediaLinks';
 import { MediaUpload } from './profile/MediaUpload';
 import { ConnectionError } from './profile/ConnectionError';
+import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 
 interface RestaurantProfile {
   id?: string;
@@ -46,39 +46,16 @@ export function ProfileManagement() {
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<RestaurantProfile>();
 
-  // Get restaurant info from session storage and create client
-  const getRestaurantClient = () => {
-    try {
-      const restaurantInfo = sessionStorage.getItem('restaurant_info');
-      if (!restaurantInfo) {
-        setConnectionError('Restaurant connection not found. Please login again.');
-        return null;
-      }
-      
-      const info = JSON.parse(restaurantInfo);
-      if (!info.supabase_url || !info.supabase_anon_key) {
-        setConnectionError('Invalid restaurant connection data. Please login again.');
-        return null;
-      }
-      
-      return createClient(info.supabase_url, info.supabase_anon_key);
-    } catch (error) {
-      setConnectionError('Failed to parse restaurant connection data. Please login again.');
-      return null;
-    }
-  };
-
   // Load profile data
   useEffect(() => {
     loadProfile();
   }, []);
 
   const loadProfile = async () => {
-    const supabase = getRestaurantClient();
-    if (!supabase) return;
-
     try {
+      const supabase = getRestaurantSupabase();
       setConnectionError(null);
+      
       const { data, error } = await supabase
         .from('restaurant_profile')
         .select('*')
@@ -104,12 +81,11 @@ export function ProfileManagement() {
   };
 
   const onSubmit = async (data: RestaurantProfile) => {
-    const supabase = getRestaurantClient();
-    if (!supabase) return;
-
     setIsLoading(true);
     try {
+      const supabase = getRestaurantSupabase();
       setConnectionError(null);
+      
       const profileData = {
         ...data,
         working_hours: data.working_hours || {},

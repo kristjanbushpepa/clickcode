@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Palette, Layout, Save } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { getRestaurantInfo, getRestaurantSupabase } from '@/utils/restaurantDatabase';
 
 interface MenuTheme {
   primaryColor: string;
@@ -67,22 +68,58 @@ export function CustomizationSettings() {
     }
   };
 
-  const saveCustomization = () => {
-    // Here you would save the customization to the restaurant's database
-    localStorage.setItem('menu_theme', JSON.stringify(customTheme));
-    localStorage.setItem('menu_layout', selectedLayout);
-    
-    toast({
-      title: 'Personalizimi u ruajt',
-      description: 'Ndryshimet tuaja janë ruajtur me sukses.',
-    });
+  const saveCustomization = async () => {
+    try {
+      const supabase = getRestaurantSupabase();
+      
+      // Save customization to restaurant database
+      const customizationData = {
+        theme: customTheme,
+        layout: selectedLayout,
+        preset: selectedPreset,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('restaurant_customization')
+        .upsert(customizationData, { 
+          onConflict: 'id'
+        });
+
+      if (error) {
+        console.error('Database save error:', error);
+        // Fallback to localStorage if database save fails
+        localStorage.setItem('menu_theme', JSON.stringify(customTheme));
+        localStorage.setItem('menu_layout', selectedLayout);
+        
+        toast({
+          title: 'Personalizimi u ruajt lokalisht',
+          description: 'Ndryshimet tuaja janë ruajtur në pajisjen tuaj.',
+        });
+      } else {
+        toast({
+          title: 'Personalizimi u ruajt',
+          description: 'Ndryshimet tuaja janë ruajtur me sukses në bazën e të dhënave.',
+        });
+      }
+    } catch (error) {
+      console.error('Error saving customization:', error);
+      // Fallback to localStorage
+      localStorage.setItem('menu_theme', JSON.stringify(customTheme));
+      localStorage.setItem('menu_layout', selectedLayout);
+      
+      toast({
+        title: 'Personalizimi u ruajt lokalisht',
+        description: 'Ndryshimet tuaja janë ruajtur në pajisjen tuaj.',
+      });
+    }
   };
 
   const getPreviewUrl = () => {
-    const restaurantInfo = sessionStorage.getItem('restaurant_info');
+    const restaurantInfo = getRestaurantInfo();
     if (!restaurantInfo) return '#';
     
-    const { id } = JSON.parse(restaurantInfo);
+    const { id } = restaurantInfo;
     return `/menu/${id}?layout=${selectedLayout}`;
   };
 

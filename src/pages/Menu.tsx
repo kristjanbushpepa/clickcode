@@ -280,6 +280,33 @@ const Menu = () => {
     }
   }, [customization]);
 
+  // Set up real-time updates for customization changes
+  useEffect(() => {
+    const restaurantSupabase = getRestaurantSupabase();
+    if (!restaurantSupabase) return;
+
+    const channel = restaurantSupabase
+      .channel('customization-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'restaurant_customization'
+        },
+        (payload) => {
+          console.log('Customization updated:', payload);
+          // Refetch customization data
+          window.location.reload();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      restaurantSupabase.removeChannel(channel);
+    };
+  }, [restaurant]);
+
   // Filter menu items based on search
   const filteredMenuItems = menuItems.filter(item => 
     (item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -13,6 +13,7 @@ interface CurrencySettings {
   id: string;
   default_currency: string;
   supported_currencies: string[];
+  enabled_currencies: string[];
   exchange_rates: Record<string, number>;
   last_updated: string;
 }
@@ -38,9 +39,9 @@ export function CurrencySettings() {
       const { data, error } = await restaurantSupabase
         .from('currency_settings')
         .select('*')
-        .single();
+        .maybeSingle();
       
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
       return data as CurrencySettings | null;
     }
   });
@@ -94,6 +95,21 @@ export function CurrencySettings() {
     updateSettingsMutation.mutate({ 
       default_currency: currency,
       supported_currencies: currencySettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+      enabled_currencies: currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+      exchange_rates: exchangeRates
+    });
+  };
+
+  const handleCurrencyToggle = (currency: string) => {
+    const currentEnabled = currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'];
+    const newEnabled = currentEnabled.includes(currency)
+      ? currentEnabled.filter(c => c !== currency)
+      : [...currentEnabled, currency];
+    
+    updateSettingsMutation.mutate({
+      default_currency: currencySettings?.default_currency || 'ALL',
+      supported_currencies: currencySettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+      enabled_currencies: newEnabled,
       exchange_rates: exchangeRates
     });
   };
@@ -110,6 +126,7 @@ export function CurrencySettings() {
     updateSettingsMutation.mutate({
       default_currency: currencySettings?.default_currency || 'ALL',
       supported_currencies: currencySettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+      enabled_currencies: currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
       exchange_rates: exchangeRates
     });
   };
@@ -177,11 +194,22 @@ export function CurrencySettings() {
           <CardContent className="space-y-4">
             {CURRENCY_OPTIONS.map((currency) => {
               const isBaseCurrency = currency.code === (currencySettings?.default_currency || 'ALL');
+              const isEnabled = currencySettings?.enabled_currencies?.includes(currency.code) ?? true;
               return (
-                <div key={currency.code} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{currency.symbol}</span>
-                    <span className="text-sm">{currency.code}</span>
+                <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isEnabled}
+                      onChange={() => handleCurrencyToggle(currency.code)}
+                      disabled={isBaseCurrency}
+                      className="w-4 h-4"
+                    />
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{currency.symbol}</span>
+                      <span className="text-sm">{currency.code}</span>
+                      <span className="text-xs text-muted-foreground">{currency.name}</span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">1 {currencySettings?.default_currency || 'ALL'} =</span>
@@ -191,7 +219,7 @@ export function CurrencySettings() {
                       className="w-24"
                       value={isBaseCurrency ? '1.000000' : (exchangeRates[currency.code] || 0).toString()}
                       onChange={(e) => handleExchangeRateChange(currency.code, e.target.value)}
-                      disabled={isBaseCurrency}
+                      disabled={isBaseCurrency || !isEnabled}
                     />
                     <span className="text-sm font-medium">{currency.code}</span>
                   </div>

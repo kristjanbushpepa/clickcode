@@ -16,6 +16,7 @@ import { Plus, Edit, Trash2, EyeOff, Tag, Utensils, DollarSign, Languages } from
 import { useToast } from '@/components/ui/use-toast';
 import { CurrencySettings } from './CurrencySettings';
 import { LanguageSettings } from './LanguageSettings';
+import { TranslationManager } from './TranslationManager';
 
 interface Category {
   id: string;
@@ -373,7 +374,7 @@ export function MenuManagement() {
       </div>
 
       <Tabs defaultValue="menu" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="menu" className="flex items-center gap-2">
             <Utensils className="h-4 w-4" />
             Artikujt e Menusë
@@ -389,6 +390,10 @@ export function MenuManagement() {
           <TabsTrigger value="language" className="flex items-center gap-2">
             <Languages className="h-4 w-4" />
             Gjuha
+          </TabsTrigger>
+          <TabsTrigger value="translations" className="flex items-center gap-2">
+            <Languages className="h-4 w-4" />
+            Përkthimet
           </TabsTrigger>
         </TabsList>
 
@@ -559,6 +564,10 @@ export function MenuManagement() {
 
         <TabsContent value="language">
           <LanguageSettings />
+        </TabsContent>
+
+        <TabsContent value="translations">
+          <TranslationManager />
         </TabsContent>
       </Tabs>
     </div>

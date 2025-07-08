@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { Languages, Edit3, Save, RefreshCw } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Languages, Edit3, Save, RefreshCw, Wand2 } from 'lucide-react';
 
 interface TranslatableItem {
   id: string;
@@ -68,6 +69,80 @@ export function TranslationManager() {
       
       if (error) throw error;
       return data || [];
+    }
+  });
+
+  // Auto translate mutation
+  const autoTranslateMutation = useMutation({
+    mutationFn: async (targetLanguage: string) => {
+      const itemsToTranslate = allItems.filter(item => {
+        const nameKey = `name_${targetLanguage}`;
+        const descKey = `description_${targetLanguage}`;
+        return !getTranslationValue(item, nameKey) || (item.description && !getTranslationValue(item, descKey));
+      });
+
+      if (itemsToTranslate.length === 0) {
+        throw new Error('Të gjitha përkthimet janë të kompletuar për këtë gjuhë');
+      }
+
+      const textsToTranslate: string[] = [];
+      const itemMap: { itemId: string; field: string; index: number }[] = [];
+      
+      itemsToTranslate.forEach(item => {
+        const nameKey = `name_${targetLanguage}`;
+        const descKey = `description_${targetLanguage}`;
+        
+        if (!getTranslationValue(item, nameKey)) {
+          itemMap.push({ itemId: item.id, field: nameKey, index: textsToTranslate.length });
+          textsToTranslate.push(item.name);
+        }
+        
+        if (item.description && !getTranslationValue(item, descKey)) {
+          itemMap.push({ itemId: item.id, field: descKey, index: textsToTranslate.length });
+          textsToTranslate.push(item.description);
+        }
+      });
+
+      const { data, error } = await supabase.functions.invoke('auto-translate', {
+        body: { texts: textsToTranslate, targetLanguage }
+      });
+
+      if (error) throw error;
+      if (!data?.translations) throw new Error('Nuk u morën përkthime nga shërbimi');
+
+      // Apply translations to editing state
+      const newEditingTranslations: Record<string, Record<string, string>> = {};
+      
+      itemMap.forEach(({ itemId, field, index }) => {
+        if (data.translations[index]) {
+          if (!newEditingTranslations[itemId]) {
+            newEditingTranslations[itemId] = {};
+          }
+          newEditingTranslations[itemId][field] = data.translations[index];
+        }
+      });
+
+      return newEditingTranslations;
+    },
+    onSuccess: (newTranslations) => {
+      setEditingTranslations(prev => {
+        const updated = { ...prev };
+        Object.keys(newTranslations).forEach(itemId => {
+          updated[itemId] = { ...updated[itemId], ...newTranslations[itemId] };
+        });
+        return updated;
+      });
+      toast({ 
+        title: 'Përkthimi automatik u kompletua', 
+        description: 'Rishikoni përkthimet dhe ruajini ato.' 
+      });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Gabim në përkthimin automatik', 
+        description: error.message, 
+        variant: 'destructive' 
+      });
     }
   });
 
@@ -148,23 +223,34 @@ export function TranslationManager() {
           <h2 className="text-2xl font-bold">Menaxhimi i Përkthimeve</h2>
           <p className="text-muted-foreground">Ndrysho dhe përditëso përkthimet për çdo gjuhë</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Label htmlFor="language-select">Gjuha:</Label>
-          <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LANGUAGE_OPTIONS.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  <div className="flex items-center gap-2">
-                    <span>{lang.flag}</span>
-                    <span>{lang.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={() => autoTranslateMutation.mutate(selectedLanguage)}
+            disabled={autoTranslateMutation.isPending}
+            variant="outline"
+            className="gap-2"
+          >
+            <Wand2 className="h-4 w-4" />
+            {autoTranslateMutation.isPending ? 'Duke përkthyer...' : 'Përkthe Automatikisht'}
+          </Button>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="language-select">Gjuha:</Label>
+            <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGE_OPTIONS.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    <div className="flex items-center gap-2">
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 

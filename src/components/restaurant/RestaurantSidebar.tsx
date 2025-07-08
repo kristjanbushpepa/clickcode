@@ -1,6 +1,6 @@
 
 import { NavLink, useLocation } from 'react-router-dom';
-import { Building2, Settings, Menu as MenuIcon, BarChart3, Users, Palette, QrCode } from 'lucide-react';
+import { Building2, Settings, Menu as MenuIcon, BarChart3, Users, Palette, QrCode, Languages } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +19,7 @@ interface RestaurantSidebarProps {}
 const navigationItems = [
   { title: 'Profile', url: '/restaurant/dashboard', icon: Building2, exact: true },
   { title: 'Menu Management', url: '/restaurant/dashboard/menu', icon: MenuIcon },
+  { title: 'Translations', url: '/restaurant/dashboard/translations', icon: Languages },
   { title: 'QR Code Generator', url: '/restaurant/dashboard/qr-generator', icon: QrCode },
   { title: 'Analytics', url: '/restaurant/dashboard/analytics', icon: BarChart3 },
   { title: 'Customization', url: '/restaurant/dashboard/customization', icon: Palette },

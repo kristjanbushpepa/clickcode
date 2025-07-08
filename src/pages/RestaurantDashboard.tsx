@@ -7,7 +7,6 @@ import { ProfileManagement } from '@/components/restaurant/ProfileManagement';
 import { MenuManagement } from '@/components/restaurant/MenuManagement';
 import { QRCodeGenerator } from '@/components/restaurant/QRCodeGenerator';
 import { CustomizationSettings } from '@/components/restaurant/CustomizationSettings';
-import { TranslationManager } from '@/components/restaurant/TranslationManager';
 
 const RestaurantDashboard = () => {
   return (
@@ -27,7 +26,6 @@ const RestaurantDashboard = () => {
             <Routes>
               <Route path="/" element={<ProfileManagement />} />
               <Route path="/menu" element={<MenuManagement />} />
-              <Route path="/translations" element={<TranslationManager />} />
               <Route path="/qr-generator" element={<QRCodeGenerator />} />
               <Route path="/analytics" element={<div>Analytics (Coming Soon)</div>} />
               <Route path="/customization" element={<CustomizationSettings />} />

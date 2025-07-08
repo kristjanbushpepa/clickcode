@@ -1,10 +1,10 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 interface TranslationRequest {
@@ -78,12 +78,17 @@ const LANGUAGE_MAP: Record<string, string> = {
 };
 
 serve(async (req) => {
+  console.log(`Auto-translate function called with method: ${req.method}`);
+  
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('Processing translation request');
     const { text, fromLang = 'en', toLang }: TranslationRequest = await req.json();
+    console.log(`Translating "${text}" from ${fromLang} to ${toLang}`);
 
     if (!text || !toLang) {
       return new Response(
@@ -94,6 +99,7 @@ serve(async (req) => {
 
     // Skip translation if target language is the same as source
     if (fromLang === toLang) {
+      console.log('Source and target languages are the same, returning original text');
       return new Response(
         JSON.stringify({ success: true, translatedText: text }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -104,6 +110,7 @@ serve(async (req) => {
     const targetLang = LANGUAGE_MAP[toLang];
 
     if (!targetLang) {
+      console.log(`Unsupported target language: ${toLang}`);
       return new Response(
         JSON.stringify({ success: false, error: `Unsupported target language: ${toLang}` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -114,13 +121,16 @@ serve(async (req) => {
 
     try {
       // Try LibreTranslate first (primary free API)
-      console.log(`Translating "${text}" from ${sourceLang} to ${targetLang} using LibreTranslate`);
+      console.log(`Attempting translation with LibreTranslate`);
       translatedText = await translateWithLibreTranslate(text, sourceLang, targetLang);
+      console.log(`LibreTranslate successful: ${translatedText}`);
     } catch (error) {
-      console.log('LibreTranslate failed, trying MyMemory as backup');
+      console.log('LibreTranslate failed, trying MyMemory as backup:', error);
       try {
         // Fallback to MyMemory
+        console.log(`Attempting translation with MyMemory`);
         translatedText = await translateWithMyMemory(text, sourceLang, targetLang);
+        console.log(`MyMemory successful: ${translatedText}`);
       } catch (fallbackError) {
         console.error('Both translation APIs failed:', error, fallbackError);
         return new Response(

@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -21,53 +22,62 @@ serve(async (req) => {
       throw new Error('Target language is required');
     }
 
-    // Language code mapping for LibreTranslate
-    const languageMap: Record<string, string> = {
-      'sq': 'sq',   // Albanian
-      'it': 'it',   // Italian
-      'de': 'de',   // German
-      'fr': 'fr',   // French
-      'zh': 'zh'    // Chinese
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const languageNames = {
+      'sq': 'Albanian',
+      'it': 'Italian', 
+      'de': 'German',
+      'fr': 'French',
+      'zh': 'Chinese'
     };
 
-    const targetLang = languageMap[targetLanguage];
-    if (!targetLang) {
-      throw new Error(`Unsupported language: ${targetLanguage}`);
-    }
+    const targetLanguageName = languageNames[targetLanguage as keyof typeof languageNames] || targetLanguage;
 
-    const translations: string[] = [];
-
-    // Translate each text individually using LibreTranslate (free API)
-    for (const text of texts) {
-      try {
-        const response = await fetch('https://libretranslate.de/translate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a professional translator. Translate the following texts to ${targetLanguageName}. Return only the translations in the same array format, maintaining the same order. Keep restaurant/food terminology accurate and appetizing. Do not add any extra formatting or explanations.`
           },
-          body: JSON.stringify({
-            q: text,
-            source: 'en',
-            target: targetLang,
-            format: 'text'
-          }),
-        });
+          {
+            role: 'user',
+            content: `Translate these texts to ${targetLanguageName}:\n${JSON.stringify(texts)}`
+          }
+        ],
+        temperature: 0.3,
+      }),
+    });
 
-        if (!response.ok) {
-          throw new Error(`Translation API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        translations.push(data.translatedText || text);
-      } catch (error) {
-        console.error(`Error translating "${text}":`, error);
-        translations.push(text); // Fallback to original text
-      }
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
-    return new Response(JSON.stringify({ translations }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    const data = await response.json();
+    const translatedContent = data.choices[0].message.content;
+    
+    try {
+      const translations = JSON.parse(translatedContent);
+      return new Response(JSON.stringify({ translations }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch {
+      // If JSON parsing fails, split by lines as fallback
+      const translations = translatedContent.split('\n').filter((line: string) => line.trim());
+      return new Response(JSON.stringify({ translations }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
   } catch (error) {
     console.error('Translation error:', error);

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { Languages, Edit3, Save, RefreshCw } from 'lucide-react';
+import { Languages, Edit3, Save, RefreshCw, Wand2, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface TranslatableItem {
   id: string;
@@ -25,7 +25,14 @@ interface TranslatableItem {
   description_de?: string;
   description_fr?: string;
   description_zh?: string;
+  translation_metadata?: any;
   type: 'category' | 'menu_item';
+}
+
+interface TranslationStatus {
+  status: 'original' | 'auto_translated' | 'manually_edited' | 'approved';
+  timestamp: string;
+  source?: string;
 }
 
 const LANGUAGE_OPTIONS = [
@@ -41,6 +48,8 @@ export function TranslationManager() {
   const queryClient = useQueryClient();
   const [selectedLanguage, setSelectedLanguage] = useState('sq');
   const [editingTranslations, setEditingTranslations] = useState<Record<string, Record<string, string>>>({});
+  const [translatingItems, setTranslatingItems] = useState<Set<string>>(new Set());
+  const [bulkTranslating, setBulkTranslating] = useState(false);
 
   // Fetch categories and menu items for translation
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
@@ -71,15 +80,41 @@ export function TranslationManager() {
     }
   });
 
+  // Auto-translate function
+  const autoTranslate = async (text: string, targetLang: string): Promise<string> => {
+    const restaurantSupabase = getRestaurantSupabase();
+    const { data, error } = await restaurantSupabase.functions.invoke('auto-translate', {
+      body: {
+        text,
+        fromLang: 'en',
+        toLang: targetLang
+      }
+    });
+
+    if (error) throw error;
+    if (!data.success) throw new Error(data.error);
+    return data.translatedText;
+  };
+
   // Update translation mutation
   const updateTranslationMutation = useMutation({
-    mutationFn: async ({ id, type, translations }: { id: string; type: 'category' | 'menu_item'; translations: Record<string, string> }) => {
+    mutationFn: async ({ id, type, translations, metadata }: { 
+      id: string; 
+      type: 'category' | 'menu_item'; 
+      translations: Record<string, string>;
+      metadata?: any;
+    }) => {
       const restaurantSupabase = getRestaurantSupabase();
       const tableName = type === 'category' ? 'categories' : 'menu_items';
       
+      const updateData = { ...translations };
+      if (metadata) {
+        updateData.translation_metadata = metadata;
+      }
+      
       const { data, error } = await restaurantSupabase
         .from(tableName)
-        .update(translations)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
@@ -100,6 +135,95 @@ export function TranslationManager() {
     }
   });
 
+  // Auto-translate single item
+  const autoTranslateItem = async (item: TranslatableItem, targetLang: string) => {
+    setTranslatingItems(prev => new Set(prev).add(item.id));
+    
+    try {
+      const translations: Record<string, string> = {};
+      const metadata = item.translation_metadata || {};
+      
+      // Translate name
+      if (item.name && !item[`name_${targetLang}` as keyof TranslatableItem]) {
+        const translatedName = await autoTranslate(item.name, targetLang);
+        translations[`name_${targetLang}`] = translatedName;
+        metadata[`name_${targetLang}`] = {
+          status: 'auto_translated',
+          timestamp: new Date().toISOString(),
+          source: 'auto-translate'
+        };
+      }
+      
+      // Translate description if exists
+      if (item.description && !item[`description_${targetLang}` as keyof TranslatableItem]) {
+        const translatedDescription = await autoTranslate(item.description, targetLang);
+        translations[`description_${targetLang}`] = translatedDescription;
+        metadata[`description_${targetLang}`] = {
+          status: 'auto_translated',
+          timestamp: new Date().toISOString(),
+          source: 'auto-translate'
+        };
+      }
+      
+      if (Object.keys(translations).length > 0) {
+        await updateTranslationMutation.mutateAsync({
+          id: item.id,
+          type: item.type,
+          translations,
+          metadata
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Gabim në përkthim automatik',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setTranslatingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(item.id);
+        return newSet;
+      });
+    }
+  };
+
+  // Auto-translate all items for selected language
+  const autoTranslateAll = async () => {
+    setBulkTranslating(true);
+    
+    try {
+      const allItems = [
+        ...categories.map(cat => ({ ...cat, type: 'category' as const })),
+        ...menuItems.map(item => ({ ...item, type: 'menu_item' as const }))
+      ];
+      
+      let translated = 0;
+      for (const item of allItems) {
+        const hasNameTranslation = item[`name_${selectedLanguage}` as keyof TranslatableItem];
+        const hasDescTranslation = !item.description || item[`description_${selectedLanguage}` as keyof TranslatableItem];
+        
+        if (!hasNameTranslation || !hasDescTranslation) {
+          await autoTranslateItem(item, selectedLanguage);
+          translated++;
+        }
+      }
+      
+      toast({
+        title: 'Përkthimi automatik u përfundua',
+        description: `U përkthyen ${translated} artikuj në ${LANGUAGE_OPTIONS.find(l => l.code === selectedLanguage)?.name}`
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Gabim në përkthimin automatik',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setBulkTranslating(false);
+    }
+  };
+
   const handleTranslationChange = (itemId: string, field: string, value: string) => {
     setEditingTranslations(prev => ({
       ...prev,
@@ -113,10 +237,21 @@ export function TranslationManager() {
   const saveTranslations = (item: TranslatableItem) => {
     const translations = editingTranslations[item.id] || {};
     if (Object.keys(translations).length > 0) {
+      // Mark as manually edited
+      const metadata = item.translation_metadata || {};
+      Object.keys(translations).forEach(field => {
+        metadata[field] = {
+          status: 'manually_edited',
+          timestamp: new Date().toISOString(),
+          source: 'manual'
+        };
+      });
+      
       updateTranslationMutation.mutate({
         id: item.id,
         type: item.type,
-        translations
+        translations,
+        metadata
       });
       setEditingTranslations(prev => {
         const newState = { ...prev };
@@ -126,10 +261,36 @@ export function TranslationManager() {
     }
   };
 
+  // Get translation status
+  const getTranslationStatus = (item: TranslatableItem, field: string): TranslationStatus | null => {
+    return item.translation_metadata?.[field] || null;
+  };
+
   const getTranslationValue = (item: TranslatableItem, field: string) => {
     const editingValue = editingTranslations[item.id]?.[field];
     if (editingValue !== undefined) return editingValue;
     return (item as any)[field] || '';
+  };
+
+  // Render translation status badge
+  const renderTranslationStatus = (item: TranslatableItem, field: string) => {
+    const status = getTranslationStatus(item, field);
+    const value = getTranslationValue(item, field);
+    
+    if (!value) return null;
+    
+    if (!status) return null;
+    
+    switch (status.status) {
+      case 'auto_translated':
+        return <Badge variant="secondary" className="text-xs"><Wand2 className="h-3 w-3 mr-1" />Auto</Badge>;
+      case 'manually_edited':
+        return <Badge variant="default" className="text-xs"><Edit3 className="h-3 w-3 mr-1" />Manual</Badge>;
+      case 'approved':
+        return <Badge variant="default" className="text-xs bg-green-500"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
+      default:
+        return null;
+    }
   };
 
   const allItems: TranslatableItem[] = [
@@ -148,23 +309,38 @@ export function TranslationManager() {
           <h2 className="text-2xl font-bold">Menaxhimi i Përkthimeve</h2>
           <p className="text-muted-foreground">Ndrysho dhe përditëso përkthimet për çdo gjuhë</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Label htmlFor="language-select">Gjuha:</Label>
-          <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LANGUAGE_OPTIONS.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  <div className="flex items-center gap-2">
-                    <span>{lang.flag}</span>
-                    <span>{lang.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={autoTranslateAll}
+            disabled={bulkTranslating || allItems.length === 0}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            {bulkTranslating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Wand2 className="h-4 w-4" />
+            )}
+            {bulkTranslating ? 'Duke përkthyer...' : 'Përkthe të Gjitha'}
+          </Button>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="language-select">Gjuha:</Label>
+            <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGE_OPTIONS.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    <div className="flex items-center gap-2">
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -177,9 +353,23 @@ export function TranslationManager() {
                   <Languages className="h-5 w-5" />
                   <span>{item.name} ({item.type === 'category' ? 'Kategori' : 'Artikull'})</span>
                 </div>
-                <Badge variant={item.type === 'category' ? 'default' : 'secondary'}>
-                  {item.type === 'category' ? 'Kategori' : 'Artikull Menuje'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => autoTranslateItem(item, selectedLanguage)}
+                    disabled={translatingItems.has(item.id)}
+                  >
+                    {translatingItems.has(item.id) ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Wand2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Badge variant={item.type === 'category' ? 'default' : 'secondary'}>
+                    {item.type === 'category' ? 'Kategori' : 'Artikull Menuje'}
+                  </Badge>
+                </div>
               </CardTitle>
               <CardDescription>
                 Redaktoni përkthimin për gjuhën e zgjedhur
@@ -196,7 +386,10 @@ export function TranslationManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Emri në {LANGUAGE_OPTIONS.find(l => l.code === selectedLanguage)?.name}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Emri në {LANGUAGE_OPTIONS.find(l => l.code === selectedLanguage)?.name}</Label>
+                    {renderTranslationStatus(item, `name_${selectedLanguage}`)}
+                  </div>
                   <Input
                     value={getTranslationValue(item, `name_${selectedLanguage}`)}
                     onChange={(e) => handleTranslationChange(item.id, `name_${selectedLanguage}`, e.target.value)}
@@ -217,7 +410,10 @@ export function TranslationManager() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Përshkrimi në {LANGUAGE_OPTIONS.find(l => l.code === selectedLanguage)?.name}</Label>
+                    <div className="flex items-center justify-between">
+                      <Label>Përshkrimi në {LANGUAGE_OPTIONS.find(l => l.code === selectedLanguage)?.name}</Label>
+                      {renderTranslationStatus(item, `description_${selectedLanguage}`)}
+                    </div>
                     <Textarea
                       value={getTranslationValue(item, `description_${selectedLanguage}`)}
                       onChange={(e) => handleTranslationChange(item.id, `description_${selectedLanguage}`, e.target.value)}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -44,6 +43,8 @@ interface RestaurantProfile {
   };
   logo_url?: string;
   banner_url?: string;
+  logo_path?: string;
+  banner_path?: string;
   google_reviews_embed?: string;
   tripadvisor_embed?: string;
   yelp_embed?: string;
@@ -54,7 +55,7 @@ export function ProfileManagement() {
   const [profile, setProfile] = useState<RestaurantProfile | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<RestaurantProfile>();
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<RestaurantProfile>();
 
   // Load profile data
   useEffect(() => {
@@ -171,7 +172,7 @@ export function ProfileManagement() {
         <BasicInformation register={register} errors={errors} />
         <WorkingHours register={register} />
         <SocialMediaLinks register={register} />
-        <MediaUpload register={register} />
+        <MediaUpload register={register} setValue={setValue} watch={watch} />
 
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? 'Saving...' : 'Save Profile'}

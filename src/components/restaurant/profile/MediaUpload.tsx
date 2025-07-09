@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { UseFormRegister } from 'react-hook-form';
+import { UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Upload } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 interface RestaurantProfile {
   id?: string;
@@ -30,42 +29,45 @@ interface RestaurantProfile {
   };
   logo_url?: string;
   banner_url?: string;
+  logo_path?: string;
+  banner_path?: string;
   google_reviews_embed?: string;
 }
 
 interface MediaUploadProps {
   register: UseFormRegister<RestaurantProfile>;
+  setValue: UseFormSetValue<RestaurantProfile>;
+  watch: UseFormWatch<RestaurantProfile>;
 }
 
-export function MediaUpload({ register }: MediaUploadProps) {
+export function MediaUpload({ register, setValue, watch }: MediaUploadProps) {
+  const logoPath = watch('logo_path');
+  const bannerPath = watch('banner_path');
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Images
+          Imazhet
         </CardTitle>
         <CardDescription>
-          Upload your restaurant logo and banner image. (File upload functionality will be implemented in the next phase)
+          Ngarkoni logon dhe bannerin e restorantit tuaj
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Logo URL (temporary)</Label>
-            <Input
-              {...register("logo_url")}
-              placeholder="https://example.com/logo.jpg"
-            />
-          </div>
+          <ImageUpload
+            currentImagePath={logoPath}
+            onImageChange={(path) => setValue('logo_path', path)}
+            label="Logoja e Restorantit"
+          />
 
-          <div className="space-y-2">
-            <Label>Banner URL (temporary)</Label>
-            <Input
-              {...register("banner_url")}
-              placeholder="https://example.com/banner.jpg"
-            />
-          </div>
+          <ImageUpload
+            currentImagePath={bannerPath}
+            onImageChange={(path) => setValue('banner_path', path)}
+            label="Banneri i Restorantit"
+          />
         </div>
       </CardContent>
     </Card>

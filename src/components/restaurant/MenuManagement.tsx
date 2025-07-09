@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
@@ -34,6 +33,7 @@ interface Category {
   description_zh?: string;
   display_order: number;
   is_active: boolean;
+  image_path?: string;
 }
 
 interface MenuItem {
@@ -53,7 +53,7 @@ interface MenuItem {
   description_zh?: string;
   price: number;
   currency: string;
-  image_url?: string;
+  image_path?: string;
   is_available: boolean;
   is_featured: boolean;
   allergens: string[];
@@ -294,7 +294,8 @@ export function MenuManagement() {
       description: formData.get('description') as string,
       description_sq: formData.get('description_sq') as string,
       display_order: parseInt(formData.get('display_order') as string) || 0,
-      is_active: formData.get('is_active') === 'on'
+      is_active: formData.get('is_active') === 'on',
+      image_path: formData.get('image_path') as string || null
     };
 
     if (editingCategory) {
@@ -315,12 +316,13 @@ export function MenuManagement() {
       description: formData.get('description') as string,
       description_sq: formData.get('description_sq') as string,
       price: parseFloat(formData.get('price') as string),
-      currency: 'ALL', // Albanian Lek as default
+      currency: 'ALL',
       is_available: formData.get('is_available') === 'on',
       is_featured: formData.get('is_featured') === 'on',
       allergens: (formData.get('allergens') as string)?.split(',').map(a => a.trim()).filter(Boolean) || [],
       preparation_time: parseInt(formData.get('preparation_time') as string) || undefined,
-      display_order: parseInt(formData.get('display_order') as string) || 0
+      display_order: parseInt(formData.get('display_order') as string) || 0,
+      image_path: formData.get('image_path') as string || null
     };
 
     if (editingItem) {
@@ -574,7 +576,7 @@ export function MenuManagement() {
   );
 }
 
-// Category Dialog Component
+// Category Dialog Component with Image Upload
 function CategoryDialog({ 
   category, 
   onSubmit, 
@@ -584,6 +586,8 @@ function CategoryDialog({
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; 
   onClose: () => void; 
 }) {
+  const [imagePath, setImagePath] = useState<string | null>(category?.image_path || null);
+
   return (
     <DialogContent className="max-w-2xl">
       <DialogHeader>
@@ -596,6 +600,8 @@ function CategoryDialog({
       </DialogHeader>
       
       <form onSubmit={onSubmit} className="space-y-4">
+        <input type="hidden" name="image_path" value={imagePath || ''} />
+        
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name_sq">Emri (Shqip)</Label>
@@ -642,6 +648,12 @@ function CategoryDialog({
           </div>
         </div>
 
+        <ImageUpload
+          currentImagePath={imagePath}
+          onImageChange={setImagePath}
+          label="Imazhi i Kategorisë"
+        />
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="display_order">Renditja</Label>
@@ -675,7 +687,7 @@ function CategoryDialog({
   );
 }
 
-// Menu Item Dialog Component
+// Menu Item Dialog Component with Image Upload
 function MenuItemDialog({ 
   item, 
   categories, 
@@ -687,6 +699,8 @@ function MenuItemDialog({
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; 
   onClose: () => void; 
 }) {
+  const [imagePath, setImagePath] = useState<string | null>(item?.image_path || null);
+
   return (
     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
       <DialogHeader>
@@ -699,6 +713,8 @@ function MenuItemDialog({
       </DialogHeader>
       
       <form onSubmit={onSubmit} className="space-y-4">
+        <input type="hidden" name="image_path" value={imagePath || ''} />
+        
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="category_id">Kategoria</Label>
@@ -775,6 +791,12 @@ function MenuItemDialog({
           </div>
         </div>
 
+        <ImageUpload
+          currentImagePath={imagePath}
+          onImageChange={setImagePath}
+          label="Imazhi i Artikullit"
+        />
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="allergens">Alergjenet (të ndara me presje)</Label>
@@ -838,7 +860,7 @@ function MenuItemDialog({
   );
 }
 
-// Menu Item Card Component
+// Menu Item Card Component with Image Display
 function MenuItemCard({ 
   item, 
   categories, 
@@ -852,9 +874,27 @@ function MenuItemCard({
 }) {
   const category = categories.find(c => c.id === item.category_id);
 
+  function getImageUrl(imagePath: string): string {
+    if (!imagePath) return '';
+    const restaurantSupabase = getRestaurantSupabase();
+    const { data } = restaurantSupabase.storage
+      .from('restaurant-images')
+      .getPublicUrl(imagePath);
+    return data.publicUrl;
+  }
+
   return (
     <Card>
       <CardContent className="p-4">
+        {item.image_path && (
+          <div className="mb-3">
+            <img
+              src={getImageUrl(item.image_path)}
+              alt={item.name_sq || item.name}
+              className="w-full h-32 object-cover rounded-md"
+            />
+          </div>
+        )}
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">

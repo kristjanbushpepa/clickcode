@@ -373,11 +373,11 @@ const Menu = () => {
   // Loading states
   if (!restaurantName) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Invalid Menu Link</h1>
-          <p className="text-muted-foreground">This menu link is not valid or has expired.</p>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-sm mx-auto">
+          <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-3" />
+          <h1 className="text-xl font-bold mb-3">Invalid Menu Link</h1>
+          <p className="text-sm text-muted-foreground">This menu link is not valid or has expired.</p>
         </div>
       </div>
     );
@@ -385,11 +385,11 @@ const Menu = () => {
 
   if (restaurantLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Looking up restaurant...</p>
-          <p className="text-sm text-muted-foreground mt-2">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-sm mx-auto">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-3"></div>
+          <p className="text-sm">Looking up restaurant...</p>
+          <p className="text-xs text-muted-foreground mt-2">
             Searching for: {convertUrlToRestaurantName(restaurantName)}
           </p>
         </div>
@@ -399,22 +399,22 @@ const Menu = () => {
 
   if (restaurantError || !restaurant) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-4">Restaurant Not Found</h1>
-          <p className="text-muted-foreground mb-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-sm mx-auto">
+          <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-3" />
+          <h1 className="text-xl font-bold mb-3">Restaurant Not Found</h1>
+          <p className="text-sm text-muted-foreground mb-3">
             Could not find restaurant matching "{restaurantName}".
           </p>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-xs text-muted-foreground mb-3">
             Searched for: {generatePossibleNames(restaurantName).join(', ')}
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Please check the URL or contact the restaurant.
           </p>
           {restaurantError && (
-            <details className="mt-4 text-left">
-              <summary className="text-sm cursor-pointer">Error Details</summary>
+            <details className="mt-3 text-left">
+              <summary className="text-xs cursor-pointer">Error Details</summary>
               <pre className="text-xs mt-2 p-2 bg-gray-100 rounded overflow-auto">
                 {restaurantError.message}
               </pre>
@@ -427,10 +427,10 @@ const Menu = () => {
 
   if (profileLoading || categoriesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading menu...</p>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-sm mx-auto">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-3"></div>
+          <p className="text-sm">Loading menu...</p>
         </div>
       </div>
     );
@@ -457,24 +457,24 @@ const Menu = () => {
             )}
             
             <div 
-              className="relative px-4 py-6"
+              className="relative px-3 py-4 safe-area-top"
               style={{ 
                 backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
                 color: 'white' 
               }}
             >
-              <div className="max-w-md mx-auto">
+              <div className="max-w-sm mx-auto">
                 {/* Back button and category title */}
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-2 mb-2">
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={() => setSelectedCategory(null)}
-                    className="text-white hover:bg-white/20 p-2"
+                    className="text-white hover:bg-white/20 p-2 h-8 w-8"
                   >
-                    <ArrowLeft className="h-5 w-5" />
+                    <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <h1 className="text-xl font-bold uppercase tracking-wide">
+                  <h1 className="text-lg font-bold uppercase tracking-wide">
                     {getLocalizedText(currentCategory, 'name')}
                   </h1>
                 </div>
@@ -483,28 +483,28 @@ const Menu = () => {
           </div>
 
           {/* Menu Items */}
-          <div className="px-4 py-4">
-            <div className="max-w-md mx-auto space-y-4">
+          <div className="px-3 py-3">
+            <div className="max-w-sm mx-auto space-y-3">
               {filteredMenuItems.length === 0 ? (
-                <div className="text-center py-12">
-                  <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No items found in this category.</p>
+                <div className="text-center py-8">
+                  <Utensils className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">No items found in this category.</p>
                 </div>
               ) : (
                 filteredMenuItems.map((item) => (
-                  <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-base mb-1" style={{ color: customTheme?.textColor }}>
+                  <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm mb-1 leading-tight" style={{ color: customTheme?.textColor }}>
                           {getLocalizedText(item, 'name')}
                         </h3>
                         {getLocalizedText(item, 'description') && (
-                          <p className="text-sm text-muted-foreground mb-2">
+                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                             {getLocalizedText(item, 'description')}
                           </p>
                         )}
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="secondary" className="text-xs">
                             {formatPrice(item.price, item.currency)}
                           </Badge>
                           {item.preparation_time && (
@@ -519,7 +519,7 @@ const Menu = () => {
                         <img 
                           src={item.image_url} 
                           alt={item.name_sq || item.name}
-                          className="w-16 h-16 rounded-lg object-cover ml-4"
+                          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                         />
                       )}
                     </div>
@@ -538,119 +538,119 @@ const Menu = () => {
     // Show categories grid
     return (
       <div className="min-h-screen" style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}>
-      {/* Header */}
-      <div className="relative">
-        {/* Background Image/Banner */}
-        {profile?.banner_url && (
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${profile.banner_url})` }}
-          >
-            <div className="absolute inset-0 bg-black/40"></div>
-          </div>
-        )}
-        
-        <div 
-          className="relative px-4 py-6"
-          style={{ 
-            backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
-            color: 'white' 
-          }}
-        >
-          <div className="max-w-md mx-auto">
-            {/* Top section with logo */}
-            <div className="flex justify-between items-start mb-4">
-              {profile?.logo_url && (
-                <img 
-                  src={profile.logo_url} 
-                  alt={profile.name} 
-                  className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
-                />
-              )}
-              <div className="flex gap-2">
-                <LanguageSwitch 
-                  restaurantSupabase={getRestaurantSupabase()} 
-                  currentLanguage={currentLanguage}
-                  onLanguageChange={setCurrentLanguage}
-                />
-                <CurrencySwitch 
-                  restaurantSupabase={getRestaurantSupabase()} 
-                  currentCurrency={currentCurrency}
-                  onCurrencyChange={setCurrentCurrency}
-                />
-              </div>
+        {/* Header */}
+        <div className="relative">
+          {/* Background Image/Banner */}
+          {profile?.banner_url && (
+            <div 
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${profile.banner_url})` }}
+            >
+              <div className="absolute inset-0 bg-black/40"></div>
             </div>
-            
-            {/* Restaurant info centered */}
-            <div className="text-center">
-              <h1 className="text-xl font-bold mb-1 uppercase tracking-wide">
-                {profile?.name || 'Restaurant Menu'}
-              </h1>
-              {profile?.address && (
-                <p className="text-sm opacity-80 uppercase tracking-wide mb-3">
-                  {profile.address.split(',')[0] || profile.address}
-                </p>
-              )}
+          )}
+          
+          <div 
+            className="relative px-3 py-4 safe-area-top"
+            style={{ 
+              backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
+              color: 'white' 
+            }}
+          >
+            <div className="max-w-sm mx-auto">
+              {/* Top section with logo */}
+              <div className="flex justify-between items-start mb-3">
+                {profile?.logo_url && (
+                  <img 
+                    src={profile.logo_url} 
+                    alt={profile.name} 
+                    className="h-8 w-8 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
+                  />
+                )}
+                <div className="flex gap-1">
+                  <LanguageSwitch 
+                    restaurantSupabase={getRestaurantSupabase()} 
+                    currentLanguage={currentLanguage}
+                    onLanguageChange={setCurrentLanguage}
+                  />
+                  <CurrencySwitch 
+                    restaurantSupabase={getRestaurantSupabase()} 
+                    currentCurrency={currentCurrency}
+                    onCurrencyChange={setCurrentCurrency}
+                  />
+                </div>
+              </div>
               
-              {/* Social Media Icons */}
-              <div className="flex justify-center gap-4 mb-2">
-                {profile?.social_media_links?.instagram && (
-                  <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer">
-                    <Instagram className="h-5 w-5 opacity-80 hover:opacity-100" />
-                  </a>
+              {/* Restaurant info centered */}
+              <div className="text-center">
+                <h1 className="text-lg font-bold mb-1 uppercase tracking-wide">
+                  {profile?.name || 'Restaurant Menu'}
+                </h1>
+                {profile?.address && (
+                  <p className="text-xs opacity-80 uppercase tracking-wide mb-2">
+                    {profile.address.split(',')[0] || profile.address}
+                  </p>
                 )}
-                {profile?.phone && (
-                  <a href={`tel:${profile.phone}`}>
-                    <Phone className="h-5 w-5 opacity-80 hover:opacity-100" />
-                  </a>
-                )}
-                {profile?.social_media_links?.facebook && (
-                  <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
-                    <Facebook className="h-5 w-5 opacity-80 hover:opacity-100" />
-                  </a>
-                )}
-                <Globe className="h-5 w-5 opacity-80" />
+                
+                {/* Social Media Icons */}
+                <div className="flex justify-center gap-3 mb-1">
+                  {profile?.social_media_links?.instagram && (
+                    <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer">
+                      <Instagram className="h-4 w-4 opacity-80 hover:opacity-100" />
+                    </a>
+                  )}
+                  {profile?.phone && (
+                    <a href={`tel:${profile.phone}`}>
+                      <Phone className="h-4 w-4 opacity-80 hover:opacity-100" />
+                    </a>
+                  )}
+                  {profile?.social_media_links?.facebook && (
+                    <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
+                      <Facebook className="h-4 w-4 opacity-80 hover:opacity-100" />
+                    </a>
+                  )}
+                  <Globe className="h-4 w-4 opacity-80" />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
         {/* Search Bar */}
-        <div className="px-4 py-4">
-          <div className="max-w-md mx-auto relative">
+        <div className="px-3 py-3">
+          <div className="max-w-sm mx-auto relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search ingredients & dishes"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-10"
             />
           </div>
         </div>
 
         {/* Categories Grid */}
-        <div className="px-4 pb-8">
-          <div className="max-w-md mx-auto">
+        <div className="px-3 pb-6">
+          <div className="max-w-sm mx-auto">
             {filteredCategories.length === 0 ? (
-              <div className="text-center py-12">
-                <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Menu Coming Soon</h3>
-                <p className="text-muted-foreground">The menu is being prepared and will be available shortly.</p>
+              <div className="text-center py-8">
+                <Utensils className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <h3 className="text-base font-semibold mb-2">Menu Coming Soon</h3>
+                <p className="text-sm text-muted-foreground">The menu is being prepared and will be available shortly.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 {filteredCategories.map((category) => {
                   const categoryItems = menuItems.filter(item => item.category_id === category.id);
                   
                   return (
                     <Card 
                       key={category.id} 
-                      className="hover:shadow-md transition-all cursor-pointer h-32"
+                      className="hover:shadow-md transition-all cursor-pointer h-28"
                       style={{ borderColor: customTheme?.accentColor }}
                       onClick={() => setSelectedCategory(category.id)}
                     >
-                      <CardContent className="p-4 h-full flex flex-col">
+                      <CardContent className="p-3 h-full flex flex-col">
                         <div className="flex-1">
                           <h3 className="font-semibold text-sm mb-1" style={{ color: customTheme?.textColor }}>
                             {getLocalizedText(category, 'name')}
@@ -694,23 +694,23 @@ const Menu = () => {
         )}
         
         <div 
-          className="relative px-4 py-6"
+          className="relative px-3 py-4 safe-area-top"
           style={{ 
             backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
             color: 'white' 
           }}
         >
-          <div className="max-w-md mx-auto">
+          <div className="max-w-sm mx-auto">
             {/* Top section with logo */}
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-3">
               {profile?.logo_url && (
                 <img 
                   src={profile.logo_url} 
                   alt={profile.name} 
-                  className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
+                  className="h-8 w-8 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
                 />
               )}
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <LanguageSwitch 
                   restaurantSupabase={getRestaurantSupabase()} 
                   currentLanguage={currentLanguage}
@@ -726,33 +726,33 @@ const Menu = () => {
             
             {/* Restaurant info centered */}
             <div className="text-center">
-              <h1 className="text-xl font-bold mb-1 uppercase tracking-wide">
+              <h1 className="text-lg font-bold mb-1 uppercase tracking-wide">
                 {profile?.name || 'Restaurant Menu'}
               </h1>
               {profile?.address && (
-                <p className="text-sm opacity-80 uppercase tracking-wide mb-3">
+                <p className="text-xs opacity-80 uppercase tracking-wide mb-2">
                   {profile.address.split(',')[0] || profile.address}
                 </p>
               )}
               
               {/* Social Media Icons */}
-              <div className="flex justify-center gap-4 mb-2">
+              <div className="flex justify-center gap-3 mb-1">
                 {profile?.social_media_links?.instagram && (
                   <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer">
-                    <Instagram className="h-5 w-5 opacity-80 hover:opacity-100" />
+                    <Instagram className="h-4 w-4 opacity-80 hover:opacity-100" />
                   </a>
                 )}
                 {profile?.phone && (
                   <a href={`tel:${profile.phone}`}>
-                    <Phone className="h-5 w-5 opacity-80 hover:opacity-100" />
+                    <Phone className="h-4 w-4 opacity-80 hover:opacity-100" />
                   </a>
                 )}
                 {profile?.social_media_links?.facebook && (
                   <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer">
-                    <Facebook className="h-5 w-5 opacity-80 hover:opacity-100" />
+                    <Facebook className="h-4 w-4 opacity-80 hover:opacity-100" />
                   </a>
                 )}
-                <Globe className="h-5 w-5 opacity-80" />
+                <Globe className="h-4 w-4 opacity-80" />
               </div>
             </div>
           </div>
@@ -760,20 +760,20 @@ const Menu = () => {
       </div>
 
       {/* Tabbed Categories and Items */}
-      <div className="px-4 py-4">
-        <div className="max-w-md mx-auto">
+      <div className="px-3 py-3">
+        <div className="max-w-sm mx-auto">
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-4" style={{ 
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-3 h-9" style={{ 
               backgroundColor: customTheme?.secondaryColor + '20' || undefined,
               borderColor: customTheme?.accentColor || undefined 
             }}>
-              <TabsTrigger value="all" className="text-xs">
+              <TabsTrigger value="all" className="text-xs h-7">
                 All
               </TabsTrigger>
               {filteredCategories.slice(0, 3).map((category) => (
-                <TabsTrigger key={category.id} value={category.id} className="text-xs">
-                  {(category.name_sq || category.name).length > 10 
-                    ? (category.name_sq || category.name).substring(0, 10) + '...'
+                <TabsTrigger key={category.id} value={category.id} className="text-xs h-7">
+                  {(category.name_sq || category.name).length > 8 
+                    ? (category.name_sq || category.name).substring(0, 8) + '...'
                     : (category.name_sq || category.name)
                   }
                 </TabsTrigger>
@@ -782,33 +782,33 @@ const Menu = () => {
 
             {/* All Items Tab */}
             <TabsContent value="all" className="space-y-3">
-              <h3 className="text-lg font-semibold mb-4" style={{ color: customTheme?.textColor }}>
+              <h3 className="text-base font-semibold mb-3" style={{ color: customTheme?.textColor }}>
                 Lista e Artikujve
               </h3>
               {menuItems.length === 0 ? (
-                <div className="text-center py-12">
-                  <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No items available.</p>
+                <div className="text-center py-8">
+                  <Utensils className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">No items available.</p>
                 </div>
               ) : (
                 filteredMenuItems.map((item) => (
-                  <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-1">
-                          <h3 className="font-semibold text-base" style={{ color: customTheme?.textColor }}>
+                  <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-1 gap-2">
+                          <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
                             {getLocalizedText(item, 'name')}
                           </h3>
-                          <Badge variant="secondary" className="ml-2">
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
                             {formatPrice(item.price, item.currency)}
                           </Badge>
                         </div>
                         {getLocalizedText(item, 'description') && (
-                          <p className="text-sm text-muted-foreground mb-2">
+                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                             {getLocalizedText(item, 'description')}
                           </p>
                         )}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Badge variant="outline" className="text-xs">
                             {categories.find(cat => cat.id === item.category_id)?.name_sq || 
                              categories.find(cat => cat.id === item.category_id)?.name}
@@ -825,7 +825,7 @@ const Menu = () => {
                         <img 
                           src={item.image_url} 
                           alt={item.name_sq || item.name}
-                          className="w-16 h-16 rounded-lg object-cover ml-4"
+                          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                         />
                       )}
                     </div>
@@ -840,29 +840,29 @@ const Menu = () => {
               
               return (
                 <TabsContent key={category.id} value={category.id} className="space-y-3">
-                  <h3 className="text-lg font-semibold mb-4" style={{ color: customTheme?.textColor }}>
+                  <h3 className="text-base font-semibold mb-3" style={{ color: customTheme?.textColor }}>
                     {getLocalizedText(category, 'name')}
                   </h3>
                   {categoryItems.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Utensils className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No items in this category.</p>
+                    <div className="text-center py-8">
+                      <Utensils className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">No items in this category.</p>
                     </div>
                   ) : (
                     categoryItems.map((item) => (
-                      <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-1">
-                              <h3 className="font-semibold text-base" style={{ color: customTheme?.textColor }}>
+                      <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between mb-1 gap-2">
+                              <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
                                 {getLocalizedText(item, 'name')}
                               </h3>
-                              <Badge variant="secondary" className="ml-2">
+                              <Badge variant="secondary" className="text-xs flex-shrink-0">
                                 {formatPrice(item.price, item.currency)}
                               </Badge>
                             </div>
                             {getLocalizedText(item, 'description') && (
-                              <p className="text-sm text-muted-foreground mb-2">
+                              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                                 {getLocalizedText(item, 'description')}
                               </p>
                             )}
@@ -877,7 +877,7 @@ const Menu = () => {
                             <img 
                               src={item.image_url} 
                               alt={item.name_sq || item.name}
-                              className="w-16 h-16 rounded-lg object-cover ml-4"
+                              className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                             />
                           )}
                         </div>

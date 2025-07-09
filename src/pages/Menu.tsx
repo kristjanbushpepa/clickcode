@@ -12,6 +12,7 @@ import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Fac
 import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameConversion';
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
 import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
+import { MenuFooter } from '@/components/menu/MenuFooter';
 
 interface Category {
   id: string;
@@ -527,6 +528,9 @@ const Menu = () => {
               )}
             </div>
           </div>
+
+          {/* Add Footer */}
+          <MenuFooter profile={profile} customTheme={customTheme} />
         </div>
       );
     }
@@ -667,6 +671,9 @@ const Menu = () => {
             )}
           </div>
         </div>
+
+        {/* Add Footer */}
+        <MenuFooter profile={profile} customTheme={customTheme} />
       </div>
     );
   }
@@ -883,6 +890,9 @@ const Menu = () => {
           </Tabs>
         </div>
       </div>
+
+      {/* Add Footer */}
+      <MenuFooter profile={profile} customTheme={customTheme} />
     </div>
   );
 };

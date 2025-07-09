@@ -33,10 +33,20 @@ interface RestaurantProfile {
     facebook?: string;
     tiktok?: string;
     whatsapp?: string;
+    tripadvisor?: string;
+    yelp?: string;
+    google_maps?: string;
+    zomato?: string;
+    foursquare?: string;
+    youtube?: string;
+    twitter?: string;
+    linkedin?: string;
   };
   logo_url?: string;
   banner_url?: string;
   google_reviews_embed?: string;
+  tripadvisor_embed?: string;
+  yelp_embed?: string;
 }
 
 export function ProfileManagement() {

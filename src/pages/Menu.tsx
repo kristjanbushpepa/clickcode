@@ -556,8 +556,8 @@ const Menu = () => {
             </div>
           </div>
 
-          {/* Add Footer */}
-          <MenuFooter profile={profile} customTheme={customTheme} />
+          {/* Add Footer - Only show basic version for category pages */}
+          <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
         </div>
       );
     }
@@ -699,8 +699,8 @@ const Menu = () => {
           </div>
         </div>
 
-        {/* Add Footer */}
-        <MenuFooter profile={profile} customTheme={customTheme} />
+        {/* Add Footer - Show full content on front page */}
+        <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
       </div>
     );
   }
@@ -918,8 +918,8 @@ const Menu = () => {
         </div>
       </div>
 
-      {/* Add Footer */}
-      <MenuFooter profile={profile} customTheme={customTheme} />
+      {/* Add Footer - Show full content on items layout front page */}
+      <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
     </div>
   );
 };

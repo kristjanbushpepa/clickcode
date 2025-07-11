@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -22,10 +23,8 @@ import {
   Camera,
   Youtube,
   Linkedin,
-  Share2,
-  ExternalLink
+  Share2
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface RestaurantProfile {
   id: string;
@@ -250,16 +249,11 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
             </>
           )}
 
-          {/* Get Menu Contact Link */}
+          {/* Footer Text */}
           <div className="text-center pt-3 border-t border-border/20">
-            <Link 
-              to="/contact" 
-              className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Mail className="h-3 w-3" />
-              <span>Get a menu for your restaurant</span>
-              <ExternalLink className="h-3 w-3" />
-            </Link>
+            <p className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} {profile.name}. All rights reserved.
+            </p>
           </div>
         </div>
       </div>

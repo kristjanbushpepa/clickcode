@@ -50,6 +50,8 @@ interface RestaurantProfile {
   email?: string;
   logo_url?: string;
   banner_url?: string;
+  logo_path?: string;
+  banner_path?: string;
   social_media_links?: {
     instagram?: string;
     facebook?: string;
@@ -163,6 +165,27 @@ const Menu = () => {
     if (!restaurant) return null;
     console.log('Creating restaurant supabase client with URL:', restaurant.supabase_url);
     return createClient(restaurant.supabase_url, restaurant.supabase_anon_key);
+  };
+
+  // Helper function to get image URL from path
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return null;
+    const restaurantSupabase = getRestaurantSupabase();
+    if (!restaurantSupabase) return null;
+    
+    const { data } = restaurantSupabase.storage
+      .from('restaurant-images')
+      .getPublicUrl(imagePath);
+    
+    return data.publicUrl;
+  };
+
+  // Helper function to get the display image URL (prioritizing uploaded images)
+  const getDisplayImageUrl = (imagePath?: string, imageUrl?: string) => {
+    if (imagePath) {
+      return getImageUrl(imagePath);
+    }
+    return imageUrl || null;
   };
 
   // Fetch restaurant profile from individual database
@@ -370,6 +393,10 @@ const Menu = () => {
     return item[languageField] || item[field] || '';
   };
 
+  // Get the final banner and logo URLs (prioritizing uploaded images)
+  const bannerImageUrl = profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null;
+  const logoImageUrl = profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null;
+
   // Loading states
   if (!restaurantName) {
     return (
@@ -447,10 +474,10 @@ const Menu = () => {
           {/* Header */}
           <div className="relative">
             {/* Background Image/Banner */}
-            {profile?.banner_url && (
+            {bannerImageUrl && (
               <div 
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${profile.banner_url})` }}
+                style={{ backgroundImage: `url(${bannerImageUrl})` }}
               >
                 <div className="absolute inset-0 bg-black/40"></div>
               </div>
@@ -459,7 +486,7 @@ const Menu = () => {
             <div 
               className="relative px-3 py-4 safe-area-top"
               style={{ 
-                backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
+                backgroundColor: bannerImageUrl ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
                 color: 'white' 
               }}
             >
@@ -541,10 +568,10 @@ const Menu = () => {
         {/* Header */}
         <div className="relative">
           {/* Background Image/Banner */}
-          {profile?.banner_url && (
+          {bannerImageUrl && (
             <div 
               className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${profile.banner_url})` }}
+              style={{ backgroundImage: `url(${bannerImageUrl})` }}
             >
               <div className="absolute inset-0 bg-black/40"></div>
             </div>
@@ -553,17 +580,17 @@ const Menu = () => {
           <div 
             className="relative px-3 py-4 safe-area-top"
             style={{ 
-              backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
+              backgroundColor: bannerImageUrl ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
               color: 'white' 
             }}
           >
             <div className="max-w-sm mx-auto">
               {/* Top section with logo */}
               <div className="flex justify-between items-start mb-3">
-                {profile?.logo_url && (
+                {logoImageUrl && (
                   <img 
-                    src={profile.logo_url} 
-                    alt={profile.name} 
+                    src={logoImageUrl} 
+                    alt={profile?.name} 
                     className="h-8 w-8 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
                   />
                 )}
@@ -684,10 +711,10 @@ const Menu = () => {
       {/* Header */}
       <div className="relative">
         {/* Background Image/Banner */}
-        {profile?.banner_url && (
+        {bannerImageUrl && (
           <div 
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${profile.banner_url})` }}
+            style={{ backgroundImage: `url(${bannerImageUrl})` }}
           >
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
@@ -696,17 +723,17 @@ const Menu = () => {
         <div 
           className="relative px-3 py-4 safe-area-top"
           style={{ 
-            backgroundColor: profile?.banner_url ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
+            backgroundColor: bannerImageUrl ? 'transparent' : (customTheme?.primaryColor || '#1f2937'),
             color: 'white' 
           }}
         >
           <div className="max-w-sm mx-auto">
             {/* Top section with logo */}
             <div className="flex justify-between items-start mb-3">
-              {profile?.logo_url && (
+              {logoImageUrl && (
                 <img 
-                  src={profile.logo_url} 
-                  alt={profile.name} 
+                  src={logoImageUrl} 
+                  alt={profile?.name} 
                   className="h-8 w-8 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
                 />
               )}

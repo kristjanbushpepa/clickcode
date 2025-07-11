@@ -1,124 +1,42 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
+import { useRouter } from 'next/router';
+import { useQuery } from 'react-query';
+import { fetchRestaurantProfile } from '@/lib/data';
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
+import { RestaurantMenu } from '@/components/restaurant/RestaurantMenu';
 import { MenuFooter } from '@/components/menu/MenuFooter';
 import {
   Clock,
   Phone,
 } from 'lucide-react';
 
-// Helper function to get image URL from path
-const getImageUrl = (path: string | null) => {
-  if (!path) return null;
-  if (path.startsWith('http')) return path;
-  return `https://zijfbnubzfonpxngmqqz.supabase.co/storage/v1/object/public/${path}`;
-};
-
-// Helper function to get display image URL with fallback
-const getDisplayImageUrl = (path: string | null, url: string | null, fallback: string) => {
-  if (path) {
-    const imageUrl = getImageUrl(path);
-    if (imageUrl) return imageUrl;
-  }
-  return url || fallback;
-};
-
-// Function to fetch restaurant profile from the restaurant's own database
-const fetchRestaurantProfile = async (restaurantId: string) => {
-  try {
-    // First get restaurant connection info from main database
-    const { data: restaurant, error: restaurantError } = await supabase
-      .from('restaurants')
-      .select('*')
-      .eq('id', restaurantId)
-      .single();
-    
-    if (restaurantError) throw restaurantError;
-    if (!restaurant) throw new Error('Restaurant not found');
-
-    // Store restaurant info in session storage for getRestaurantSupabase
-    sessionStorage.setItem('restaurant_info', JSON.stringify({
-      supabase_url: restaurant.supabase_url,
-      supabase_anon_key: restaurant.supabase_anon_key,
-      restaurant_id: restaurant.id
-    }));
-
-    // Now fetch from restaurant's own database
-    const restaurantSupabase = getRestaurantSupabase();
-    const { data: profile, error: profileError } = await restaurantSupabase
-      .from('restaurant_profile')
-      .select('*')
-      .maybeSingle();
-    
-    if (profileError) {
-      console.error('Profile fetch error:', profileError);
-      // Return basic restaurant info if no profile exists
-      return {
-        id: restaurant.id,
-        name: restaurant.name,
-        description: '',
-        address: restaurant.address,
-        phone: restaurant.owner_phone,
-        email: restaurant.owner_email,
-        working_hours: {},
-        social_media_links: {},
-        logo_url: null,
-        banner_url: null,
-        logo_path: null,
-        banner_path: null,
-        google_reviews_embed: null,
-        tripadvisor_embed: null,
-        yelp_embed: null,
-        google_maps_embed: null
-      };
-    }
-
-    return profile || {
-      id: restaurant.id,
-      name: restaurant.name,
-      description: '',
-      address: restaurant.address,
-      phone: restaurant.owner_phone,
-      email: restaurant.owner_email,
-      working_hours: {},
-      social_media_links: {},
-      logo_url: null,
-      banner_url: null,
-      logo_path: null,
-      banner_path: null,
-      google_reviews_embed: null,
-      tripadvisor_embed: null,
-      yelp_embed: null,
-      google_maps_embed: null
-    };
-  } catch (error) {
-    console.error('Error in fetchRestaurantProfile:', error);
-    throw error;
-  }
-};
-
 export default function Menu() {
-  const { restaurantId } = useParams();
+  const router = useRouter();
+  const { restaurantId } = router.query;
   const [activeTab, setActiveTab] = useState('menu');
 
-  const { data: profile, isLoading, isError } = useQuery({
-    queryKey: ['restaurantProfile', restaurantId],
-    queryFn: () => fetchRestaurantProfile(restaurantId as string),
-    enabled: !!restaurantId,
-  });
+  const { data: profile, isLoading, isError } = useQuery(
+    ['restaurantProfile', restaurantId],
+    () => fetchRestaurantProfile(restaurantId as string),
+    {
+      enabled: !!restaurantId,
+    }
+  );
 
-  const displayLogoUrl = getDisplayImageUrl(profile?.logo_path, profile?.logo_url, '/placeholder-logo.png');
-  const displayBannerUrl = getDisplayImageUrl(profile?.banner_path, profile?.banner_url, '');
+  useEffect(() => {
+    if (router.asPath.includes("#reviews")) {
+        setActiveTab('reviews');
+    }
+  }, [router.asPath]);
 
   if (isError) {
     return <div>Error loading restaurant profile.</div>;
   }
+
+  const displayLogoUrl = profile?.logo_url || '/placeholder-logo.png';
+  const displayBannerUrl = profile?.banner_url;
 
   const getCurrentDayHours = () => {
     if (!profile?.working_hours) return null;
@@ -259,31 +177,24 @@ export default function Menu() {
         )}
         {profile && (
           <>
-            <div className={activeTab === 'menu' ? 'block' : 'hidden'}>
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Menu</h2>
-                <p>Menu items will be displayed here.</p>
-              </div>
-            </div>
+            <TabsContent value="menu" className="space-y-4">
+              <RestaurantMenu restaurantId={restaurantId as string} />
+            </TabsContent>
 
-            <div className={activeTab === 'reviews' ? 'block' : 'hidden'}>
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Reviews</h2>
-                {profile.google_reviews_embed ? (
-                  <div dangerouslySetInnerHTML={{ __html: profile.google_reviews_embed }} />
-                ) : (
-                  <p>No reviews available.</p>
-                )}
-              </div>
-            </div>
+            <TabsContent value="reviews" className="space-y-4">
+              <h2 className="text-2xl font-bold">Reviews</h2>
+              {profile.google_reviews_embed ? (
+                <div dangerouslySetInnerHTML={{ __html: profile.google_reviews_embed }} />
+              ) : (
+                <p>No reviews available.</p>
+              )}
+            </TabsContent>
 
-            <div className={activeTab === 'about' ? 'block' : 'hidden'}>
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">About Us</h2>
-                <p>{profile.description}</p>
-                <Separator className="my-4" />
-              </div>
-            </div>
+            <TabsContent value="about" className="space-y-4">
+              <h2 className="text-2xl font-bold">About Us</h2>
+              <p>{profile.description}</p>
+              <Separator className="my-4" />
+            </TabsContent>
           </>
         )}
       </div>

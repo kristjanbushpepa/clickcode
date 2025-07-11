@@ -66,12 +66,13 @@ interface RestaurantProfile {
 interface MenuFooterProps {
   profile: RestaurantProfile | null;
   customTheme?: any;
-  showFullContent?: boolean; // New prop to control visibility
+  showFullContent?: boolean;
 }
 
 export function MenuFooter({ profile, customTheme, showFullContent = false }: MenuFooterProps) {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isHoursOpen, setIsHoursOpen] = useState(false);
+  const [isSocialOpen, setIsSocialOpen] = useState(false);
 
   if (!profile) return null;
 
@@ -79,13 +80,6 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
   const hasWorkingHours = profile.working_hours && Object.values(profile.working_hours).some(hours => hours);
   const hasSocialLinks = profile.social_media_links && Object.values(profile.social_media_links).some(link => link);
   const hasEmbeds = profile.google_reviews_embed || profile.tripadvisor_embed || profile.yelp_embed || profile.google_maps_embed;
-
-  const getCurrentDayHours = () => {
-    if (!profile.working_hours) return null;
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const today = days[new Date().getDay()];
-    return profile.working_hours[today as keyof typeof profile.working_hours];
-  };
 
   const getSocialIcon = (platform: string) => {
     switch (platform) {
@@ -105,71 +99,11 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
     }
   };
 
-  const todayHours = getCurrentDayHours();
-
   return (
     <div className="mt-6 border-t border-border/20">
       <div className="px-3 py-4">
         <div className="max-w-sm mx-auto space-y-3">
           
-          {/* Quick Info Bar - Always visible */}
-          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-            {todayHours && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>Today: {todayHours}</span>
-              </div>
-            )}
-            {profile.phone && (
-              <a href={`tel:${profile.phone}`} className="flex items-center gap-1 hover:text-foreground transition-colors">
-                <Phone className="h-3 w-3" />
-                <span className="truncate">{profile.phone}</span>
-              </a>
-            )}
-          </div>
-
-          {/* Description - Always visible */}
-          {profile.description && (
-            <div className="text-center text-xs text-muted-foreground px-2">
-              {profile.description}
-            </div>
-          )}
-
-          {/* Social Media Dropdown - Always visible if links exist */}
-          {hasSocialLinks && (
-            <div className="flex justify-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Share2 className="h-4 w-4" />
-                    Follow Us
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="w-48">
-                  {Object.entries(profile.social_media_links || {}).map(([platform, url]) => {
-                    if (!url) return null;
-                    const IconComponent = getSocialIcon(platform);
-                    
-                    return (
-                      <DropdownMenuItem key={platform} asChild>
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
-                          <IconComponent className="h-4 w-4" />
-                          <span className="capitalize">{platform.replace('_', ' ')}</span>
-                        </a>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-
           {/* Full Content - Only show on front page */}
           {showFullContent && (
             <>
@@ -239,6 +173,39 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                               <span className="capitalize">{day}</span>
                               <span>{hours}</span>
                             </div>
+                          );
+                        })}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
+                {/* Social Media Links - Collapsible format */}
+                {hasSocialLinks && (
+                  <Collapsible open={isSocialOpen} onOpenChange={setIsSocialOpen}>
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors">
+                      <span>Follow Us</span>
+                      <ChevronDown className={`h-3 w-3 transition-transform ${isSocialOpen ? 'rotate-180' : ''}`} />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-2 pb-2">
+                      <div className="space-y-1">
+                        {Object.entries(profile.social_media_links || {}).map(([platform, url]) => {
+                          if (!url) return null;
+                          const IconComponent = getSocialIcon(platform);
+                          
+                          return (
+                            <a
+                              key={platform}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 text-xs p-1 hover:bg-muted/50 rounded transition-colors"
+                            >
+                              <IconComponent className="h-3 w-3 text-muted-foreground" />
+                              <span className="capitalize text-muted-foreground hover:text-foreground">
+                                {platform.replace('_', ' ')}
+                              </span>
+                            </a>
                           );
                         })}
                       </div>

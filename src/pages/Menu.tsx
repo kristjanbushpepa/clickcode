@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,16 +29,78 @@ const getDisplayImageUrl = (path: string | null, url: string | null, fallback: s
   return url || fallback;
 };
 
-// Function to fetch restaurant profile
+// Function to fetch restaurant profile from the restaurant's own database
 const fetchRestaurantProfile = async (restaurantId: string) => {
-  const { data, error } = await supabase
-    .from('restaurant_profiles')
-    .select('*')
-    .eq('restaurant_id', restaurantId)
-    .maybeSingle();
-  
-  if (error) throw error;
-  return data;
+  try {
+    // First get restaurant connection info from main database
+    const { data: restaurant, error: restaurantError } = await supabase
+      .from('restaurants')
+      .select('*')
+      .eq('id', restaurantId)
+      .single();
+    
+    if (restaurantError) throw restaurantError;
+    if (!restaurant) throw new Error('Restaurant not found');
+
+    // Store restaurant info in session storage for getRestaurantSupabase
+    sessionStorage.setItem('restaurant_info', JSON.stringify({
+      supabase_url: restaurant.supabase_url,
+      supabase_anon_key: restaurant.supabase_anon_key,
+      restaurant_id: restaurant.id
+    }));
+
+    // Now fetch from restaurant's own database
+    const restaurantSupabase = getRestaurantSupabase();
+    const { data: profile, error: profileError } = await restaurantSupabase
+      .from('restaurant_profile')
+      .select('*')
+      .maybeSingle();
+    
+    if (profileError) {
+      console.error('Profile fetch error:', profileError);
+      // Return basic restaurant info if no profile exists
+      return {
+        id: restaurant.id,
+        name: restaurant.name,
+        description: '',
+        address: restaurant.address,
+        phone: restaurant.owner_phone,
+        email: restaurant.owner_email,
+        working_hours: {},
+        social_media_links: {},
+        logo_url: null,
+        banner_url: null,
+        logo_path: null,
+        banner_path: null,
+        google_reviews_embed: null,
+        tripadvisor_embed: null,
+        yelp_embed: null,
+        google_maps_embed: null
+      };
+    }
+
+    return profile || {
+      id: restaurant.id,
+      name: restaurant.name,
+      description: '',
+      address: restaurant.address,
+      phone: restaurant.owner_phone,
+      email: restaurant.owner_email,
+      working_hours: {},
+      social_media_links: {},
+      logo_url: null,
+      banner_url: null,
+      logo_path: null,
+      banner_path: null,
+      google_reviews_embed: null,
+      tripadvisor_embed: null,
+      yelp_embed: null,
+      google_maps_embed: null
+    };
+  } catch (error) {
+    console.error('Error in fetchRestaurantProfile:', error);
+    throw error;
+  }
 };
 
 export default function Menu() {

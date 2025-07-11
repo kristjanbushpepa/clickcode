@@ -1,4 +1,3 @@
-
 -- SQL to initialize a new restaurant's individual Supabase database
 -- This file should be run when setting up a new restaurant's database
 
@@ -10,6 +9,30 @@ BEGIN
     RETURN NEW;
 END;
 $$ language 'plpgsql';
+
+-- Create storage bucket for restaurant images
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('restaurant-images', 'restaurant-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Create storage policies for restaurant images bucket
+DROP POLICY IF EXISTS "Public can view restaurant images" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can upload restaurant images" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can update restaurant images" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can delete restaurant images" ON storage.objects;
+
+-- Create permissive policies for the restaurant images bucket
+CREATE POLICY "Public can view restaurant images" ON storage.objects
+FOR SELECT USING (bucket_id = 'restaurant-images');
+
+CREATE POLICY "Anyone can upload restaurant images" ON storage.objects
+FOR INSERT WITH CHECK (bucket_id = 'restaurant-images');
+
+CREATE POLICY "Anyone can update restaurant images" ON storage.objects
+FOR UPDATE USING (bucket_id = 'restaurant-images');
+
+CREATE POLICY "Anyone can delete restaurant images" ON storage.objects
+FOR DELETE USING (bucket_id = 'restaurant-images');
 
 -- Drop existing tables that are not part of our schema (cleanup)
 DO $$

@@ -57,38 +57,14 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
     setIsUploading(true);
     try {
       const restaurantSupabase = getRestaurantSupabase();
-      
-      // Check if bucket exists, if not create it
-      const { data: buckets, error: bucketError } = await restaurantSupabase.storage.listBuckets();
-      
-      const bucketExists = buckets?.some(bucket => bucket.name === 'restaurant-images');
-      
-      if (!bucketExists) {
-        // Create bucket if it doesn't exist
-        const { error: createBucketError } = await restaurantSupabase.storage.createBucket('restaurant-images', {
-          public: true,
-        });
-        
-        if (createBucketError) {
-          console.error('Error creating bucket:', createBucketError);
-        }
-      }
-      
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-      // Upload with public access
       const { error: uploadError } = await restaurantSupabase.storage
         .from('restaurant-images')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+        .upload(fileName, file);
 
-      if (uploadError) {
-        console.error('Upload error details:', uploadError);
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       const imageUrl = getImageUrl(fileName);
       setPreviewUrl(imageUrl);
@@ -100,21 +76,9 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
       });
     } catch (error: any) {
       console.error('Error uploading image:', error);
-      
-      // More specific error handling
-      let errorMessage = 'Gabim në ngarkimin e imazhit';
-      
-      if (error.message?.includes('row-level security')) {
-        errorMessage = 'Problem i sigurisë së databazës. Kontaktoni administratorin.';
-      } else if (error.message?.includes('bucket')) {
-        errorMessage = 'Problem me hapësirën e ruajtjes së imazheve.';
-      } else if (error.message) {
-        errorMessage = `Gabim: ${error.message}`;
-      }
-      
       toast({
         title: 'Gabim',
-        description: errorMessage,
+        description: `Gabim në ngarkimin e imazhit: ${error.message}`,
         variant: 'destructive',
       });
     } finally {

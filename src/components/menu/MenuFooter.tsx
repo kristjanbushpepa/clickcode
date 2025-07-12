@@ -23,7 +23,8 @@ import {
   Camera,
   Youtube,
   Linkedin,
-  Share2
+  Share2,
+  ExternalLink
 } from 'lucide-react';
 
 interface RestaurantProfile {
@@ -250,10 +251,25 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
           )}
 
           {/* Footer Text */}
-          <div className="text-center pt-3 border-t border-border/20">
+          <div className="text-center pt-3 border-t border-border/20 space-y-2">
             <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} {profile.name}. All rights reserved.
             </p>
+            
+            {/* CodeClick.cc Branding */}
+            <div className="pt-2 border-t border-border/10">
+              <a 
+                href="/" 
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground/80 hover:text-foreground transition-colors group"
+              >
+                <span>Powered by</span>
+                <span className="font-semibold text-primary group-hover:text-primary/80">CodeClick.cc</span>
+                <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+              </a>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                Digital menus made simple
+              </p>
+            </div>
           </div>
         </div>
       </div>

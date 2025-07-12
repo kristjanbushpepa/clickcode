@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DollarSign } from 'lucide-react';
@@ -52,7 +53,7 @@ export function CurrencySwitch({ restaurantSupabase, currentCurrency, onCurrency
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 text-foreground bg-background border-border hover:bg-accent hover:text-accent-foreground">
           <DollarSign className="h-4 w-4" />
           <span>{currentCurrencyData?.symbol}</span>
           <span className="hidden sm:inline">{currentCurrency}</span>

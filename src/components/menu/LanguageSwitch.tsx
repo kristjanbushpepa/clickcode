@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Globe } from 'lucide-react';
@@ -54,7 +55,7 @@ export function LanguageSwitch({ restaurantSupabase, currentLanguage, onLanguage
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 text-foreground bg-background border-border hover:bg-accent hover:text-accent-foreground">
           <Globe className="h-4 w-4" />
           <span>{currentLangData?.flag}</span>
           <span className="hidden sm:inline">{currentLangData?.name}</span>

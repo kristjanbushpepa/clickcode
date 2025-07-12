@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Facebook, MessageCircle, ArrowLeft } from 'lucide-react';
 import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameConversion';
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
@@ -800,25 +802,25 @@ const Menu = () => {
       <div className="px-3 py-3">
         <div className="max-w-sm mx-auto">
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-3 h-9" style={{ 
-              backgroundColor: customTheme?.secondaryColor + '20' || undefined,
-              borderColor: customTheme?.accentColor || undefined 
-            }}>
-              <TabsTrigger value="all" className="text-xs h-7">
-                All
-              </TabsTrigger>
-              {filteredCategories.slice(0, 3).map((category) => (
-                <TabsTrigger key={category.id} value={category.id} className="text-xs h-7">
-                  {(category.name_sq || category.name).length > 8 
-                    ? (category.name_sq || category.name).substring(0, 8) + '...'
-                    : (category.name_sq || category.name)
-                  }
+            <ScrollArea className="w-full whitespace-nowrap">
+              <TabsList className="inline-flex h-9 w-max min-w-full gap-1 p-1" style={{ 
+                backgroundColor: customTheme?.secondaryColor + '20' || undefined,
+                borderColor: customTheme?.accentColor || undefined 
+              }}>
+                <TabsTrigger value="all" className="text-xs h-7 px-3 flex-shrink-0">
+                  All
                 </TabsTrigger>
-              ))}
-            </TabsList>
+                {filteredCategories.map((category) => (
+                  <TabsTrigger key={category.id} value={category.id} className="text-xs h-7 px-3 flex-shrink-0">
+                    {getLocalizedText(category, 'name')}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <ScrollBar orientation="horizontal" className="mt-2" />
+            </ScrollArea>
 
             {/* All Items Tab */}
-            <TabsContent value="all" className="space-y-3">
+            <TabsContent value="all" className="space-y-3 mt-4">
               <h3 className="text-base font-semibold mb-3" style={{ color: customTheme?.textColor }}>
                 Lista e Artikujve
               </h3>
@@ -876,11 +878,11 @@ const Menu = () => {
             </TabsContent>
 
             {/* Category-specific tabs */}
-            {filteredCategories.slice(0, 3).map((category) => {
+            {filteredCategories.map((category) => {
               const categoryItems = menuItems.filter(item => item.category_id === category.id);
               
               return (
-                <TabsContent key={category.id} value={category.id} className="space-y-3">
+                <TabsContent key={category.id} value={category.id} className="space-y-3 mt-4">
                   <h3 className="text-base font-semibold mb-3" style={{ color: customTheme?.textColor }}>
                     {getLocalizedText(category, 'name')}
                   </h3>

@@ -72,6 +72,11 @@ interface MenuTheme {
   textColor: string;
   mutedTextColor: string;
   borderColor: string;
+  headingColor?: string;
+  categoryNameColor?: string;
+  itemNameColor?: string;
+  descriptionColor?: string;
+  priceColor?: string;
 }
 
 interface Restaurant {
@@ -298,7 +303,7 @@ const Menu = () => {
       setCustomTheme(customization.theme);
     } else {
       console.log('Using default light theme');
-      // Set default light theme
+      // Set default light theme with new text colors
       setCustomTheme({
         mode: 'light',
         primaryColor: '#1f2937',
@@ -307,7 +312,12 @@ const Menu = () => {
         cardBackground: '#ffffff',
         textColor: '#1f2937',
         mutedTextColor: '#6b7280',
-        borderColor: '#e5e7eb'
+        borderColor: '#e5e7eb',
+        headingColor: '#111827',
+        categoryNameColor: '#1f2937',
+        itemNameColor: '#111827',
+        descriptionColor: '#6b7280',
+        priceColor: '#059669'
       });
     }
   }, [customization]);
@@ -384,7 +394,7 @@ const Menu = () => {
   const bannerImageUrl = profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null;
   const logoImageUrl = profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null;
 
-  // Theme styles object
+  // Enhanced theme styles object
   const themeStyles = customTheme ? {
     backgroundColor: customTheme.backgroundColor,
     color: customTheme.textColor
@@ -394,6 +404,26 @@ const Menu = () => {
     backgroundColor: customTheme.cardBackground,
     borderColor: customTheme.borderColor,
     color: customTheme.textColor
+  } : {};
+
+  const headingStyles = customTheme ? {
+    color: customTheme.headingColor || customTheme.textColor
+  } : {};
+
+  const categoryNameStyles = customTheme ? {
+    color: customTheme.categoryNameColor || customTheme.textColor
+  } : {};
+
+  const itemNameStyles = customTheme ? {
+    color: customTheme.itemNameColor || customTheme.textColor
+  } : {};
+
+  const descriptionStyles = customTheme ? {
+    color: customTheme.descriptionColor || customTheme.mutedTextColor
+  } : {};
+
+  const priceStyles = customTheme ? {
+    color: customTheme.priceColor || customTheme.accentColor
   } : {};
 
   const mutedTextStyles = customTheme ? {
@@ -465,7 +495,7 @@ const Menu = () => {
     );
   }
 
-  // Categories layout with theme
+  // Categories layout with enhanced theme
   if (layout === 'categories') {
     if (selectedCategory) {
       const currentCategory = categories.find(cat => cat.id === selectedCategory);
@@ -498,7 +528,7 @@ const Menu = () => {
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <h1 className="text-lg font-bold uppercase tracking-wide">
+                  <h1 className="text-lg font-bold uppercase tracking-wide" style={headingStyles}>
                     {getLocalizedText(currentCategory, 'name')}
                   </h1>
                 </div>
@@ -521,11 +551,11 @@ const Menu = () => {
                     <Card key={item.id} className="p-3 hover:shadow-md transition-shadow border" style={cardStyles}>
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm mb-1 leading-tight" style={{ color: customTheme?.textColor }}>
+                          <h3 className="font-semibold text-sm mb-1 leading-tight" style={itemNameStyles}>
                             {getLocalizedText(item, 'name')}
                           </h3>
                           {getLocalizedText(item, 'description') && (
-                            <p className="text-xs mb-2 line-clamp-2" style={mutedTextStyles}>
+                            <p className="text-xs mb-2 line-clamp-2" style={descriptionStyles}>
                               {getLocalizedText(item, 'description')}
                             </p>
                           )}
@@ -535,7 +565,7 @@ const Menu = () => {
                               className="text-xs"
                               style={{ 
                                 backgroundColor: customTheme?.accentColor + '20',
-                                color: customTheme?.accentColor 
+                                color: priceStyles.color 
                               }}
                             >
                               {formatPrice(item.price, item.currency)}
@@ -610,7 +640,7 @@ const Menu = () => {
               </div>
               
               <div className="text-center">
-                <h1 className="text-lg font-bold mb-1 uppercase tracking-wide">
+                <h1 className="text-lg font-bold mb-1 uppercase tracking-wide" style={headingStyles}>
                   {profile?.name || 'Restaurant Menu'}
                 </h1>
                 {profile?.address && (
@@ -643,7 +673,7 @@ const Menu = () => {
         </div>
 
         <div className="px-3 py-3">
-          <div className="max-w-sm mx-auto relative">
+          <div className="max-w-sm mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" style={mutedTextStyles} />
             <Input
               placeholder="Search ingredients & dishes"
@@ -663,7 +693,7 @@ const Menu = () => {
             {filteredCategories.length === 0 ? (
               <div className="text-center py-8">
                 <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
-                <h3 className="text-base font-semibold mb-2" style={{ color: customTheme?.textColor }}>Menu Coming Soon</h3>
+                <h3 className="text-base font-semibold mb-2" style={headingStyles}>Menu Coming Soon</h3>
                 <p className="text-sm" style={mutedTextStyles}>The menu is being prepared and will be available shortly.</p>
               </div>
             ) : (
@@ -683,10 +713,10 @@ const Menu = () => {
                     >
                       <CardContent className="p-3 h-full flex flex-col">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-sm mb-1" style={{ color: customTheme?.textColor }}>
+                          <h3 className="font-semibold text-sm mb-1" style={categoryNameStyles}>
                             {getLocalizedText(category, 'name')}
                           </h3>
-                          <p className="text-xs line-clamp-2" style={mutedTextStyles}>
+                          <p className="text-xs line-clamp-2" style={descriptionStyles}>
                             {categoryItems.slice(0, 2).map(item => getLocalizedText(item, 'name')).join(', ')}
                             {categoryItems.length > 2 && '...'}
                           </p>
@@ -708,7 +738,7 @@ const Menu = () => {
     );
   }
 
-  // Items layout with theme
+  // Items layout with enhanced theme
   return (
     <div className="min-h-screen" style={themeStyles}>
       <div className="relative">
@@ -751,7 +781,7 @@ const Menu = () => {
             </div>
             
             <div className="text-center">
-              <h1 className="text-lg font-bold mb-1 uppercase tracking-wide">
+              <h1 className="text-lg font-bold mb-1 uppercase tracking-wide" style={headingStyles}>
                 {profile?.name || 'Restaurant Menu'}
               </h1>
               {profile?.address && (
@@ -807,7 +837,7 @@ const Menu = () => {
             </ScrollArea>
 
             <TabsContent value="all" className="space-y-3 mt-4">
-              <h3 className="text-base font-semibold mb-3" style={{ color: customTheme?.textColor }}>
+              <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
                 Lista e Artikujve
               </h3>
               {menuItems.length === 0 ? (
@@ -824,7 +854,7 @@ const Menu = () => {
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between mb-1 gap-2">
-                            <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
+                            <h3 className="font-semibold text-sm leading-tight" style={itemNameStyles}>
                               {getLocalizedText(item, 'name')}
                             </h3>
                             <Badge 
@@ -832,14 +862,14 @@ const Menu = () => {
                               className="text-xs flex-shrink-0"
                               style={{ 
                                 backgroundColor: customTheme?.accentColor + '20',
-                                color: customTheme?.accentColor 
+                                color: priceStyles.color 
                               }}
                             >
                               {formatPrice(item.price, item.currency)}
                             </Badge>
                           </div>
                           {getLocalizedText(item, 'description') && (
-                            <p className="text-xs mb-2 line-clamp-2" style={mutedTextStyles}>
+                            <p className="text-xs mb-2 line-clamp-2" style={descriptionStyles}>
                               {getLocalizedText(item, 'description')}
                             </p>
                           )}
@@ -875,7 +905,7 @@ const Menu = () => {
               
               return (
                 <TabsContent key={category.id} value={category.id} className="space-y-3 mt-4">
-                  <h3 className="text-base font-semibold mb-3" style={{ color: customTheme?.textColor }}>
+                  <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
                     {getLocalizedText(category, 'name')}
                   </h3>
                   {categoryItems.length === 0 ? (
@@ -892,7 +922,7 @@ const Menu = () => {
                           <div className="flex justify-between items-start gap-3">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between mb-1 gap-2">
-                                <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
+                                <h3 className="font-semibold text-sm leading-tight" style={itemNameStyles}>
                                   {getLocalizedText(item, 'name')}
                                 </h3>
                                 <Badge 
@@ -900,14 +930,14 @@ const Menu = () => {
                                   className="text-xs flex-shrink-0"
                                   style={{ 
                                     backgroundColor: customTheme?.accentColor + '20',
-                                    color: customTheme?.accentColor 
+                                    color: priceStyles.color 
                                   }}
                                 >
                                   {formatPrice(item.price, item.currency)}
                                 </Badge>
                               </div>
                               {getLocalizedText(item, 'description') && (
-                                <p className="text-xs mb-2 line-clamp-2" style={mutedTextStyles}>
+                                <p className="text-xs mb-2 line-clamp-2" style={descriptionStyles}>
                                   {getLocalizedText(item, 'description')}
                                 </p>
                               )}

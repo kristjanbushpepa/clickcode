@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
@@ -553,7 +552,7 @@ export function TranslationManager() {
             <p className="text-muted-foreground text-center">
               Shtoni kategori dhe artikuj menuje për t'i përkthyer në gjuhë të ndryshme
             </p>
-          </Content>
+          </CardContent>
         </Card>
       )}
     </div>

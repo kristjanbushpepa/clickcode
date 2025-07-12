@@ -323,7 +323,6 @@ const Menu = () => {
   const { data: currencySettings } = useQuery({
     queryKey: ['currency_settings_menu'],
     queryFn: async () => {
-      const restaurantSupabase = getRestaurantSupabase();
       if (!restaurantSupabase) return null;
       
       const { data, error } = await restaurantSupabase
@@ -334,7 +333,7 @@ const Menu = () => {
       if (error) return null;
       return data;
     },
-    enabled: !!restaurant
+    enabled: !!restaurantSupabase
   });
 
   const formatPrice = (price: number, originalCurrency: string) => {

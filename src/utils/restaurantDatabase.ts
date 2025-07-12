@@ -39,26 +39,3 @@ export const getRestaurantInfo = () => {
   }
   return JSON.parse(restaurantInfo);
 };
-
-// Initialize restaurant database with required tables
-export const initializeRestaurantDatabase = async () => {
-  try {
-    const restaurantSupabase = getRestaurantSupabase();
-    
-    // Check if restaurant_customization table exists, if not create it
-    const { error: tableError } = await restaurantSupabase
-      .from('restaurant_customization')
-      .select('id')
-      .limit(1);
-    
-    if (tableError && tableError.code === '42P01') {
-      // Table doesn't exist, create it
-      const { error: createError } = await restaurantSupabase.rpc('create_customization_table');
-      if (createError) {
-        console.warn('Could not create customization table:', createError);
-      }
-    }
-  } catch (error) {
-    console.warn('Database initialization warning:', error);
-  }
-};

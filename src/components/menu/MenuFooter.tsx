@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
@@ -23,7 +24,8 @@ import {
   Camera,
   Youtube,
   Linkedin,
-  Share2
+  Share2,
+  ArrowLeft
 } from 'lucide-react';
 
 interface RestaurantProfile {
@@ -102,6 +104,19 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
     <div className="mt-6 border-t border-border/20">
       <div className="px-3 py-4">
         <div className="max-w-sm mx-auto space-y-3">
+          
+          {/* More Restaurants Section */}
+          <div className="text-center py-3 border-b border-border/20">
+            <Link to="/">
+              <Button variant="outline" className="gap-2 text-foreground bg-background border-border hover:bg-accent hover:text-accent-foreground">
+                <ArrowLeft className="h-4 w-4" />
+                <span>More Restaurants</span>
+              </Button>
+            </Link>
+            <p className="text-xs text-muted-foreground mt-2">
+              Discover other restaurants with digital menus
+            </p>
+          </div>
           
           {/* Full Content - Only show on front page */}
           {showFullContent && (

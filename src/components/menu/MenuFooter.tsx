@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -250,7 +251,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
           )}
 
           {/* Footer Text */}
-          <div className="text-center pt-3 border-t border-border/20 space-y-2">
+          <div className="text-center pt-3 space-y-2">
             {/* CodeClick.cc Branding */}
             <div className="pt-2 border-t border-border/10">
               <a 

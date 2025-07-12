@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -590,6 +590,11 @@ function CategoryDialog({
 }) {
   const [imagePath, setImagePath] = useState<string | null>(category?.image_path || null);
 
+  // Update imagePath when category changes
+  useEffect(() => {
+    setImagePath(category?.image_path || null);
+  }, [category]);
+
   return (
     <DialogContent className="max-w-2xl">
       <DialogHeader>
@@ -702,6 +707,11 @@ function MenuItemDialog({
   onClose: () => void; 
 }) {
   const [imagePath, setImagePath] = useState<string | null>(item?.image_path || null);
+
+  // Update imagePath when item changes
+  useEffect(() => {
+    setImagePath(item?.image_path || null);
+  }, [item]);
 
   return (
     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">

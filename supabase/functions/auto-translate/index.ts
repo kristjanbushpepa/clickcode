@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -19,37 +20,44 @@ interface TranslationResponse {
   error?: string;
 }
 
-// LibreTranslate API (free)
-async function translateWithLibreTranslate(text: string, fromLang: string, toLang: string): Promise<string> {
+// Google Translate (free, no API key required)
+async function translateWithGoogle(text: string, fromLang: string, toLang: string): Promise<string> {
   try {
-    const response = await fetch('https://libretranslate.de/translate', {
-      method: 'POST',
+    console.log(`Translating with Google: "${text}" from ${fromLang} to ${toLang}`);
+    
+    // Use Google Translate's free endpoint
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromLang}&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        q: text,
-        source: fromLang,
-        target: toLang,
-        format: 'text'
-      }),
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
     });
 
     if (!response.ok) {
-      throw new Error(`LibreTranslate API error: ${response.status}`);
+      throw new Error(`Google Translate API error: ${response.status}`);
     }
 
     const data = await response.json();
-    return data.translatedText;
+    console.log('Google Translate response:', data);
+    
+    // Google Translate returns an array structure
+    if (data && data[0] && data[0][0] && data[0][0][0]) {
+      return data[0][0][0];
+    }
+    
+    throw new Error('Invalid response format from Google Translate');
   } catch (error) {
-    console.error('LibreTranslate error:', error);
+    console.error('Google Translate error:', error);
     throw error;
   }
 }
 
-// MyMemory API (free backup)
+// MyMemory API (backup)
 async function translateWithMyMemory(text: string, fromLang: string, toLang: string): Promise<string> {
   try {
+    console.log(`Translating with MyMemory: "${text}" from ${fromLang} to ${toLang}`);
     const encodedText = encodeURIComponent(text);
     const response = await fetch(
       `https://api.mymemory.translated.net/get?q=${encodedText}&langpair=${fromLang}|${toLang}`
@@ -60,14 +68,20 @@ async function translateWithMyMemory(text: string, fromLang: string, toLang: str
     }
 
     const data = await response.json();
-    return data.responseData.translatedText;
+    console.log('MyMemory response:', data);
+    
+    if (data.responseData && data.responseData.translatedText) {
+      return data.responseData.translatedText;
+    }
+    
+    throw new Error('Invalid response from MyMemory');
   } catch (error) {
     console.error('MyMemory error:', error);
     throw error;
   }
 }
 
-// Language code mapping for APIs
+// Language code mapping
 const LANGUAGE_MAP: Record<string, string> = {
   'sq': 'sq', // Albanian
   'it': 'it', // Italian
@@ -88,9 +102,10 @@ serve(async (req) => {
   try {
     console.log('Processing translation request');
     const { text, fromLang = 'en', toLang }: TranslationRequest = await req.json();
-    console.log(`Translating "${text}" from ${fromLang} to ${toLang}`);
+    console.log(`Request: translate "${text}" from ${fromLang} to ${toLang}`);
 
     if (!text || !toLang) {
+      console.log('Missing text or target language');
       return new Response(
         JSON.stringify({ success: false, error: 'Text and target language are required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -120,12 +135,12 @@ serve(async (req) => {
     let translatedText: string;
 
     try {
-      // Try LibreTranslate first (primary free API)
-      console.log(`Attempting translation with LibreTranslate`);
-      translatedText = await translateWithLibreTranslate(text, sourceLang, targetLang);
-      console.log(`LibreTranslate successful: ${translatedText}`);
+      // Try Google Translate first (free, no API key needed)
+      console.log(`Attempting translation with Google Translate`);
+      translatedText = await translateWithGoogle(text, sourceLang, targetLang);
+      console.log(`Google Translate successful: ${translatedText}`);
     } catch (error) {
-      console.log('LibreTranslate failed, trying MyMemory as backup:', error);
+      console.log('Google Translate failed, trying MyMemory as backup:', error);
       try {
         // Fallback to MyMemory
         console.log(`Attempting translation with MyMemory`);
@@ -136,7 +151,7 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'Translation service temporarily unavailable' 
+            error: 'Translation service temporarily unavailable. Please try again later.' 
           }),
           { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -148,6 +163,7 @@ serve(async (req) => {
       translatedText
     };
 
+    console.log('Translation successful, returning response');
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

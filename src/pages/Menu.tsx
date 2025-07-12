@@ -34,6 +34,7 @@ interface MenuItem {
   price: number;
   currency: string;
   image_url?: string;
+  image_path?: string;
   is_available: boolean;
   is_featured: boolean;
   allergens: string[];
@@ -186,6 +187,11 @@ const Menu = () => {
       return getImageUrl(imagePath);
     }
     return imageUrl || null;
+  };
+
+  // Helper function to get menu item image URL
+  const getMenuItemImageUrl = (item: MenuItem) => {
+    return getDisplayImageUrl(item.image_path, item.image_url);
   };
 
   // Fetch restaurant profile from individual database
@@ -518,40 +524,44 @@ const Menu = () => {
                   <p className="text-sm text-muted-foreground">No items found in this category.</p>
                 </div>
               ) : (
-                filteredMenuItems.map((item) => (
-                  <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm mb-1 leading-tight" style={{ color: customTheme?.textColor }}>
-                          {getLocalizedText(item, 'name')}
-                        </h3>
-                        {getLocalizedText(item, 'description') && (
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                            {getLocalizedText(item, 'description')}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="secondary" className="text-xs">
-                            {formatPrice(item.price, item.currency)}
-                          </Badge>
-                          {item.preparation_time && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {item.preparation_time}min
-                            </div>
+                filteredMenuItems.map((item) => {
+                  const itemImageUrl = getMenuItemImageUrl(item);
+                  
+                  return (
+                    <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm mb-1 leading-tight" style={{ color: customTheme?.textColor }}>
+                            {getLocalizedText(item, 'name')}
+                          </h3>
+                          {getLocalizedText(item, 'description') && (
+                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                              {getLocalizedText(item, 'description')}
+                            </p>
                           )}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="secondary" className="text-xs">
+                              {formatPrice(item.price, item.currency)}
+                            </Badge>
+                            {item.preparation_time && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {item.preparation_time}min
+                              </div>
+                            )}
+                          </div>
                         </div>
+                        {itemImageUrl && (
+                          <img 
+                            src={itemImageUrl} 
+                            alt={item.name_sq || item.name}
+                            className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                          />
+                        )}
                       </div>
-                      {item.image_url && (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name_sq || item.name}
-                          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                        />
-                      )}
-                    </div>
-                  </Card>
-                ))
+                    </Card>
+                  );
+                })
               )}
             </div>
           </div>
@@ -818,46 +828,50 @@ const Menu = () => {
                   <p className="text-sm text-muted-foreground">No items available.</p>
                 </div>
               ) : (
-                filteredMenuItems.map((item) => (
-                  <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-1 gap-2">
-                          <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
-                            {getLocalizedText(item, 'name')}
-                          </h3>
-                          <Badge variant="secondary" className="text-xs flex-shrink-0">
-                            {formatPrice(item.price, item.currency)}
-                          </Badge>
-                        </div>
-                        {getLocalizedText(item, 'description') && (
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                            {getLocalizedText(item, 'description')}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="outline" className="text-xs">
-                            {categories.find(cat => cat.id === item.category_id)?.name_sq || 
-                             categories.find(cat => cat.id === item.category_id)?.name}
-                          </Badge>
-                          {item.preparation_time && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {item.preparation_time}min
-                            </div>
+                filteredMenuItems.map((item) => {
+                  const itemImageUrl = getMenuItemImageUrl(item);
+                  
+                  return (
+                    <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between mb-1 gap-2">
+                            <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
+                              {getLocalizedText(item, 'name')}
+                            </h3>
+                            <Badge variant="secondary" className="text-xs flex-shrink-0">
+                              {formatPrice(item.price, item.currency)}
+                            </Badge>
+                          </div>
+                          {getLocalizedText(item, 'description') && (
+                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                              {getLocalizedText(item, 'description')}
+                            </p>
                           )}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              {categories.find(cat => cat.id === item.category_id)?.name_sq || 
+                               categories.find(cat => cat.id === item.category_id)?.name}
+                            </Badge>
+                            {item.preparation_time && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {item.preparation_time}min
+                              </div>
+                            )}
+                          </div>
                         </div>
+                        {itemImageUrl && (
+                          <img 
+                            src={itemImageUrl} 
+                            alt={item.name_sq || item.name}
+                            className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                          />
+                        )}
                       </div>
-                      {item.image_url && (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name_sq || item.name}
-                          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                        />
-                      )}
-                    </div>
-                  </Card>
-                ))
+                    </Card>
+                  );
+                })
               )}
             </TabsContent>
 
@@ -876,40 +890,44 @@ const Menu = () => {
                       <p className="text-sm text-muted-foreground">No items in this category.</p>
                     </div>
                   ) : (
-                    categoryItems.map((item) => (
-                      <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between mb-1 gap-2">
-                              <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
-                                {getLocalizedText(item, 'name')}
-                              </h3>
-                              <Badge variant="secondary" className="text-xs flex-shrink-0">
-                                {formatPrice(item.price, item.currency)}
-                              </Badge>
-                            </div>
-                            {getLocalizedText(item, 'description') && (
-                              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                                {getLocalizedText(item, 'description')}
-                              </p>
-                            )}
-                            {item.preparation_time && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                {item.preparation_time}min
+                    categoryItems.map((item) => {
+                      const itemImageUrl = getMenuItemImageUrl(item);
+                      
+                      return (
+                        <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between mb-1 gap-2">
+                                <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
+                                  {getLocalizedText(item, 'name')}
+                                </h3>
+                                <Badge variant="secondary" className="text-xs flex-shrink-0">
+                                  {formatPrice(item.price, item.currency)}
+                                </Badge>
                               </div>
+                              {getLocalizedText(item, 'description') && (
+                                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                                  {getLocalizedText(item, 'description')}
+                                </p>
+                              )}
+                              {item.preparation_time && (
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Clock className="h-3 w-3" />
+                                  {item.preparation_time}min
+                                </div>
+                              )}
+                            </div>
+                            {itemImageUrl && (
+                              <img 
+                                src={itemImageUrl} 
+                                alt={item.name_sq || item.name}
+                                className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                              />
                             )}
                           </div>
-                          {item.image_url && (
-                            <img 
-                              src={item.image_url} 
-                              alt={item.name_sq || item.name}
-                              className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                            />
-                          )}
-                        </div>
-                      </Card>
-                    ))
+                        </Card>
+                      );
+                    })
                   )}
                 </TabsContent>
               );

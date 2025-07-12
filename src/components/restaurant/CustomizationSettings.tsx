@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Palette, Layout, Save, Moon, Sun } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { getRestaurantSupabase, getRestaurantInfo } from '@/utils/restaurantDatabase';
 
 interface MenuTheme {
@@ -52,6 +52,7 @@ export function CustomizationSettings() {
   const [customTheme, setCustomTheme] = useState<MenuTheme>(defaultThemes.light);
   const [selectedPreset, setSelectedPreset] = useState<string>('light');
   const [restaurantName, setRestaurantName] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
 
   // Load existing customization and restaurant info on component mount
   useEffect(() => {
@@ -69,9 +70,10 @@ export function CustomizationSettings() {
         const { data, error } = await supabase
           .from('restaurant_customization')
           .select('*')
-          .single();
+          .maybeSingle();
 
         if (data && !error) {
+          console.log('Loaded customization data:', data);
           if (data.theme) {
             setCustomTheme(data.theme);
             setSelectedPreset(data.preset || 'light');
@@ -79,9 +81,11 @@ export function CustomizationSettings() {
           if (data.layout) {
             setSelectedLayout(data.layout);
           }
+        } else if (error) {
+          console.error('Error loading customization:', error);
         }
       } catch (error) {
-        console.log('No existing customization found, using defaults');
+        console.error('Error in loadData:', error);
       }
     };
 
@@ -101,6 +105,9 @@ export function CustomizationSettings() {
   };
 
   const saveCustomization = async () => {
+    if (isSaving) return;
+    
+    setIsSaving(true);
     try {
       const supabase = getRestaurantSupabase();
       
@@ -111,22 +118,43 @@ export function CustomizationSettings() {
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      console.log('Saving customization data:', customizationData);
+
+      // First try to get existing record
+      const { data: existingData, error: fetchError } = await supabase
         .from('restaurant_customization')
-        .upsert(customizationData, { 
-          onConflict: 'id'
-        });
+        .select('id')
+        .maybeSingle();
+
+      let result;
+      if (existingData?.id) {
+        // Update existing record
+        result = await supabase
+          .from('restaurant_customization')
+          .update(customizationData)
+          .eq('id', existingData.id);
+      } else {
+        // Insert new record
+        result = await supabase
+          .from('restaurant_customization')
+          .insert([customizationData]);
+      }
+
+      const { error } = result;
 
       if (error) {
         console.error('Database save error:', error);
+        // Fallback to localStorage
         localStorage.setItem('menu_theme', JSON.stringify(customTheme));
         localStorage.setItem('menu_layout', selectedLayout);
+        localStorage.setItem('menu_preset', selectedPreset);
         
         toast({
           title: 'Personalizimi u ruajt lokalisht',
           description: 'Ndryshimet tuaja janë ruajtur në pajisjen tuaj.',
         });
       } else {
+        console.log('Successfully saved to database');
         toast({
           title: 'Personalizimi u ruajt',
           description: 'Ndryshimet tuaja janë ruajtur me sukses.',
@@ -134,13 +162,17 @@ export function CustomizationSettings() {
       }
     } catch (error) {
       console.error('Error saving customization:', error);
+      // Fallback to localStorage
       localStorage.setItem('menu_theme', JSON.stringify(customTheme));
       localStorage.setItem('menu_layout', selectedLayout);
+      localStorage.setItem('menu_preset', selectedPreset);
       
       toast({
         title: 'Personalizimi u ruajt lokalisht',
         description: 'Ndryshimet tuaja janë ruajtur në pajisjen tuaj.',
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -168,9 +200,9 @@ export function CustomizationSettings() {
             <Eye className="h-4 w-4 mr-2" />
             Shiko Parapamjen
           </Button>
-          <Button onClick={saveCustomization}>
+          <Button onClick={saveCustomization} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            Ruaj Ndryshimet
+            {isSaving ? 'Duke ruajtur...' : 'Ruaj Ndryshimet'}
           </Button>
         </div>
       </div>

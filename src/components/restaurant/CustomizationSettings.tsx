@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Palette, Layout, Save, Moon, Sun } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
+import { getRestaurantSupabase, getRestaurantInfo } from '@/utils/restaurantDatabase';
 
 interface MenuTheme {
   mode: 'light' | 'dark';
@@ -51,23 +50,19 @@ export function CustomizationSettings() {
   const [selectedPreset, setSelectedPreset] = useState<string>('light');
   const [restaurantName, setRestaurantName] = useState<string>('');
 
-  // Load existing customization and restaurant profile on component mount
+  // Load existing customization and restaurant info on component mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const supabase = getRestaurantSupabase();
-        
-        // Load restaurant profile to get the name
-        const { data: profile } = await supabase
-          .from('restaurant_profile')
-          .select('name')
-          .single();
-        
-        if (profile?.name) {
-          setRestaurantName(profile.name);
+        // Get restaurant name from admin database (same as QR code)
+        const restaurantInfo = getRestaurantInfo();
+        if (restaurantInfo?.name) {
+          setRestaurantName(restaurantInfo.name);
         }
 
-        // Load customization settings
+        const supabase = getRestaurantSupabase();
+
+        // Load customization settings from individual restaurant database
         const { data, error } = await supabase
           .from('restaurant_customization')
           .select('*')
@@ -149,7 +144,7 @@ export function CustomizationSettings() {
   const getPreviewUrl = () => {
     if (!restaurantName) return '#';
     
-    // Convert restaurant name to URL-friendly format
+    // Convert restaurant name to URL-friendly format (same as QR code)
     const urlFriendlyName = restaurantName
       .toLowerCase()
       .replace(/\s+/g, '-')

@@ -601,7 +601,7 @@ const Menu = () => {
                   <img 
                     src={logoImageUrl} 
                     alt={profile?.name} 
-                    className="h-8 w-8 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
+                    className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
                   />
                 )}
                 <div className="flex gap-1">
@@ -744,7 +744,7 @@ const Menu = () => {
                 <img 
                   src={logoImageUrl} 
                   alt={profile?.name} 
-                  className="h-8 w-8 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
+                  className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
                 />
               )}
               <div className="flex gap-1">

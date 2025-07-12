@@ -55,15 +55,13 @@ export function LanguageSwitch({ restaurantSupabase, currentLanguage, onLanguage
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 text-foreground bg-background border-border hover:bg-accent hover:text-accent-foreground">
-          <Globe className="h-4 w-4" />
-          <span>{currentLangData?.flag}</span>
-          <span className="hidden sm:inline">{currentLangData?.name}</span>
+        <Button variant="outline" size="sm" className="gap-1 text-foreground bg-background border-border hover:bg-accent hover:text-accent-foreground px-2 h-8">
+          <span className="text-sm">{currentLangData?.flag}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-48" align="end">
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm">Choose Language</h4>
+      <PopoverContent className="w-40" align="end">
+        <div className="space-y-1">
+          <h4 className="font-medium text-xs mb-2">Language</h4>
           {supportedLanguages.map((langCode) => {
             const lang = LANGUAGE_OPTIONS.find(l => l.code === langCode);
             if (!lang) return null;
@@ -73,7 +71,7 @@ export function LanguageSwitch({ restaurantSupabase, currentLanguage, onLanguage
                 key={lang.code}
                 variant={currentLanguage === lang.code ? "default" : "ghost"}
                 size="sm"
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 h-8 text-xs"
                 onClick={() => onLanguageChange(lang.code)}
               >
                 <span>{lang.flag}</span>

@@ -53,15 +53,13 @@ export function CurrencySwitch({ restaurantSupabase, currentCurrency, onCurrency
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 text-foreground bg-background border-border hover:bg-accent hover:text-accent-foreground">
-          <DollarSign className="h-4 w-4" />
-          <span>{currentCurrencyData?.symbol}</span>
-          <span className="hidden sm:inline">{currentCurrency}</span>
+        <Button variant="outline" size="sm" className="gap-1 text-foreground bg-background border-border hover:bg-accent hover:text-accent-foreground px-2 h-8">
+          <span className="text-sm">{currentCurrencyData?.symbol}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-48" align="end">
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm">Choose Currency</h4>
+      <PopoverContent className="w-40" align="end">
+        <div className="space-y-1">
+          <h4 className="font-medium text-xs mb-2">Currency</h4>
           {enabledCurrencies.map((currCode) => {
             const currency = CURRENCY_OPTIONS.find(c => c.code === currCode);
             if (!currency) return null;
@@ -71,11 +69,11 @@ export function CurrencySwitch({ restaurantSupabase, currentCurrency, onCurrency
                 key={currency.code}
                 variant={currentCurrency === currency.code ? "default" : "ghost"}
                 size="sm"
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 h-8 text-xs"
                 onClick={() => onCurrencyChange(currency.code)}
               >
                 <span>{currency.symbol}</span>
-                <span>{currency.code} - {currency.name}</span>
+                <span>{currency.code}</span>
               </Button>
             );
           })}

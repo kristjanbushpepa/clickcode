@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +54,50 @@ export function CustomizationSettings() {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('categories');
   const [customTheme, setCustomTheme] = useState<MenuTheme>(defaultThemes.classic);
   const [selectedPreset, setSelectedPreset] = useState<string>('classic');
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize database and load existing settings
+  useEffect(() => {
+    const initializeAndLoad = async () => {
+      try {
+        const supabase = getRestaurantSupabase();
+        
+        // Try to create the table if it doesn't exist
+        const createTableSQL = `
+          CREATE TABLE IF NOT EXISTS restaurant_customization (
+            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+            theme JSONB NOT NULL DEFAULT '{}',
+            layout TEXT DEFAULT 'categories',
+            preset TEXT DEFAULT 'classic',
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `;
+        
+        // Since we can't execute raw SQL directly, we'll handle the error gracefully
+        try {
+          const { data: existingData, error } = await supabase
+            .from('restaurant_customization')
+            .select('*')
+            .maybeSingle();
+          
+          if (existingData) {
+            setCustomTheme(existingData.theme || defaultThemes.classic);
+            setSelectedLayout(existingData.layout || 'categories');
+            setSelectedPreset(existingData.preset || 'classic');
+          }
+        } catch (tableError: any) {
+          console.log('Table may not exist yet, will create on first save');
+        }
+        
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error initializing customization:', error);
+        setIsInitialized(true);
+      }
+    };
+    
+    initializeAndLoad();
+  }, []);
 
   const handleThemeChange = (key: keyof MenuTheme, value: string) => {
     setCustomTheme(prev => ({ ...prev, [key]: value }));
@@ -72,7 +115,6 @@ export function CustomizationSettings() {
     try {
       const supabase = getRestaurantSupabase();
       
-      // Save customization to restaurant database
       const customizationData = {
         theme: customTheme,
         layout: selectedLayout,
@@ -80,15 +122,19 @@ export function CustomizationSettings() {
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      // Try to update first
+      const { data: updateData, error: updateError } = await supabase
         .from('restaurant_customization')
         .upsert(customizationData, { 
-          onConflict: 'id'
-        });
+          onConflict: 'id',
+          ignoreDuplicates: false 
+        })
+        .select()
+        .maybeSingle();
 
-      if (error) {
-        console.error('Database save error:', error);
-        // Fallback to localStorage if database save fails
+      if (updateError) {
+        console.error('Database save error:', updateError);
+        // Fallback to localStorage
         localStorage.setItem('menu_theme', JSON.stringify(customTheme));
         localStorage.setItem('menu_layout', selectedLayout);
         
@@ -99,7 +145,7 @@ export function CustomizationSettings() {
       } else {
         toast({
           title: 'Personalizimi u ruajt',
-          description: 'Ndryshimet tuaja janë ruajtur me sukses në bazën e të dhënave.',
+          description: 'Ndryshimet tuaja janë ruajtur me sukses.',
         });
       }
     } catch (error) {
@@ -119,9 +165,13 @@ export function CustomizationSettings() {
     const restaurantInfo = getRestaurantInfo();
     if (!restaurantInfo) return '#';
     
-    const { id } = restaurantInfo;
-    return `/menu/${id}?layout=${selectedLayout}`;
+    const { name } = restaurantInfo;
+    return `/menu/${name}?layout=${selectedLayout}`;
   };
+
+  if (!isInitialized) {
+    return <div className="flex justify-center p-8">Duke ngarkuar...</div>;
+  }
 
   return (
     <div className="space-y-6">

@@ -280,6 +280,7 @@ const Menu = () => {
                 onCurrencyChange={setSelectedCurrency}
               />
               <LanguageSwitch 
+                restaurantSupabase={restaurantSupabase}
                 currentLanguage={selectedLanguage} 
                 onLanguageChange={setSelectedLanguage}
               />

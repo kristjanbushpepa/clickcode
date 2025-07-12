@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,12 +11,10 @@ interface PopupSettings {
   description: string;
   link: string;
   buttonText: string;
-  displayDelay: number;
   wheelSettings: {
     enabled: boolean;
     unlockText: string;
     unlockButtonText: string;
-    unlockLink: string;
     rewards: Array<{
       text: string;
       chance: number;
@@ -38,21 +35,16 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
 
   useEffect(() => {
     if (settings.enabled) {
-      // Use the delay setting from admin (in seconds)
-      const delayMs = (settings.displayDelay || 3) * 1000;
+      // Show popup after 3 seconds
       const timer = setTimeout(() => {
         setIsOpen(true);
-      }, delayMs);
+      }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [settings.enabled, settings.displayDelay]);
+  }, [settings.enabled]);
 
   const handleCtaClick = () => {
     if (settings.type === 'wheel' && settings.wheelSettings.enabled) {
-      // If there's an unlock link, open it first
-      if (settings.wheelSettings.unlockLink) {
-        window.open(settings.wheelSettings.unlockLink, '_blank');
-      }
       setShowWheel(true);
     } else if (settings.link) {
       window.open(settings.link, '_blank');
@@ -103,10 +95,9 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                   </p>
                   <Button 
                     onClick={handleCtaClick}
-                    className="w-full flex items-center gap-2"
+                    className="w-full"
                   >
                     {settings.wheelSettings.unlockButtonText}
-                    {settings.wheelSettings.unlockLink && <ExternalLink className="h-4 w-4" />}
                   </Button>
                 </div>
               ) : (

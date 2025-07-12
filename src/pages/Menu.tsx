@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { createRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,6 +89,7 @@ const Menu = () => {
   const [customTheme, setCustomTheme] = useState<MenuTheme | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState('sq');
   const [currentCurrency, setCurrentCurrency] = useState('ALL');
+  const [restaurantSupabase, setRestaurantSupabase] = useState<any>(null);
 
   console.log('Menu component loaded with restaurantName:', restaurantName);
 
@@ -159,16 +160,17 @@ const Menu = () => {
     retry: 1
   });
 
-  const getRestaurantSupabase = () => {
-    if (!restaurant) return null;
-    console.log('Creating restaurant supabase client with URL:', restaurant.supabase_url);
-    return createClient(restaurant.supabase_url, restaurant.supabase_anon_key);
-  };
+  // Create restaurant supabase client when restaurant data is available
+  useEffect(() => {
+    if (restaurant) {
+      console.log('Creating restaurant supabase client with URL:', restaurant.supabase_url);
+      const client = createRestaurantSupabase(restaurant.supabase_url, restaurant.supabase_anon_key);
+      setRestaurantSupabase(client);
+    }
+  }, [restaurant]);
 
   const getImageUrl = (imagePath: string) => {
-    if (!imagePath) return null;
-    const restaurantSupabase = getRestaurantSupabase();
-    if (!restaurantSupabase) return null;
+    if (!imagePath || !restaurantSupabase) return null;
     
     const { data } = restaurantSupabase.storage
       .from('restaurant-images')
@@ -191,7 +193,6 @@ const Menu = () => {
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['restaurant-profile', restaurant?.supabase_url],
     queryFn: async () => {
-      const restaurantSupabase = getRestaurantSupabase();
       if (!restaurantSupabase) throw new Error('Restaurant database not available');
 
       console.log('Fetching restaurant profile from individual database...');
@@ -208,14 +209,13 @@ const Menu = () => {
       console.log('Profile data:', data);
       return data as RestaurantProfile;
     },
-    enabled: !!restaurant,
+    enabled: !!restaurantSupabase,
     retry: 1
   });
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories', restaurant?.supabase_url],
     queryFn: async () => {
-      const restaurantSupabase = getRestaurantSupabase();
       if (!restaurantSupabase) return [];
 
       console.log('Fetching categories from individual database...');
@@ -233,14 +233,13 @@ const Menu = () => {
       console.log('Categories data:', data);
       return data as Category[];
     },
-    enabled: !!restaurant,
+    enabled: !!restaurantSupabase,
     retry: 1
   });
 
   const { data: menuItems = [], isLoading: itemsLoading } = useQuery({
     queryKey: ['menu-items', restaurant?.supabase_url, selectedCategory],
     queryFn: async () => {
-      const restaurantSupabase = getRestaurantSupabase();
       if (!restaurantSupabase) return [];
 
       console.log('Fetching menu items from individual database for category:', selectedCategory);
@@ -264,16 +263,16 @@ const Menu = () => {
       console.log('Menu items data:', data);
       return data as MenuItem[];
     },
-    enabled: !!restaurant,
+    enabled: !!restaurantSupabase,
     retry: 1
   });
 
   const { data: customization } = useQuery({
     queryKey: ['customization', restaurant?.supabase_url],
     queryFn: async () => {
-      const restaurantSupabase = getRestaurantSupabase();
       if (!restaurantSupabase) return null;
 
+      console.log('Fetching customization from individual database...');
       const { data, error } = await restaurantSupabase
         .from('restaurant_customization')
         .select('*')
@@ -284,16 +283,31 @@ const Menu = () => {
         return null;
       }
       
+      console.log('Customization data:', data);
       return data;
     },
-    enabled: !!restaurant,
+    enabled: !!restaurantSupabase,
     retry: 0
   });
 
   // Apply theme when customization loads
   useEffect(() => {
     if (customization?.theme) {
+      console.log('Applying theme:', customization.theme);
       setCustomTheme(customization.theme);
+    } else {
+      console.log('Using default light theme');
+      // Set default light theme
+      setCustomTheme({
+        mode: 'light',
+        primaryColor: '#1f2937',
+        accentColor: '#3b82f6',
+        backgroundColor: '#ffffff',
+        cardBackground: '#ffffff',
+        textColor: '#1f2937',
+        mutedTextColor: '#6b7280',
+        borderColor: '#e5e7eb'
+      });
     }
   }, [customization]);
 
@@ -567,12 +581,12 @@ const Menu = () => {
                 )}
                 <div className="flex gap-1">
                   <LanguageSwitch 
-                    restaurantSupabase={getRestaurantSupabase()} 
+                    restaurantSupabase={restaurantSupabase} 
                     currentLanguage={currentLanguage}
                     onLanguageChange={setCurrentLanguage}
                   />
                   <CurrencySwitch 
-                    restaurantSupabase={getRestaurantSupabase()} 
+                    restaurantSupabase={restaurantSupabase} 
                     currentCurrency={currentCurrency}
                     onCurrencyChange={setCurrentCurrency}
                   />
@@ -708,12 +722,12 @@ const Menu = () => {
               )}
               <div className="flex gap-1">
                 <LanguageSwitch 
-                  restaurantSupabase={getRestaurantSupabase()} 
+                  restaurantSupabase={restaurantSupabase} 
                   currentLanguage={currentLanguage}
                   onLanguageChange={setCurrentLanguage}
                 />
                 <CurrencySwitch 
-                  restaurantSupabase={getRestaurantSupabase()} 
+                  restaurantSupabase={restaurantSupabase} 
                   currentCurrency={currentCurrency}
                   onCurrencyChange={setCurrentCurrency}
                 />

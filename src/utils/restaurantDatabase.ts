@@ -39,3 +39,14 @@ export const getRestaurantInfo = () => {
   }
   return JSON.parse(restaurantInfo);
 };
+
+// Helper function to create restaurant supabase client from restaurant data
+export const createRestaurantSupabase = (supabase_url: string, supabase_anon_key: string) => {
+  return createClient(supabase_url, supabase_anon_key, {
+    auth: {
+      storage: sessionStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  });
+};

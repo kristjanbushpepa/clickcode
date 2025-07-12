@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -25,10 +26,12 @@ interface PopupSettingsData {
   description: string;
   link: string;
   buttonText: string;
+  displayDelay: number;
   wheelSettings: {
     enabled: boolean;
     unlockText: string;
     unlockButtonText: string;
+    unlockLink: string;
     rewards: Reward[];
   };
 }
@@ -46,10 +49,12 @@ export const PopupSettings: React.FC = () => {
     description: 'Get the latest updates and special offers',
     link: '',
     buttonText: 'Follow Now',
+    displayDelay: 3,
     wheelSettings: {
       enabled: false,
       unlockText: 'Give us a 5-star review to spin the wheel!',
       unlockButtonText: 'Leave Review & Spin',
+      unlockLink: '',
       rewards: [
         { text: '10% Off', chance: 20, color: '#ef4444' },
         { text: 'Free Drink', chance: 15, color: '#3b82f6' },
@@ -73,15 +78,22 @@ export const PopupSettings: React.FC = () => {
       const { data, error } = await restaurantSupabase
         .from('restaurant_customization')
         .select('popup_settings')
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
       
       if (data?.popup_settings) {
         setSettings(data.popup_settings);
       }
     } catch (error) {
       console.error('Error loading popup settings:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load popup settings.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -89,13 +101,34 @@ export const PopupSettings: React.FC = () => {
     setLoading(true);
     try {
       const restaurantSupabase = getRestaurantSupabase();
-      const { error } = await restaurantSupabase
+      
+      // First, try to get existing data
+      const { data: existingData } = await restaurantSupabase
         .from('restaurant_customization')
-        .upsert({
-          popup_settings: settings
-        });
+        .select('id')
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existingData) {
+        // Update existing record
+        const { error } = await restaurantSupabase
+          .from('restaurant_customization')
+          .update({
+            popup_settings: settings,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingData.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new record
+        const { error } = await restaurantSupabase
+          .from('restaurant_customization')
+          .insert({
+            popup_settings: settings
+          });
+
+        if (error) throw error;
+      }
 
       toast({
         title: 'Settings saved',
@@ -105,7 +138,7 @@ export const PopupSettings: React.FC = () => {
       console.error('Error saving popup settings:', error);
       toast({
         title: 'Error',
-        description: 'Failed to save popup settings.',
+        description: 'Failed to save popup settings. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -185,6 +218,21 @@ export const PopupSettings: React.FC = () => {
                     <SelectItem value="wheel">Spin Wheel</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="display-delay">Display Delay (seconds)</Label>
+                <Input
+                  id="display-delay"
+                  type="number"
+                  min="1"
+                  max="60"
+                  value={settings.displayDelay}
+                  onChange={(e) => setSettings(prev => ({ ...prev, displayDelay: parseInt(e.target.value) || 3 }))}
+                />
+                <p className="text-sm text-muted-foreground">
+                  How long to wait before showing the popup (1-60 seconds)
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -271,6 +319,23 @@ export const PopupSettings: React.FC = () => {
                               wheelSettings: { ...prev.wheelSettings, unlockButtonText: e.target.value }
                             }))}
                           />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="unlock-link">Unlock Link (optional)</Label>
+                          <Input
+                            id="unlock-link"
+                            type="url"
+                            value={settings.wheelSettings.unlockLink}
+                            onChange={(e) => setSettings(prev => ({
+                              ...prev,
+                              wheelSettings: { ...prev.wheelSettings, unlockLink: e.target.value }
+                            }))}
+                            placeholder="https://google.com/business/your-restaurant/reviews"
+                          />
+                          <p className="text-sm text-muted-foreground">
+                            Link to direct users to (e.g., Google Reviews, social media)
+                          </p>
                         </div>
 
                         <div className="space-y-4">

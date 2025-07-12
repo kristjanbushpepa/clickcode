@@ -66,6 +66,11 @@ interface MenuTheme {
   mode: 'light' | 'dark';
   primaryColor: string;
   accentColor: string;
+  backgroundColor: string;
+  cardBackground: string;
+  textColor: string;
+  mutedTextColor: string;
+  borderColor: string;
 }
 
 interface Restaurant {
@@ -285,22 +290,10 @@ const Menu = () => {
     retry: 0
   });
 
+  // Apply theme when customization loads
   useEffect(() => {
     if (customization?.theme) {
       setCustomTheme(customization.theme);
-      
-      const root = document.documentElement;
-      
-      if (customization.theme.mode === 'dark') {
-        root.classList.add('dark-theme');
-        root.classList.remove('light-theme');
-      } else {
-        root.classList.add('light-theme');
-        root.classList.remove('dark-theme');
-      }
-      
-      root.style.setProperty('--menu-primary', customization.theme.primaryColor);
-      root.style.setProperty('--menu-accent', customization.theme.accentColor);
     }
   }, [customization]);
 
@@ -360,6 +353,22 @@ const Menu = () => {
 
   const bannerImageUrl = profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null;
   const logoImageUrl = profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null;
+
+  // Theme styles object
+  const themeStyles = customTheme ? {
+    backgroundColor: customTheme.backgroundColor,
+    color: customTheme.textColor
+  } : {};
+
+  const cardStyles = customTheme ? {
+    backgroundColor: customTheme.cardBackground,
+    borderColor: customTheme.borderColor,
+    color: customTheme.textColor
+  } : {};
+
+  const mutedTextStyles = customTheme ? {
+    color: customTheme.mutedTextColor
+  } : {};
 
   if (!restaurantName) {
     return (
@@ -426,19 +435,20 @@ const Menu = () => {
     );
   }
 
+  // Categories layout with theme
   if (layout === 'categories') {
     if (selectedCategory) {
       const currentCategory = categories.find(cat => cat.id === selectedCategory);
       
       return (
-        <div className={`min-h-screen ${customTheme?.mode === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+        <div className="min-h-screen" style={themeStyles}>
           <div className="relative">
             {bannerImageUrl && (
               <div 
                 className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url(${bannerImageUrl})` }}
               >
-                <div className={`absolute inset-0 ${customTheme?.mode === 'dark' ? 'bg-black/60' : 'bg-black/40'}`}></div>
+                <div className="absolute inset-0 bg-black/40"></div>
               </div>
             )}
             
@@ -470,22 +480,22 @@ const Menu = () => {
             <div className="max-w-sm mx-auto space-y-3">
               {filteredMenuItems.length === 0 ? (
                 <div className="text-center py-8">
-                  <Utensils className={`h-10 w-10 mx-auto mb-3 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
-                  <p className={`text-sm ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>No items found in this category.</p>
+                  <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
+                  <p className="text-sm" style={mutedTextStyles}>No items found in this category.</p>
                 </div>
               ) : (
                 filteredMenuItems.map((item) => {
                   const itemImageUrl = getMenuItemImageUrl(item);
                   
                   return (
-                    <Card key={item.id} className={`p-3 hover:shadow-md transition-shadow ${customTheme?.mode === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                    <Card key={item.id} className="p-3 hover:shadow-md transition-shadow border" style={cardStyles}>
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-semibold text-sm mb-1 leading-tight ${customTheme?.mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          <h3 className="font-semibold text-sm mb-1 leading-tight" style={{ color: customTheme?.textColor }}>
                             {getLocalizedText(item, 'name')}
                           </h3>
                           {getLocalizedText(item, 'description') && (
-                            <p className={`text-xs mb-2 line-clamp-2 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <p className="text-xs mb-2 line-clamp-2" style={mutedTextStyles}>
                               {getLocalizedText(item, 'description')}
                             </p>
                           )}
@@ -501,7 +511,7 @@ const Menu = () => {
                               {formatPrice(item.price, item.currency)}
                             </Badge>
                             {item.preparation_time && (
-                              <div className={`flex items-center gap-1 text-xs ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                              <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
                                 <Clock className="h-3 w-3" />
                                 {item.preparation_time}min
                               </div>
@@ -526,18 +536,17 @@ const Menu = () => {
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
         </div>
       );
-
     }
 
     return (
-      <div className={`min-h-screen ${customTheme?.mode === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+      <div className="min-h-screen" style={themeStyles}>
         <div className="relative">
           {bannerImageUrl && (
             <div 
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${bannerImageUrl})` }}
             >
-              <div className={`absolute inset-0 ${customTheme?.mode === 'dark' ? 'bg-black/60' : 'bg-black/40'}`}></div>
+              <div className="absolute inset-0 bg-black/40"></div>
             </div>
           )}
           
@@ -605,12 +614,16 @@ const Menu = () => {
 
         <div className="px-3 py-3">
           <div className="max-w-sm mx-auto relative">
-            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" style={mutedTextStyles} />
             <Input
               placeholder="Search ingredients & dishes"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`pl-10 h-10 ${customTheme?.mode === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${customTheme?.mode === 'dark' ? 'border-gray-700' : 'border-gray-200'} ${customTheme?.mode === 'dark' ? 'text-white' : 'text-gray-900'}`}
+              className="pl-10 h-10 border"
+              style={{ 
+                ...cardStyles,
+                borderColor: customTheme?.borderColor 
+              }}
             />
           </div>
         </div>
@@ -619,9 +632,9 @@ const Menu = () => {
           <div className="max-w-sm mx-auto">
             {filteredCategories.length === 0 ? (
               <div className="text-center py-8">
-                <Utensils className={`h-10 w-10 mx-auto mb-3 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
-                <h3 className={`text-base font-semibold mb-2 ${customTheme?.mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>Menu Coming Soon</h3>
-                <p className={`text-sm ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>The menu is being prepared and will be available shortly.</p>
+                <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
+                <h3 className="text-base font-semibold mb-2" style={{ color: customTheme?.textColor }}>Menu Coming Soon</h3>
+                <p className="text-sm" style={mutedTextStyles}>The menu is being prepared and will be available shortly.</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
@@ -631,21 +644,24 @@ const Menu = () => {
                   return (
                     <Card 
                       key={category.id} 
-                      className={`hover:shadow-md transition-all cursor-pointer h-28 ${customTheme?.mode === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${customTheme?.mode === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
-                      style={{ borderColor: customTheme?.accentColor + '40' }}
+                      className="hover:shadow-md transition-all cursor-pointer h-28 border"
+                      style={{
+                        ...cardStyles,
+                        borderColor: customTheme?.accentColor + '40'
+                      }}
                       onClick={() => setSelectedCategory(category.id)}
                     >
                       <CardContent className="p-3 h-full flex flex-col">
                         <div className="flex-1">
-                          <h3 className={`font-semibold text-sm mb-1 ${customTheme?.mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          <h3 className="font-semibold text-sm mb-1" style={{ color: customTheme?.textColor }}>
                             {getLocalizedText(category, 'name')}
                           </h3>
-                          <p className={`text-xs line-clamp-2 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                          <p className="text-xs line-clamp-2" style={mutedTextStyles}>
                             {categoryItems.slice(0, 2).map(item => getLocalizedText(item, 'name')).join(', ')}
                             {categoryItems.length > 2 && '...'}
                           </p>
                         </div>
-                        <div className={`text-xs mt-2 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <div className="text-xs mt-2" style={mutedTextStyles}>
                           {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
                         </div>
                       </CardContent>
@@ -662,15 +678,16 @@ const Menu = () => {
     );
   }
 
+  // Items layout with theme
   return (
-    <div className={`min-h-screen ${customTheme?.mode === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className="min-h-screen" style={themeStyles}>
       <div className="relative">
         {bannerImageUrl && (
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${bannerImageUrl})` }}
           >
-            <div className={`absolute inset-0 ${customTheme?.mode === 'dark' ? 'bg-black/60' : 'bg-black/40'}`}></div>
+            <div className="absolute inset-0 bg-black/40"></div>
           </div>
         )}
         
@@ -740,10 +757,13 @@ const Menu = () => {
         <div className="max-w-sm mx-auto">
           <Tabs defaultValue="all" className="w-full">
             <ScrollArea className="w-full whitespace-nowrap">
-              <TabsList className={`inline-flex h-9 w-max min-w-full gap-1 p-1 ${customTheme?.mode === 'dark' ? 'bg-gray-800' : 'bg-white'}`} style={{ 
-                backgroundColor: customTheme?.accentColor + '20',
-                borderColor: customTheme?.accentColor 
-              }}>
+              <TabsList 
+                className="inline-flex h-9 w-max min-w-full gap-1 p-1"
+                style={{ 
+                  backgroundColor: customTheme?.accentColor + '20',
+                  borderColor: customTheme?.accentColor 
+                }}
+              >
                 <TabsTrigger value="all" className="text-xs h-7 px-3 flex-shrink-0">
                   All
                 </TabsTrigger>
@@ -757,24 +777,24 @@ const Menu = () => {
             </ScrollArea>
 
             <TabsContent value="all" className="space-y-3 mt-4">
-              <h3 className={`text-base font-semibold mb-3 ${customTheme?.mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              <h3 className="text-base font-semibold mb-3" style={{ color: customTheme?.textColor }}>
                 Lista e Artikujve
               </h3>
               {menuItems.length === 0 ? (
                 <div className="text-center py-8">
-                  <Utensils className={`h-10 w-10 mx-auto mb-3 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
-                  <p className={`text-sm ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>No items available.</p>
+                  <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
+                  <p className="text-sm" style={mutedTextStyles}>No items available.</p>
                 </div>
               ) : (
                 filteredMenuItems.map((item) => {
                   const itemImageUrl = getMenuItemImageUrl(item);
                   
                   return (
-                    <Card key={item.id} className={`p-3 hover:shadow-md transition-shadow ${customTheme?.mode === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                    <Card key={item.id} className="p-3 hover:shadow-md transition-shadow border" style={cardStyles}>
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between mb-1 gap-2">
-                            <h3 className={`font-semibold text-sm leading-tight ${customTheme?.mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
                               {getLocalizedText(item, 'name')}
                             </h3>
                             <Badge 
@@ -789,7 +809,7 @@ const Menu = () => {
                             </Badge>
                           </div>
                           {getLocalizedText(item, 'description') && (
-                            <p className={`text-xs mb-2 line-clamp-2 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <p className="text-xs mb-2 line-clamp-2" style={mutedTextStyles}>
                               {getLocalizedText(item, 'description')}
                             </p>
                           )}
@@ -799,7 +819,7 @@ const Menu = () => {
                                categories.find(cat => cat.id === item.category_id)?.name}
                             </Badge>
                             {item.preparation_time && (
-                              <div className={`flex items-center gap-1 text-xs ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                              <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
                                 <Clock className="h-3 w-3" />
                                 {item.preparation_time}min
                               </div>
@@ -825,24 +845,24 @@ const Menu = () => {
               
               return (
                 <TabsContent key={category.id} value={category.id} className="space-y-3 mt-4">
-                  <h3 className={`text-base font-semibold mb-3 ${customTheme?.mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className="text-base font-semibold mb-3" style={{ color: customTheme?.textColor }}>
                     {getLocalizedText(category, 'name')}
                   </h3>
                   {categoryItems.length === 0 ? (
                     <div className="text-center py-8">
-                      <Utensils className={`h-10 w-10 mx-auto mb-3 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
-                      <p className={`text-sm ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>No items in this category.</p>
+                      <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
+                      <p className="text-sm" style={mutedTextStyles}>No items in this category.</p>
                     </div>
                   ) : (
                     categoryItems.map((item) => {
                       const itemImageUrl = getMenuItemImageUrl(item);
                       
                       return (
-                        <Card key={item.id} className={`p-3 hover:shadow-md transition-shadow ${customTheme?.mode === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                        <Card key={item.id} className="p-3 hover:shadow-md transition-shadow border" style={cardStyles}>
                           <div className="flex justify-between items-start gap-3">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between mb-1 gap-2">
-                                <h3 className={`font-semibold text-sm leading-tight ${customTheme?.mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                <h3 className="font-semibold text-sm leading-tight" style={{ color: customTheme?.textColor }}>
                                   {getLocalizedText(item, 'name')}
                                 </h3>
                                 <Badge 
@@ -857,12 +877,12 @@ const Menu = () => {
                                 </Badge>
                               </div>
                               {getLocalizedText(item, 'description') && (
-                                <p className={`text-xs mb-2 line-clamp-2 ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                <p className="text-xs mb-2 line-clamp-2" style={mutedTextStyles}>
                                   {getLocalizedText(item, 'description')}
                                 </p>
                               )}
                               {item.preparation_time && (
-                                <div className={`flex items-center gap-1 text-xs ${customTheme?.mode === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
                                   <Clock className="h-3 w-3" />
                                   {item.preparation_time}min
                                 </div>

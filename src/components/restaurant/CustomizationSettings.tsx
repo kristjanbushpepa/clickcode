@@ -13,18 +13,33 @@ interface MenuTheme {
   mode: 'light' | 'dark';
   primaryColor: string;
   accentColor: string;
+  backgroundColor: string;
+  cardBackground: string;
+  textColor: string;
+  mutedTextColor: string;
+  borderColor: string;
 }
 
 const defaultThemes = {
   light: {
     mode: 'light' as const,
     primaryColor: '#1f2937',
-    accentColor: '#3b82f6'
+    accentColor: '#3b82f6',
+    backgroundColor: '#ffffff',
+    cardBackground: '#f8fafc',
+    textColor: '#1f2937',
+    mutedTextColor: '#6b7280',
+    borderColor: '#e5e7eb'
   },
   dark: {
     mode: 'dark' as const,
     primaryColor: '#f8fafc',
-    accentColor: '#60a5fa'
+    accentColor: '#60a5fa',
+    backgroundColor: '#0f172a',
+    cardBackground: '#1e293b',
+    textColor: '#f8fafc',
+    mutedTextColor: '#94a3b8',
+    borderColor: '#334155'
   }
 };
 
@@ -144,17 +159,245 @@ export function CustomizationSettings() {
         </div>
       </div>
 
-      <Tabs defaultValue="layout" className="space-y-6">
+      <Tabs defaultValue="colors" className="space-y-6">
         <TabsList>
+          <TabsTrigger value="colors">
+            <Palette className="h-4 w-4 mr-2" />
+            Ngjyrat & Tema
+          </TabsTrigger>
           <TabsTrigger value="layout">
             <Layout className="h-4 w-4 mr-2" />
             Dizajni
           </TabsTrigger>
-          <TabsTrigger value="colors">
-            <Palette className="h-4 w-4 mr-2" />
-            Ngjyrat
-          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="colors" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tema e Ngjyrave</CardTitle>
+              <CardDescription>
+                Zgjidhni një temë ngjyrash për menunë tuaj
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    selectedPreset === 'light' ? 'border-primary' : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => applyPresetTheme('light')}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Sun className="h-5 w-5 text-yellow-500" />
+                      <h3 className="font-semibold">Light Mode</h3>
+                    </div>
+                    <div className="flex space-x-2">
+                      <div className="w-6 h-6 rounded bg-white border"></div>
+                      <div className="w-6 h-6 rounded bg-gray-100"></div>
+                      <div className="w-6 h-6 rounded bg-gray-800"></div>
+                      <div className="w-6 h-6 rounded bg-blue-500"></div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Sfond i bardhë me tekst të errët</p>
+                  </div>
+                </div>
+
+                <div
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    selectedPreset === 'dark' ? 'border-primary' : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => applyPresetTheme('dark')}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Moon className="h-5 w-5 text-blue-400" />
+                      <h3 className="font-semibold">Dark Mode</h3>
+                    </div>
+                    <div className="flex space-x-2">
+                      <div className="w-6 h-6 rounded bg-slate-900"></div>
+                      <div className="w-6 h-6 rounded bg-slate-700"></div>
+                      <div className="w-6 h-6 rounded bg-slate-100"></div>
+                      <div className="w-6 h-6 rounded bg-blue-400"></div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Sfond i errët me tekst të bardhë</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Ngjyrat e Personalizuara</CardTitle>
+              <CardDescription>
+                Personalizoni ngjyrat për temën e zgjedhur
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="primaryColor">Ngjyra Kryesore</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="primaryColor"
+                      type="color"
+                      value={customTheme.primaryColor}
+                      onChange={(e) => handleThemeChange('primaryColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.primaryColor}
+                      onChange={(e) => handleThemeChange('primaryColor', e.target.value)}
+                      placeholder="#1f2937"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="accentColor">Ngjyra e Theksuar</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="accentColor"
+                      type="color"
+                      value={customTheme.accentColor}
+                      onChange={(e) => handleThemeChange('accentColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.accentColor}
+                      onChange={(e) => handleThemeChange('accentColor', e.target.value)}
+                      placeholder="#3b82f6"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="backgroundColor">Ngjyra e Sfondit</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="backgroundColor"
+                      type="color"
+                      value={customTheme.backgroundColor}
+                      onChange={(e) => handleThemeChange('backgroundColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.backgroundColor}
+                      onChange={(e) => handleThemeChange('backgroundColor', e.target.value)}
+                      placeholder="#ffffff"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cardBackground">Ngjyra e Kartave</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="cardBackground"
+                      type="color"
+                      value={customTheme.cardBackground}
+                      onChange={(e) => handleThemeChange('cardBackground', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.cardBackground}
+                      onChange={(e) => handleThemeChange('cardBackground', e.target.value)}
+                      placeholder="#f8fafc"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Preview */}
+              <div className="mt-6 p-4 rounded-lg border overflow-hidden">
+                <h4 className="font-semibold mb-3">Parapamja e Menusë</h4>
+                <div 
+                  className="rounded-lg p-4 space-y-3"
+                  style={{ 
+                    backgroundColor: customTheme.backgroundColor,
+                    color: customTheme.textColor,
+                    border: `1px solid ${customTheme.borderColor}`
+                  }}
+                >
+                  {/* Header Preview */}
+                  <div 
+                    className="text-white p-3 rounded-lg"
+                    style={{ backgroundColor: customTheme.primaryColor }}
+                  >
+                    <h3 className="font-bold">Restoranti Juaj</h3>
+                    <p className="text-sm opacity-90">Adresa, Qyteti</p>
+                  </div>
+                  
+                  {/* Menu Items Preview */}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold" style={{ color: customTheme.textColor }}>
+                      Antipastet
+                    </h4>
+                    <div 
+                      className="p-3 rounded-lg"
+                      style={{ 
+                        backgroundColor: customTheme.cardBackground,
+                        border: `1px solid ${customTheme.borderColor}`
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium" style={{ color: customTheme.textColor }}>
+                            Sallatë Cezar
+                          </p>
+                          <p className="text-sm" style={{ color: customTheme.mutedTextColor }}>
+                            Sallatë e freskët me parmezan dhe kroton
+                          </p>
+                        </div>
+                        <span 
+                          className="font-bold px-2 py-1 rounded text-sm"
+                          style={{ 
+                            color: customTheme.accentColor,
+                            backgroundColor: customTheme.accentColor + '20' 
+                          }}
+                        >
+                          800 ALL
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      className="p-3 rounded-lg"
+                      style={{ 
+                        backgroundColor: customTheme.cardBackground,
+                        border: `1px solid ${customTheme.borderColor}`
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium" style={{ color: customTheme.textColor }}>
+                            Bruschetta
+                          </p>
+                          <p className="text-sm" style={{ color: customTheme.mutedTextColor }}>
+                            Bukë e pjekur me domate dhe borzilok
+                          </p>
+                        </div>
+                        <span 
+                          className="font-bold px-2 py-1 rounded text-sm"
+                          style={{ 
+                            color: customTheme.accentColor,
+                            backgroundColor: customTheme.accentColor + '20' 
+                          }}
+                        >
+                          650 ALL
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="layout" className="space-y-6">
           <Card>
@@ -243,141 +486,6 @@ export function CustomizationSettings() {
                           <div className="h-1 bg-primary/20 rounded w-8"></div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="colors" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Tema e Ngjyrave</CardTitle>
-              <CardDescription>
-                Zgjidhni një temë ngjyrash për menunë tuaj
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    selectedPreset === 'light' ? 'border-primary' : 'border-border hover:border-primary/50'
-                  }`}
-                  onClick={() => applyPresetTheme('light')}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Sun className="h-5 w-5 text-yellow-500" />
-                      <h3 className="font-semibold">Light Mode</h3>
-                    </div>
-                    <div className="flex space-x-2">
-                      <div className="w-6 h-6 rounded bg-gray-800"></div>
-                      <div className="w-6 h-6 rounded bg-blue-500"></div>
-                      <div className="w-6 h-6 rounded bg-white border"></div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Sfond i bardhë me tekst të errët</p>
-                  </div>
-                </div>
-
-                <div
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    selectedPreset === 'dark' ? 'border-primary' : 'border-border hover:border-primary/50'
-                  }`}
-                  onClick={() => applyPresetTheme('dark')}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Moon className="h-5 w-5 text-blue-400" />
-                      <h3 className="font-semibold">Dark Mode</h3>
-                    </div>
-                    <div className="flex space-x-2">
-                      <div className="w-6 h-6 rounded bg-gray-900"></div>
-                      <div className="w-6 h-6 rounded bg-blue-400"></div>
-                      <div className="w-6 h-6 rounded bg-gray-100"></div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Sfond i errët me tekst të bardhë</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Ngjyrat e Personalizuara</CardTitle>
-              <CardDescription>
-                Personalizoni ngjyrat për temën e zgjedhur
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="primaryColor">Ngjyra Kryesore</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="primaryColor"
-                      type="color"
-                      value={customTheme.primaryColor}
-                      onChange={(e) => handleThemeChange('primaryColor', e.target.value)}
-                      className="w-16 h-10 p-1"
-                    />
-                    <Input
-                      value={customTheme.primaryColor}
-                      onChange={(e) => handleThemeChange('primaryColor', e.target.value)}
-                      placeholder="#1f2937"
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="accentColor">Ngjyra e Theksuar</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="accentColor"
-                      type="color"
-                      value={customTheme.accentColor}
-                      onChange={(e) => handleThemeChange('accentColor', e.target.value)}
-                      className="w-16 h-10 p-1"
-                    />
-                    <Input
-                      value={customTheme.accentColor}
-                      onChange={(e) => handleThemeChange('accentColor', e.target.value)}
-                      placeholder="#3b82f6"
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Preview */}
-              <div className="mt-6 p-4 rounded-lg border">
-                <div className="space-y-3">
-                  <div 
-                    className="text-white p-3 rounded"
-                    style={{ backgroundColor: customTheme.primaryColor }}
-                  >
-                    <h3 className="font-bold">Restoranti Juaj</h3>
-                    <p className="text-sm opacity-90">Shembull i header-it të menusë</p>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Antipastet</h4>
-                    <div className="flex justify-between items-center p-3 bg-muted/50 rounded">
-                      <div>
-                        <p className="font-medium">Sallatë Cezar</p>
-                        <p className="text-sm text-muted-foreground">Sallatë e freskët me parmezan</p>
-                      </div>
-                      <span 
-                        className="font-bold px-2 py-1 rounded"
-                        style={{ 
-                          color: customTheme.accentColor,
-                          backgroundColor: customTheme.accentColor + '20' 
-                        }}
-                      >
-                        800 ALL
-                      </span>
                     </div>
                   </div>
                 </div>

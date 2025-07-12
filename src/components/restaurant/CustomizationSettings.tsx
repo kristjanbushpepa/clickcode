@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Palette, Layout, Save, Moon, Sun } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { getRestaurantInfo, getRestaurantSupabase } from '@/utils/restaurantDatabase';
+import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 
 interface MenuTheme {
   mode: 'light' | 'dark';
@@ -26,14 +27,14 @@ const defaultThemes = {
     primaryColor: '#1f2937',
     accentColor: '#3b82f6',
     backgroundColor: '#ffffff',
-    cardBackground: '#f8fafc',
+    cardBackground: '#ffffff',
     textColor: '#1f2937',
     mutedTextColor: '#6b7280',
     borderColor: '#e5e7eb'
   },
   dark: {
     mode: 'dark' as const,
-    primaryColor: '#f8fafc',
+    primaryColor: '#1e293b',
     accentColor: '#60a5fa',
     backgroundColor: '#0f172a',
     cardBackground: '#1e293b',
@@ -48,12 +49,25 @@ export function CustomizationSettings() {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('categories');
   const [customTheme, setCustomTheme] = useState<MenuTheme>(defaultThemes.light);
   const [selectedPreset, setSelectedPreset] = useState<string>('light');
+  const [restaurantName, setRestaurantName] = useState<string>('');
 
-  // Load existing customization on component mount
+  // Load existing customization and restaurant profile on component mount
   useEffect(() => {
-    const loadCustomization = async () => {
+    const loadData = async () => {
       try {
         const supabase = getRestaurantSupabase();
+        
+        // Load restaurant profile to get the name
+        const { data: profile } = await supabase
+          .from('restaurant_profile')
+          .select('name')
+          .single();
+        
+        if (profile?.name) {
+          setRestaurantName(profile.name);
+        }
+
+        // Load customization settings
         const { data, error } = await supabase
           .from('restaurant_customization')
           .select('*')
@@ -73,7 +87,7 @@ export function CustomizationSettings() {
       }
     };
 
-    loadCustomization();
+    loadData();
   }, []);
 
   const handleThemeChange = (key: keyof MenuTheme, value: string) => {
@@ -133,11 +147,15 @@ export function CustomizationSettings() {
   };
 
   const getPreviewUrl = () => {
-    const restaurantInfo = getRestaurantInfo();
-    if (!restaurantInfo) return '#';
+    if (!restaurantName) return '#';
     
-    const { id } = restaurantInfo;
-    return `/menu/${id}?layout=${selectedLayout}`;
+    // Convert restaurant name to URL-friendly format
+    const urlFriendlyName = restaurantName
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+    
+    return `/menu/${urlFriendlyName}?layout=${selectedLayout}`;
   };
 
   return (
@@ -148,7 +166,7 @@ export function CustomizationSettings() {
           <p className="text-muted-foreground">Personalizoni pamjen dhe ngjyrat e menusë suaj dixhitale</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => window.open(getPreviewUrl(), '_blank')}>
+          <Button variant="outline" onClick={() => window.open(getPreviewUrl(), '_blank')} disabled={!restaurantName}>
             <Eye className="h-4 w-4 mr-2" />
             Shiko Parapamjen
           </Button>
@@ -328,7 +346,7 @@ export function CustomizationSettings() {
                     className="text-white p-3 rounded-lg"
                     style={{ backgroundColor: customTheme.primaryColor }}
                   >
-                    <h3 className="font-bold">Restoranti Juaj</h3>
+                    <h3 className="font-bold">{restaurantName || 'Restoranti Juaj'}</h3>
                     <p className="text-sm opacity-90">Adresa, Qyteti</p>
                   </div>
                   

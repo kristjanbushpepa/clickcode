@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { CurrencySettings } from './CurrencySettings';
+import { LanguageSettings } from './LanguageSettings';
+import { PopupSettings } from './PopupSettings';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -173,7 +176,7 @@ export function CustomizationSettings() {
       </div>
 
       <Tabs defaultValue="colors" className="space-y-6">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="colors">
             <Palette className="h-4 w-4 mr-2" />
             Ngjyrat & Tema
@@ -181,6 +184,9 @@ export function CustomizationSettings() {
           <TabsTrigger value="layout">
             <Layout className="h-4 w-4 mr-2" />
             Dizajni
+          </TabsTrigger>
+          <TabsTrigger value="popup">
+            Popup & Wheel
           </TabsTrigger>
         </TabsList>
 
@@ -505,6 +511,10 @@ export function CustomizationSettings() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="popup">
+          <PopupSettings />
         </TabsContent>
       </Tabs>
     </div>

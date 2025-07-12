@@ -14,6 +14,7 @@ import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameC
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
 import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
 import { MenuFooter } from '@/components/menu/MenuFooter';
+import { PopupModal } from '@/components/menu/PopupModal';
 
 interface Category {
   id: string;
@@ -332,6 +333,22 @@ const Menu = () => {
       
       if (error) return null;
       return data;
+    },
+    enabled: !!restaurantSupabase
+  });
+
+  const { data: popupSettings } = useQuery({
+    queryKey: ['popup_settings_menu'],
+    queryFn: async () => {
+      if (!restaurantSupabase) return null;
+      
+      const { data, error } = await restaurantSupabase
+        .from('restaurant_customization')
+        .select('popup_settings')
+        .single();
+      
+      if (error) return null;
+      return data?.popup_settings;
     },
     enabled: !!restaurantSupabase
   });
@@ -921,6 +938,14 @@ const Menu = () => {
       </div>
 
       <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
+      
+      {/* Popup Modal */}
+      {popupSettings && restaurant && (
+        <PopupModal 
+          settings={popupSettings}
+          restaurantName={restaurant.name}
+        />
+      )}
     </div>
   );
 };

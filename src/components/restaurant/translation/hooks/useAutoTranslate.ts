@@ -8,9 +8,78 @@ export const useAutoTranslate = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Client-side translation using Google Translate's free API
+  const translateWithGoogle = async (text: string, targetLang: string): Promise<string> => {
+    try {
+      console.log(`Translating with Google: "${text}" to ${targetLang}`);
+      
+      // Use Google Translate's free endpoint
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Translate API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Google Translate response:', data);
+      
+      // Google Translate returns an array structure
+      if (data && data[0] && data[0][0] && data[0][0][0]) {
+        return data[0][0][0];
+      }
+      
+      throw new Error('Invalid response format from Google Translate');
+    } catch (error) {
+      console.error('Google Translate error:', error);
+      throw error;
+    }
+  };
+
+  // Fallback to MyMemory API
+  const translateWithMyMemory = async (text: string, targetLang: string): Promise<string> => {
+    try {
+      console.log(`Translating with MyMemory: "${text}" to ${targetLang}`);
+      const encodedText = encodeURIComponent(text);
+      const response = await fetch(
+        `https://api.mymemory.translated.net/get?q=${encodedText}&langpair=en|${targetLang}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`MyMemory API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('MyMemory response:', data);
+      
+      if (data.responseData && data.responseData.translatedText) {
+        return data.responseData.translatedText;
+      }
+      
+      throw new Error('Invalid response from MyMemory');
+    } catch (error) {
+      console.error('MyMemory error:', error);
+      throw error;
+    }
+  };
+
   const autoTranslate = async (text: string, targetLang: string): Promise<string> => {
     console.log(`Auto-translating "${text}" to ${targetLang}`);
+    
+    // Skip translation if target language is the same as source
+    if (targetLang === 'en') {
+      console.log('Target language is English, returning original text');
+      return text;
+    }
+
     try {
+      // First try the edge function
       const restaurantSupabase = getRestaurantSupabase();
       const { data, error } = await restaurantSupabase.functions.invoke('auto-translate', {
         body: {
@@ -20,22 +89,30 @@ export const useAutoTranslate = () => {
         }
       });
 
-      console.log('Translation response:', data);
+      console.log('Edge function response:', data, error);
       
-      if (error) {
-        console.error('Translation error:', error);
-        throw error;
+      if (!error && data?.success) {
+        return data.translatedText;
       }
       
-      if (!data?.success) {
-        console.error('Translation failed:', data?.error);
-        throw new Error(data?.error || 'Translation failed');
+      console.log('Edge function failed, trying client-side translation');
+    } catch (edgeFunctionError) {
+      console.log('Edge function not available, using client-side translation:', edgeFunctionError);
+    }
+
+    // Fallback to client-side translation
+    try {
+      // Try Google Translate first
+      return await translateWithGoogle(text, targetLang);
+    } catch (googleError) {
+      console.log('Google Translate failed, trying MyMemory:', googleError);
+      try {
+        // Fallback to MyMemory
+        return await translateWithMyMemory(text, targetLang);
+      } catch (myMemoryError) {
+        console.error('All translation services failed:', googleError, myMemoryError);
+        throw new Error('Translation service temporarily unavailable. Please try again later.');
       }
-      
-      return data.translatedText;
-    } catch (error) {
-      console.error('Auto-translate error:', error);
-      throw error;
     }
   };
 
@@ -107,7 +184,7 @@ export const useAutoTranslate = () => {
         metadata[`name_${targetLang}`] = {
           status: 'auto_translated',
           timestamp: new Date().toISOString(),
-          source: 'auto-translate'
+          source: 'client-side'
         };
       }
       
@@ -119,7 +196,7 @@ export const useAutoTranslate = () => {
         metadata[`description_${targetLang}`] = {
           status: 'auto_translated',
           timestamp: new Date().toISOString(),
-          source: 'auto-translate'
+          source: 'client-side'
         };
       }
       

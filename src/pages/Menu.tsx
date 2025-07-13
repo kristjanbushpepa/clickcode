@@ -89,7 +89,7 @@ interface Restaurant {
 const Menu = () => {
   const { restaurantName } = useParams();
   const [searchParams] = useSearchParams();
-  const layout = searchParams.get('layout') || 'categories';
+  const layout = searchParams.get('layout') || 'items';
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [customTheme, setCustomTheme] = useState<MenuTheme | null>(null);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Palette, Layout, Save, Moon, Sun } from 'lucide-react';
+import { Eye, Palette, Layout, Save, Moon, Sun, Grid3X3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getRestaurantSupabase, getRestaurantInfo } from '@/utils/restaurantDatabase';
 
@@ -65,7 +64,7 @@ const defaultThemes = {
 
 export function CustomizationSettings() {
   const { toast } = useToast();
-  const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('categories');
+  const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items' | 'grid'>('categories');
   const [customTheme, setCustomTheme] = useState<MenuTheme>(defaultThemes.light);
   const [selectedPreset, setSelectedPreset] = useState<string>('light');
   const [restaurantName, setRestaurantName] = useState<string>('');
@@ -489,9 +488,9 @@ export function CustomizationSettings() {
             </CardContent>
           </Card>
 
-          {/* Enhanced Live Preview */}
+          {/* Enhanced Live Preview with Layout */}
           <div className="mt-6 p-4 rounded-lg border overflow-hidden">
-            <h4 className="font-semibold mb-3">Parapamja e Menusë</h4>
+            <h4 className="font-semibold mb-3">Parapamja e Menusë - {selectedLayout === 'categories' ? 'Kategori' : selectedLayout === 'items' ? 'Lista Artikujsh' : 'Grid'}</h4>
             <div 
               className="rounded-lg p-4 space-y-3"
               style={{ 
@@ -511,29 +510,113 @@ export function CustomizationSettings() {
                 <p className="text-sm opacity-90">Adresa, Qyteti</p>
               </div>
               
-              {/* Menu Items Preview */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-lg" style={{ color: customTheme.categoryNameColor }}>
-                  Antipastet
-                </h4>
-                <div 
-                  className="p-3 rounded-lg"
-                  style={{ 
-                    backgroundColor: customTheme.cardBackground,
-                    border: `1px solid ${customTheme.borderColor}`
-                  }}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold" style={{ color: customTheme.itemNameColor }}>
+              {/* Menu Items Preview based on Layout */}
+              {selectedLayout === 'categories' && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div 
+                    className="p-3 rounded-lg"
+                    style={{ 
+                      backgroundColor: customTheme.cardBackground,
+                      border: `1px solid ${customTheme.borderColor}`
+                    }}
+                  >
+                    <h4 className="font-bold text-sm mb-1" style={{ color: customTheme.categoryNameColor }}>
+                      Antipastet
+                    </h4>
+                    <p className="text-xs" style={{ color: customTheme.descriptionColor }}>
+                      Sallatë Cezar, Bruschetta...
+                    </p>
+                  </div>
+                  <div 
+                    className="p-3 rounded-lg"
+                    style={{ 
+                      backgroundColor: customTheme.cardBackground,
+                      border: `1px solid ${customTheme.borderColor}`
+                    }}
+                  >
+                    <h4 className="font-bold text-sm mb-1" style={{ color: customTheme.categoryNameColor }}>
+                      Pjatat Kryesore
+                    </h4>
+                    <p className="text-xs" style={{ color: customTheme.descriptionColor }}>
+                      Pizza, Pasta, Mish...
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {selectedLayout === 'grid' && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div 
+                    className="rounded-lg overflow-hidden"
+                    style={{ 
+                      backgroundColor: customTheme.cardBackground,
+                      border: `1px solid ${customTheme.borderColor}`
+                    }}
+                  >
+                    <div 
+                      className="h-16 bg-gradient-to-br from-orange-200 to-orange-300"
+                      style={{ backgroundColor: customTheme.accentColor + '40' }}
+                    ></div>
+                    <div className="p-2">
+                      <p className="font-semibold text-xs" style={{ color: customTheme.itemNameColor }}>
+                        Pizza Margherita
+                      </p>
+                      <span 
+                        className="text-xs font-bold"
+                        style={{ color: customTheme.priceColor }}
+                      >
+                        1200 ALL
+                      </span>
+                    </div>
+                  </div>
+                  <div 
+                    className="rounded-lg overflow-hidden"
+                    style={{ 
+                      backgroundColor: customTheme.cardBackground,
+                      border: `1px solid ${customTheme.borderColor}`
+                    }}
+                  >
+                    <div 
+                      className="h-16 bg-gradient-to-br from-green-200 to-green-300"
+                      style={{ backgroundColor: customTheme.accentColor + '40' }}
+                    ></div>
+                    <div className="p-2">
+                      <p className="font-semibold text-xs" style={{ color: customTheme.itemNameColor }}>
                         Sallatë Cezar
                       </p>
-                      <p className="text-sm" style={{ color: customTheme.descriptionColor }}>
-                        Sallatë e freskët me parmezan dhe kroton
+                      <span 
+                        className="text-xs font-bold"
+                        style={{ color: customTheme.priceColor }}
+                      >
+                        800 ALL
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedLayout === 'items' && (
+                <div className="space-y-2">
+                  <h4 className="font-bold text-sm" style={{ color: customTheme.categoryNameColor }}>
+                    Lista e Artikujve
+                  </h4>
+                  <div 
+                    className="p-2 rounded-lg flex justify-between items-center"
+                    style={{ 
+                      backgroundColor: customTheme.cardBackground,
+                      border: `1px solid ${customTheme.borderColor}`
+                    }}
+                  >
+                    <div>
+                      <p className="font-semibold text-xs" style={{ color: customTheme.itemNameColor }}>
+                        Sallatë Cezar
+                      </p>
+                      <p className="text-xs" style={{ color: customTheme.descriptionColor }}>
+                        Sallatë e freskët me parmezan
                       </p>
                     </div>
                     <span 
-                      className="font-bold px-2 py-1 rounded text-sm"
+                      className="font-bold text-xs px-2 py-1 rounded"
                       style={{ 
                         color: customTheme.priceColor,
                         backgroundColor: customTheme.priceColor + '20' 
@@ -543,35 +626,7 @@ export function CustomizationSettings() {
                     </span>
                   </div>
                 </div>
-                
-                <div 
-                  className="p-3 rounded-lg"
-                  style={{ 
-                    backgroundColor: customTheme.cardBackground,
-                    border: `1px solid ${customTheme.borderColor}`
-                  }}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold" style={{ color: customTheme.itemNameColor }}>
-                        Bruschetta
-                      </p>
-                      <p className="text-sm" style={{ color: customTheme.descriptionColor }}>
-                        Bukë e pjekur me domate dhe borzilok
-                      </p>
-                    </div>
-                    <span 
-                      className="font-bold px-2 py-1 rounded text-sm"
-                      style={{ 
-                        color: customTheme.priceColor,
-                        backgroundColor: customTheme.priceColor + '20' 
-                      }}
-                    >
-                      650 ALL
-                    </span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </TabsContent>
@@ -585,7 +640,7 @@ export function CustomizationSettings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div 
                   className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
                     selectedLayout === 'categories' 
@@ -661,6 +716,47 @@ export function CustomizationSettings() {
                         <div className="bg-background rounded p-1 flex justify-between">
                           <div className="h-1 bg-muted rounded w-2/3"></div>
                           <div className="h-1 bg-primary/20 rounded w-8"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div 
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    selectedLayout === 'grid' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => setSelectedLayout('grid')}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold">Grid e Artikujve</h3>
+                      {selectedLayout === 'grid' && (
+                        <Badge variant="default">E Zgjedhur</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Artikujt shfaqen në një grid me foto dhe çmime
+                    </p>
+                    
+                    {/* Preview */}
+                    <div className="bg-muted/30 rounded p-3 mt-3">
+                      <div className="grid grid-cols-2 gap-1">
+                        <div className="bg-background rounded overflow-hidden">
+                          <div className="h-4 bg-primary/20"></div>
+                          <div className="p-1">
+                            <div className="h-1 bg-muted rounded w-3/4 mb-1"></div>
+                            <div className="h-1 bg-accent rounded w-1/2"></div>
+                          </div>
+                        </div>
+                        <div className="bg-background rounded overflow-hidden">
+                          <div className="h-4 bg-primary/20"></div>
+                          <div className="p-1">
+                            <div className="h-1 bg-muted rounded w-2/3 mb-1"></div>
+                            <div className="h-1 bg-accent rounded w-1/2"></div>
+                          </div>
                         </div>
                       </div>
                     </div>

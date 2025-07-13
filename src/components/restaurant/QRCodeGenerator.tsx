@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import { getRestaurantInfo } from '@/utils/restaurantDatabase';
 import { convertRestaurantNameToUrl, convertUrlToRestaurantName } from '@/utils/nameConversion';
 
 export function QRCodeGenerator() {
-  const [layout, setLayout] = useState<'categories' | 'all-items'>('categories');
+  const [layout, setLayout] = useState<'categories' | 'items' | 'grid'>('categories');
   const [size, setSize] = useState(256);
   const [includeMargin, setIncludeMargin] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -214,13 +215,14 @@ export function QRCodeGenerator() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="layout">Menu Layout</Label>
-              <Select value={layout} onValueChange={(value: 'categories' | 'all-items') => setLayout(value)}>
+              <Select value={layout} onValueChange={(value: 'categories' | 'items' | 'grid') => setLayout(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="categories">Categories View</SelectItem>
-                  <SelectItem value="all-items">All Items View</SelectItem>
+                  <SelectItem value="items">All Items View</SelectItem>
+                  <SelectItem value="grid">Grid View</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -264,7 +266,7 @@ export function QRCodeGenerator() {
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p><strong>Restaurant:</strong> {restaurantInfo.name}</p>
                 <p><strong>URL Name:</strong> {restaurantUrlName}</p>
-                <p><strong>Layout:</strong> {layout === 'categories' ? 'Categories' : 'All Items'}</p>
+                <p><strong>Layout:</strong> {layout === 'categories' ? 'Categories' : layout === 'items' ? 'All Items' : 'Grid View'}</p>
                 <p><strong>Size:</strong> {size}x{size}px</p>
                 {conversionValidation && (
                   <p><strong>Conversion Test:</strong> 

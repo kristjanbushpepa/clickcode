@@ -1,8 +1,21 @@
+
 # Welcome to your Lovable project
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/d68d6feb-97b1-4947-a9c1-94cf489226b0
+
+## GitHub Pages Deployment
+
+This project is configured for GitHub Pages deployment. To deploy:
+
+1. Push your code to the `main` branch
+2. Go to your repository settings on GitHub
+3. Navigate to "Pages" in the left sidebar
+4. Select "GitHub Actions" as the source
+5. The deployment will happen automatically on every push to main
+
+Your site will be available at: `https://yourusername.github.io/repository-name`
 
 ## How can I edit this code?
 
@@ -60,14 +73,31 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Local Development
 
-Simply open [Lovable](https://lovable.dev/projects/d68d6feb-97b1-4947-a9c1-94cf489226b0) and click on Share -> Publish.
+To run the project locally:
 
-## Can I connect a custom domain to my Lovable project?
+```bash
+npm install
+npm run dev
+```
 
-Yes, you can!
+## Building for Production
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+To build for production:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```bash
+npm run build
+```
+
+The built files will be in the `dist` directory.
+
+## Can I connect a custom domain to my GitHub Pages site?
+
+Yes! After deployment:
+
+1. Add a `CNAME` file to the `public` directory with your domain
+2. Configure your domain's DNS to point to GitHub Pages
+3. Enable custom domain in your repository's Pages settings
+
+Read more: [GitHub Pages custom domain documentation](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)

@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getRestaurantSupabase, getRestaurantInfo } from '@/utils/restaurantDatabase';
+import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 
 interface Reward {
   text: string;
@@ -69,53 +69,30 @@ export const PopupSettings: React.FC = () => {
 
   const loadSettings = async () => {
     try {
-      const restaurantInfo = getRestaurantInfo();
-      if (!restaurantInfo) {
-        console.error('Restaurant info not found');
-        return;
-      }
-
       const restaurantSupabase = getRestaurantSupabase();
       const { data, error } = await restaurantSupabase
         .from('restaurant_customization')
         .select('popup_settings')
-        .eq('restaurant_id', restaurantInfo.id)
-        .maybeSingle();
+        .single();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+      if (error) throw error;
       
       if (data?.popup_settings) {
         setSettings(data.popup_settings);
       }
     } catch (error) {
       console.error('Error loading popup settings:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load popup settings.',
-        variant: 'destructive',
-      });
     }
   };
 
   const saveSettings = async () => {
     setLoading(true);
     try {
-      const restaurantInfo = getRestaurantInfo();
-      if (!restaurantInfo) {
-        throw new Error('Restaurant info not found');
-      }
-
       const restaurantSupabase = getRestaurantSupabase();
       const { error } = await restaurantSupabase
         .from('restaurant_customization')
         .upsert({
-          restaurant_id: restaurantInfo.id,
-          popup_settings: settings,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'restaurant_id'
+          popup_settings: settings
         });
 
       if (error) throw error;

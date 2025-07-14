@@ -15,6 +15,21 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Get the repository name from the URL for GitHub Pages deployment
+const getBasename = () => {
+  if (import.meta.env.DEV) {
+    return "/";
+  }
+  
+  // For GitHub Pages, extract repository name from pathname
+  const pathSegments = window.location.pathname.split('/').filter(Boolean);
+  if (pathSegments.length > 0 && window.location.hostname.includes('github.io')) {
+    return `/${pathSegments[0]}`;
+  }
+  
+  return "/";
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -22,7 +37,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter basename={getBasename()}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/admin/*" element={<AdminDashboard />} />

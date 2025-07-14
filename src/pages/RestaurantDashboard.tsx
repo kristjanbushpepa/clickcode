@@ -8,6 +8,7 @@ import { MenuManagement } from '@/components/restaurant/MenuManagement';
 import { QRCodeGenerator } from '@/components/restaurant/QRCodeGenerator';
 import { CustomizationSettings } from '@/components/restaurant/CustomizationSettings';
 import { TranslationManager } from '@/components/restaurant/TranslationManager';
+import { PopupSettingsPage } from '@/components/restaurant/PopupSettingsPage';
 
 const RestaurantDashboard = () => {
   return (
@@ -31,6 +32,7 @@ const RestaurantDashboard = () => {
               <Route path="/qr-generator" element={<QRCodeGenerator />} />
               <Route path="/analytics" element={<div>Analytics (Coming Soon)</div>} />
               <Route path="/customization" element={<CustomizationSettings />} />
+              <Route path="/popup-settings" element={<PopupSettingsPage />} />
               <Route path="/settings" element={<div>Settings (Coming Soon)</div>} />
             </Routes>
           </main>

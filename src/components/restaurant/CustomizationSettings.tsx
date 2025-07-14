@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Palette, Layout, Save, Moon, Sun } from 'lucide-react';
+import { Eye, Palette, Layout, Save, Moon, Sun, Leaf, Coins, Waves, Grape, Sunset } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getRestaurantSupabase, getRestaurantInfo } from '@/utils/restaurantDatabase';
 
@@ -93,7 +94,142 @@ const defaultThemes = {
     socialMediaLinkColor: '#94a3b8',
     footerBrandingColor: '#60a5fa',
     footerDescriptionColor: '#64748b'
+  },
+  green: {
+    mode: 'light' as const,
+    primaryColor: '#166534',
+    accentColor: '#22c55e',
+    backgroundColor: '#f0fdf4',
+    cardBackground: '#ffffff',
+    textColor: '#166534',
+    mutedTextColor: '#15803d',
+    borderColor: '#dcfce7',
+    headingColor: '#14532d',
+    categoryNameColor: '#166534',
+    itemNameColor: '#14532d',
+    descriptionColor: '#15803d',
+    priceColor: '#16a34a',
+    contactSectionTitleColor: '#166534',
+    contactLabelColor: '#14532d',
+    contactValueColor: '#15803d',
+    openingHoursSectionTitleColor: '#166534',
+    openingHoursLabelColor: '#14532d',
+    openingHoursValueColor: '#15803d',
+    socialMediaSectionTitleColor: '#166534',
+    socialMediaLinkColor: '#15803d',
+    footerBrandingColor: '#22c55e',
+    footerDescriptionColor: '#65a30d'
+  },
+  gold: {
+    mode: 'light' as const,
+    primaryColor: '#92400e',
+    accentColor: '#f59e0b',
+    backgroundColor: '#fffbeb',
+    cardBackground: '#ffffff',
+    textColor: '#92400e',
+    mutedTextColor: '#d97706',
+    borderColor: '#fef3c7',
+    headingColor: '#78350f',
+    categoryNameColor: '#92400e',
+    itemNameColor: '#78350f',
+    descriptionColor: '#d97706',
+    priceColor: '#ea580c',
+    contactSectionTitleColor: '#92400e',
+    contactLabelColor: '#78350f',
+    contactValueColor: '#d97706',
+    openingHoursSectionTitleColor: '#92400e',
+    openingHoursLabelColor: '#78350f',
+    openingHoursValueColor: '#d97706',
+    socialMediaSectionTitleColor: '#92400e',
+    socialMediaLinkColor: '#d97706',
+    footerBrandingColor: '#f59e0b',
+    footerDescriptionColor: '#a16207'
+  },
+  ocean: {
+    mode: 'light' as const,
+    primaryColor: '#075985',
+    accentColor: '#0ea5e9',
+    backgroundColor: '#f0f9ff',
+    cardBackground: '#ffffff',
+    textColor: '#075985',
+    mutedTextColor: '#0284c7',
+    borderColor: '#e0f2fe',
+    headingColor: '#0c4a6e',
+    categoryNameColor: '#075985',
+    itemNameColor: '#0c4a6e',
+    descriptionColor: '#0284c7',
+    priceColor: '#0891b2',
+    contactSectionTitleColor: '#075985',
+    contactLabelColor: '#0c4a6e',
+    contactValueColor: '#0284c7',
+    openingHoursSectionTitleColor: '#075985',
+    openingHoursLabelColor: '#0c4a6e',
+    openingHoursValueColor: '#0284c7',
+    socialMediaSectionTitleColor: '#075985',
+    socialMediaLinkColor: '#0284c7',
+    footerBrandingColor: '#0ea5e9',
+    footerDescriptionColor: '#0369a1'
+  },
+  purple: {
+    mode: 'light' as const,
+    primaryColor: '#6b21a8',
+    accentColor: '#a855f7',
+    backgroundColor: '#faf5ff',
+    cardBackground: '#ffffff',
+    textColor: '#6b21a8',
+    mutedTextColor: '#9333ea',
+    borderColor: '#f3e8ff',
+    headingColor: '#581c87',
+    categoryNameColor: '#6b21a8',
+    itemNameColor: '#581c87',
+    descriptionColor: '#9333ea',
+    priceColor: '#c026d3',
+    contactSectionTitleColor: '#6b21a8',
+    contactLabelColor: '#581c87',
+    contactValueColor: '#9333ea',
+    openingHoursSectionTitleColor: '#6b21a8',
+    openingHoursLabelColor: '#581c87',
+    openingHoursValueColor: '#9333ea',
+    socialMediaSectionTitleColor: '#6b21a8',
+    socialMediaLinkColor: '#9333ea',
+    footerBrandingColor: '#a855f7',
+    footerDescriptionColor: '#7c3aed'
+  },
+  sunset: {
+    mode: 'light' as const,
+    primaryColor: '#dc2626',
+    accentColor: '#f97316',
+    backgroundColor: '#fff7ed',
+    cardBackground: '#ffffff',
+    textColor: '#dc2626',
+    mutedTextColor: '#ea580c',
+    borderColor: '#fed7aa',
+    headingColor: '#b91c1c',
+    categoryNameColor: '#dc2626',
+    itemNameColor: '#b91c1c',
+    descriptionColor: '#ea580c',
+    priceColor: '#f59e0b',
+    contactSectionTitleColor: '#dc2626',
+    contactLabelColor: '#b91c1c',
+    contactValueColor: '#ea580c',
+    openingHoursSectionTitleColor: '#dc2626',
+    openingHoursLabelColor: '#b91c1c',
+    openingHoursValueColor: '#ea580c',
+    socialMediaSectionTitleColor: '#dc2626',
+    socialMediaLinkColor: '#ea580c',
+    footerBrandingColor: '#f97316',
+    footerDescriptionColor: '#d97706'
   }
+};
+
+const themeInfo = {
+  light: { name: 'Light Mode', description: 'Sfond i bardhë me tekst të errët', icon: Sun },
+  dark: { name: 'Dark Mode', description: 'Sfond i errët me tekst të bardhë', icon: Moon },
+  green: { name: 'Green Nature', description: 'Tema natyrale me ngjyra të gjelbra', icon: Leaf },
+  gold: { name: 'Golden Luxury', description: 'Tema luksoze me ngjyra ari', icon: Coins },
+  ocean: { name: 'Ocean Blue', description: 'Tema qetësuese me blu oqeani', icon: Waves },
+  purple: { name: 'Royal Purple', description: 'Tema mbretërore me vjollcë', icon: Grape },
+  sunset: { name: 'Sunset Orange', description: 'Tema e ngrohtë me portokalli', icon: Sunset }
 };
 
 export function CustomizationSettings() {
@@ -281,48 +417,47 @@ export function CustomizationSettings() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    selectedPreset === 'light' ? 'border-primary' : 'border-border hover:border-primary/50'
-                  }`}
-                  onClick={() => applyPresetTheme('light')}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Sun className="h-5 w-5 text-yellow-500" />
-                      <h3 className="font-semibold">Light Mode</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(themeInfo).map(([key, info]) => {
+                  const IconComponent = info.icon;
+                  const theme = defaultThemes[key as keyof typeof defaultThemes];
+                  
+                  return (
+                    <div
+                      key={key}
+                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                        selectedPreset === key ? 'border-primary' : 'border-border hover:border-primary/50'
+                      }`}
+                      onClick={() => applyPresetTheme(key)}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <IconComponent className="h-5 w-5" style={{ color: theme.accentColor }} />
+                          <h3 className="font-semibold">{info.name}</h3>
+                        </div>
+                        <div className="flex space-x-2">
+                          <div 
+                            className="w-6 h-6 rounded border" 
+                            style={{ backgroundColor: theme.backgroundColor }}
+                          ></div>
+                          <div 
+                            className="w-6 h-6 rounded" 
+                            style={{ backgroundColor: theme.cardBackground }}
+                          ></div>
+                          <div 
+                            className="w-6 h-6 rounded" 
+                            style={{ backgroundColor: theme.primaryColor }}
+                          ></div>
+                          <div 
+                            className="w-6 h-6 rounded" 
+                            style={{ backgroundColor: theme.accentColor }}
+                          ></div>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{info.description}</p>
+                      </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <div className="w-6 h-6 rounded bg-white border"></div>
-                      <div className="w-6 h-6 rounded bg-gray-100"></div>
-                      <div className="w-6 h-6 rounded bg-gray-800"></div>
-                      <div className="w-6 h-6 rounded bg-blue-500"></div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Sfond i bardhë me tekst të errët</p>
-                  </div>
-                </div>
-
-                <div
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    selectedPreset === 'dark' ? 'border-primary' : 'border-border hover:border-primary/50'
-                  }`}
-                  onClick={() => applyPresetTheme('dark')}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Moon className="h-5 w-5 text-blue-400" />
-                      <h3 className="font-semibold">Dark Mode</h3>
-                    </div>
-                    <div className="flex space-x-2">
-                      <div className="w-6 h-6 rounded bg-slate-900"></div>
-                      <div className="w-6 h-6 rounded bg-slate-700"></div>
-                      <div className="w-6 h-6 rounded bg-slate-100"></div>
-                      <div className="w-6 h-6 rounded bg-blue-400"></div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Sfond i errët me tekst të bardhë</p>
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

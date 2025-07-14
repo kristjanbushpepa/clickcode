@@ -39,6 +39,8 @@ interface RestaurantProfile {
   };
   logo_url?: string;
   banner_url?: string;
+  logo_path?: string;
+  banner_path?: string;
   google_reviews_embed?: string;
   tripadvisor_embed?: string;
   yelp_embed?: string;
@@ -233,26 +235,6 @@ export function SocialMediaLinks({ register }: SocialMediaLinksProps) {
               id="google_reviews_embed"
               {...register("google_reviews_embed")}
               placeholder="Paste your Google Reviews embed code here..."
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tripadvisor_embed">TripAdvisor Widget Code</Label>
-            <Textarea
-              id="tripadvisor_embed"
-              {...register("tripadvisor_embed")}
-              placeholder="Paste your TripAdvisor widget embed code here..."
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="yelp_embed">Yelp Badge/Widget Code</Label>
-            <Textarea
-              id="yelp_embed"
-              {...register("yelp_embed")}
-              placeholder="Paste your Yelp badge or widget embed code here..."
               rows={3}
             />
           </div>

@@ -113,7 +113,10 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {/* Contact Information */}
                 {hasContactInfo && (
                   <Collapsible open={isContactOpen} onOpenChange={setIsContactOpen}>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors">
+                    <CollapsibleTrigger 
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      style={{ color: customTheme?.contactSectionTitleColor }}
+                    >
                       <span>Contact Information</span>
                       <ChevronDown className={`h-3 w-3 transition-transform ${isContactOpen ? 'rotate-180' : ''}`} />
                     </CollapsibleTrigger>
@@ -123,8 +126,12 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                           <div className="flex items-start gap-2">
                             <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                             <div className="text-xs">
-                              <p className="font-medium">Address</p>
-                              <p className="text-muted-foreground">{profile.address}</p>
+                              <p className="font-medium" style={{ color: customTheme?.contactLabelColor }}>
+                                Address
+                              </p>
+                              <p style={{ color: customTheme?.contactValueColor }}>
+                                {profile.address}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -132,8 +139,14 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                           <div className="flex items-center gap-2">
                             <Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                             <div className="text-xs">
-                              <p className="font-medium">Phone</p>
-                              <a href={`tel:${profile.phone}`} className="text-muted-foreground hover:text-foreground">
+                              <p className="font-medium" style={{ color: customTheme?.contactLabelColor }}>
+                                Phone
+                              </p>
+                              <a 
+                                href={`tel:${profile.phone}`} 
+                                className="hover:text-foreground"
+                                style={{ color: customTheme?.contactValueColor }}
+                              >
                                 {profile.phone}
                               </a>
                             </div>
@@ -143,8 +156,14 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                           <div className="flex items-center gap-2">
                             <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                             <div className="text-xs">
-                              <p className="font-medium">Email</p>
-                              <a href={`mailto:${profile.email}`} className="text-muted-foreground hover:text-foreground truncate">
+                              <p className="font-medium" style={{ color: customTheme?.contactLabelColor }}>
+                                Email
+                              </p>
+                              <a 
+                                href={`mailto:${profile.email}`} 
+                                className="hover:text-foreground truncate"
+                                style={{ color: customTheme?.contactValueColor }}
+                              >
                                 {profile.email}
                               </a>
                             </div>
@@ -158,7 +177,10 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {/* Working Hours */}
                 {hasWorkingHours && (
                   <Collapsible open={isHoursOpen} onOpenChange={setIsHoursOpen}>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors">
+                    <CollapsibleTrigger 
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      style={{ color: customTheme?.openingHoursSectionTitleColor }}
+                    >
                       <span>Opening Hours</span>
                       <ChevronDown className={`h-3 w-3 transition-transform ${isHoursOpen ? 'rotate-180' : ''}`} />
                     </CollapsibleTrigger>
@@ -169,9 +191,19 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                           const isToday = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][new Date().getDay()] === day;
                           
                           return (
-                            <div key={day} className={`flex justify-between text-xs ${isToday ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
-                              <span className="capitalize">{day}</span>
-                              <span>{hours}</span>
+                            <div key={day} className="flex justify-between text-xs">
+                              <span 
+                                className={`capitalize ${isToday ? 'font-medium' : ''}`}
+                                style={{ color: customTheme?.openingHoursLabelColor }}
+                              >
+                                {day}
+                              </span>
+                              <span 
+                                className={isToday ? 'font-medium' : ''}
+                                style={{ color: customTheme?.openingHoursValueColor }}
+                              >
+                                {hours}
+                              </span>
                             </div>
                           );
                         })}
@@ -183,7 +215,10 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {/* Social Media Links */}
                 {hasSocialLinks && (
                   <Collapsible open={isSocialOpen} onOpenChange={setIsSocialOpen}>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors">
+                    <CollapsibleTrigger 
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      style={{ color: customTheme?.socialMediaSectionTitleColor }}
+                    >
                       <span>Follow Us</span>
                       <ChevronDown className={`h-3 w-3 transition-transform ${isSocialOpen ? 'rotate-180' : ''}`} />
                     </CollapsibleTrigger>
@@ -199,7 +234,8 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                               href={url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                              className="flex items-center gap-2 text-xs hover:text-foreground transition-colors"
+                              style={{ color: customTheme?.socialMediaLinkColor }}
                             >
                               <IconComponent className="h-3 w-3" />
                               <span className="capitalize">{platform.replace('_', ' ')}</span>
@@ -256,13 +292,17 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
             <div className="pt-2 border-t border-border/10">
               <a 
                 href="/" 
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground/80 hover:text-foreground transition-colors group"
+                className="inline-flex items-center gap-1 text-xs hover:text-foreground transition-colors group"
+                style={{ color: customTheme?.footerBrandingColor || '#3b82f6' }}
               >
                 <span>Powered by</span>
-                <span className="font-semibold text-primary group-hover:text-primary/80">CodeClick.cc</span>
+                <span className="font-semibold group-hover:text-primary/80">CodeClick.cc</span>
                 <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
               </a>
-              <p className="text-xs text-muted-foreground/60 mt-1">
+              <p 
+                className="text-xs mt-1"
+                style={{ color: customTheme?.footerDescriptionColor || '#9ca3af' }}
+              >
                 Digital menus made simple
               </p>
             </div>

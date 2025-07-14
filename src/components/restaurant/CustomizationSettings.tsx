@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +27,20 @@ interface MenuTheme {
   itemNameColor: string;
   descriptionColor: string;
   priceColor: string;
+  // Contact information colors
+  contactSectionTitleColor: string;
+  contactLabelColor: string;
+  contactValueColor: string;
+  // Opening hours colors
+  openingHoursSectionTitleColor: string;
+  openingHoursLabelColor: string;
+  openingHoursValueColor: string;
+  // Social media colors
+  socialMediaSectionTitleColor: string;
+  socialMediaLinkColor: string;
+  // Footer colors
+  footerBrandingColor: string;
+  footerDescriptionColor: string;
 }
 
 const defaultThemes = {
@@ -44,7 +57,17 @@ const defaultThemes = {
     categoryNameColor: '#1f2937',
     itemNameColor: '#111827',
     descriptionColor: '#6b7280',
-    priceColor: '#059669'
+    priceColor: '#059669',
+    contactSectionTitleColor: '#1f2937',
+    contactLabelColor: '#111827',
+    contactValueColor: '#6b7280',
+    openingHoursSectionTitleColor: '#1f2937',
+    openingHoursLabelColor: '#111827',
+    openingHoursValueColor: '#6b7280',
+    socialMediaSectionTitleColor: '#1f2937',
+    socialMediaLinkColor: '#6b7280',
+    footerBrandingColor: '#3b82f6',
+    footerDescriptionColor: '#9ca3af'
   },
   dark: {
     mode: 'dark' as const,
@@ -59,7 +82,17 @@ const defaultThemes = {
     categoryNameColor: '#e2e8f0',
     itemNameColor: '#f8fafc',
     descriptionColor: '#94a3b8',
-    priceColor: '#34d399'
+    priceColor: '#34d399',
+    contactSectionTitleColor: '#e2e8f0',
+    contactLabelColor: '#f1f5f9',
+    contactValueColor: '#94a3b8',
+    openingHoursSectionTitleColor: '#e2e8f0',
+    openingHoursLabelColor: '#f1f5f9',
+    openingHoursValueColor: '#94a3b8',
+    socialMediaSectionTitleColor: '#e2e8f0',
+    socialMediaLinkColor: '#94a3b8',
+    footerBrandingColor: '#60a5fa',
+    footerDescriptionColor: '#64748b'
   }
 };
 
@@ -489,6 +522,244 @@ export function CustomizationSettings() {
             </CardContent>
           </Card>
 
+          <Card>
+            <CardHeader>
+              <CardTitle>Ngjyrat e Informacionit për Kontakt</CardTitle>
+              <CardDescription>
+                Personalizoni ngjyrat për seksionin e kontaktit
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contactSectionTitleColor">Titulli i Seksionit</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="contactSectionTitleColor"
+                      type="color"
+                      value={customTheme.contactSectionTitleColor}
+                      onChange={(e) => handleThemeChange('contactSectionTitleColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.contactSectionTitleColor}
+                      onChange={(e) => handleThemeChange('contactSectionTitleColor', e.target.value)}
+                      placeholder="#1f2937"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contactLabelColor">Etiketat (Address, Phone)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="contactLabelColor"
+                      type="color"
+                      value={customTheme.contactLabelColor}
+                      onChange={(e) => handleThemeChange('contactLabelColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.contactLabelColor}
+                      onChange={(e) => handleThemeChange('contactLabelColor', e.target.value)}
+                      placeholder="#111827"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contactValueColor">Vlerat e Kontaktit</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="contactValueColor"
+                      type="color"
+                      value={customTheme.contactValueColor}
+                      onChange={(e) => handleThemeChange('contactValueColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.contactValueColor}
+                      onChange={(e) => handleThemeChange('contactValueColor', e.target.value)}
+                      placeholder="#6b7280"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Ngjyrat e Orareve</CardTitle>
+              <CardDescription>
+                Personalizoni ngjyrat për oraret e punës
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="openingHoursSectionTitleColor">Titulli i Seksionit</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="openingHoursSectionTitleColor"
+                      type="color"
+                      value={customTheme.openingHoursSectionTitleColor}
+                      onChange={(e) => handleThemeChange('openingHoursSectionTitleColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.openingHoursSectionTitleColor}
+                      onChange={(e) => handleThemeChange('openingHoursSectionTitleColor', e.target.value)}
+                      placeholder="#1f2937"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="openingHoursLabelColor">Ditët e Javës</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="openingHoursLabelColor"
+                      type="color"
+                      value={customTheme.openingHoursLabelColor}
+                      onChange={(e) => handleThemeChange('openingHoursLabelColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.openingHoursLabelColor}
+                      onChange={(e) => handleThemeChange('openingHoursLabelColor', e.target.value)}
+                      placeholder="#111827"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="openingHoursValueColor">Oraret</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="openingHoursValueColor"
+                      type="color"
+                      value={customTheme.openingHoursValueColor}
+                      onChange={(e) => handleThemeChange('openingHoursValueColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.openingHoursValueColor}
+                      onChange={(e) => handleThemeChange('openingHoursValueColor', e.target.value)}
+                      placeholder="#6b7280"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Ngjyrat e Mediave Sociale</CardTitle>
+              <CardDescription>
+                Personalizoni ngjyrat për seksionin e mediave sociale
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="socialMediaSectionTitleColor">Titulli i Seksionit</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="socialMediaSectionTitleColor"
+                      type="color"
+                      value={customTheme.socialMediaSectionTitleColor}
+                      onChange={(e) => handleThemeChange('socialMediaSectionTitleColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.socialMediaSectionTitleColor}
+                      onChange={(e) => handleThemeChange('socialMediaSectionTitleColor', e.target.value)}
+                      placeholder="#1f2937"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="socialMediaLinkColor">Linqet e Mediave Sociale</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="socialMediaLinkColor"
+                      type="color"
+                      value={customTheme.socialMediaLinkColor}
+                      onChange={(e) => handleThemeChange('socialMediaLinkColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.socialMediaLinkColor}
+                      onChange={(e) => handleThemeChange('socialMediaLinkColor', e.target.value)}
+                      placeholder="#6b7280"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Ngjyrat e Footer-it</CardTitle>
+              <CardDescription>
+                Personalizoni ngjyrat për seksionin e footer-it
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="footerBrandingColor">Branding (CodeClick.cc)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="footerBrandingColor"
+                      type="color"
+                      value={customTheme.footerBrandingColor}
+                      onChange={(e) => handleThemeChange('footerBrandingColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.footerBrandingColor}
+                      onChange={(e) => handleThemeChange('footerBrandingColor', e.target.value)}
+                      placeholder="#3b82f6"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="footerDescriptionColor">Përshkrimi</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="footerDescriptionColor"
+                      type="color"
+                      value={customTheme.footerDescriptionColor}
+                      onChange={(e) => handleThemeChange('footerDescriptionColor', e.target.value)}
+                      className="w-16 h-10 p-1"
+                    />
+                    <Input
+                      value={customTheme.footerDescriptionColor}
+                      onChange={(e) => handleThemeChange('footerDescriptionColor', e.target.value)}
+                      placeholder="#9ca3af"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Enhanced Live Preview */}
           <div className="mt-6 p-4 rounded-lg border overflow-hidden">
             <h4 className="font-semibold mb-3">Parapamja e Menusë</h4>
@@ -569,6 +840,55 @@ export function CustomizationSettings() {
                     >
                       650 ALL
                     </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Preview */}
+              <div className="mt-4 pt-3 border-t" style={{ borderColor: customTheme.borderColor }}>
+                <div className="space-y-2">
+                  <h5 className="text-sm font-medium" style={{ color: customTheme.contactSectionTitleColor }}>
+                    Contact Information
+                  </h5>
+                  <div className="text-xs space-y-1">
+                    <div>
+                      <span className="font-medium" style={{ color: customTheme.contactLabelColor }}>Address: </span>
+                      <span style={{ color: customTheme.contactValueColor }}>Lake View Residences</span>
+                    </div>
+                    <div>
+                      <span className="font-medium" style={{ color: customTheme.contactLabelColor }}>Phone: </span>
+                      <span style={{ color: customTheme.contactValueColor }}>+355 68 804 8347</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 mt-3">
+                  <h5 className="text-sm font-medium" style={{ color: customTheme.openingHoursSectionTitleColor }}>
+                    Opening Hours
+                  </h5>
+                  <div className="text-xs">
+                    <div className="flex justify-between">
+                      <span style={{ color: customTheme.openingHoursLabelColor }}>Monday</span>
+                      <span style={{ color: customTheme.openingHoursValueColor }}>8 AM – 12 AM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-3">
+                  <h5 className="text-sm font-medium" style={{ color: customTheme.socialMediaSectionTitleColor }}>
+                    Follow Us
+                  </h5>
+                  <div className="text-xs">
+                    <span style={{ color: customTheme.socialMediaLinkColor }}>Instagram • TikTok • WhatsApp</span>
+                  </div>
+                </div>
+
+                <div className="text-center mt-3 pt-2 border-t" style={{ borderColor: customTheme.borderColor }}>
+                  <div className="text-xs">
+                    <span style={{ color: customTheme.footerBrandingColor }}>CodeClick.cc</span>
+                  </div>
+                  <div className="text-xs">
+                    <span style={{ color: customTheme.footerDescriptionColor }}>Digital menus made simple</span>
                   </div>
                 </div>
               </div>

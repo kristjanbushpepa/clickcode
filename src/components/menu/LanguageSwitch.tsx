@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Globe } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 interface LanguageSettings {
   id: string;
   main_ui_language: string;
@@ -10,6 +12,7 @@ interface LanguageSettings {
   content_languages: string[];
   auto_translate: boolean;
 }
+
 const LANGUAGE_OPTIONS = [{
   code: 'sq',
   name: 'Shqip',
@@ -35,11 +38,13 @@ const LANGUAGE_OPTIONS = [{
   name: '中文',
   flag: '🇨🇳'
 }];
+
 interface LanguageSwitchProps {
   restaurantSupabase: any;
   currentLanguage: string;
   onLanguageChange: (language: string) => void;
 }
+
 export function LanguageSwitch({
   restaurantSupabase,
   currentLanguage,
@@ -64,26 +69,43 @@ export function LanguageSwitch({
     },
     enabled: !!restaurantSupabase
   });
+
   const supportedLanguages = languageSettings?.supported_ui_languages || ['sq', 'en'];
   const currentLangData = LANGUAGE_OPTIONS.find(lang => lang.code === currentLanguage);
-  return <Popover>
+
+  return (
+    <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1 border-border px-2 h-8 font-normal text-slate-950 bg-slate-50">
-          <span className="text-sm text-black">{currentLangData?.flag}</span>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-8 px-2 bg-gray-800 border-gray-600 hover:bg-gray-700 text-white rounded-md flex items-center gap-1"
+        >
+          <span className="text-sm">{currentLangData?.flag}</span>
+          <span className="text-xs font-medium">{currentLanguage.toUpperCase()}</span>
+          <ChevronDown className="h-3 w-3" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-40" align="end">
-        <div className="space-y-1">
-          <h4 className="font-medium text-xs mb-2">Language</h4>
+      <PopoverContent className="w-40 p-1" align="end">
+        <div className="space-y-0">
           {supportedLanguages.map(langCode => {
-          const lang = LANGUAGE_OPTIONS.find(l => l.code === langCode);
-          if (!lang) return null;
-          return <Button key={lang.code} variant={currentLanguage === lang.code ? "default" : "ghost"} size="sm" className="w-full justify-start gap-2 h-8 text-xs" onClick={() => onLanguageChange(lang.code)}>
+            const lang = LANGUAGE_OPTIONS.find(l => l.code === langCode);
+            if (!lang) return null;
+            return (
+              <Button 
+                key={lang.code} 
+                variant={currentLanguage === lang.code ? "default" : "ghost"} 
+                size="sm" 
+                className="w-full justify-start gap-2 h-8 text-xs rounded-sm"
+                onClick={() => onLanguageChange(lang.code)}
+              >
                 <span>{lang.flag}</span>
                 <span>{lang.name}</span>
-              </Button>;
-        })}
+              </Button>
+            );
+          })}
         </div>
       </PopoverContent>
-    </Popover>;
+    </Popover>
+  );
 }

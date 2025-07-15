@@ -1,40 +1,50 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { DollarSign } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 interface CurrencySettings {
   id: string;
   default_currency: string;
   enabled_currencies: string[];
   exchange_rates: Record<string, number>;
 }
+
 const CURRENCY_OPTIONS = [{
   code: 'ALL',
   name: 'Albanian Lek',
-  symbol: 'L'
+  symbol: 'L',
+  flag: '🇦🇱'
 }, {
   code: 'EUR',
   name: 'Euro',
-  symbol: '€'
+  symbol: '€',
+  flag: '🇪🇺'
 }, {
   code: 'USD',
   name: 'US Dollar',
-  symbol: '$'
+  symbol: '$',
+  flag: '🇺🇸'
 }, {
   code: 'GBP',
   name: 'British Pound',
-  symbol: '£'
+  symbol: '£',
+  flag: '🇬🇧'
 }, {
   code: 'CHF',
   name: 'Swiss Franc',
-  symbol: 'CHF'
+  symbol: 'CHF',
+  flag: '🇨🇭'
 }];
+
 interface CurrencySwitchProps {
   restaurantSupabase: any;
   currentCurrency: string;
   onCurrencyChange: (currency: string) => void;
 }
+
 export function CurrencySwitch({
   restaurantSupabase,
   currentCurrency,
@@ -59,26 +69,43 @@ export function CurrencySwitch({
     },
     enabled: !!restaurantSupabase
   });
+
   const enabledCurrencies = currencySettings?.enabled_currencies || ['ALL', 'EUR'];
   const currentCurrencyData = CURRENCY_OPTIONS.find(curr => curr.code === currentCurrency);
-  return <Popover>
+
+  return (
+    <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1 text-foreground border-border hover:text-accent-foreground px-2 h-8 bg-slate-50 rounded-sm">
-          <span className="text-sm">{currentCurrencyData?.symbol}</span>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-8 px-2 bg-gray-800 border-gray-600 hover:bg-gray-700 text-white rounded-md flex items-center gap-1"
+        >
+          <span className="text-sm">{currentCurrencyData?.flag}</span>
+          <span className="text-xs font-medium">{currentCurrency}</span>
+          <ChevronDown className="h-3 w-3" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-40" align="end">
-        <div className="space-y-1">
-          <h4 className="font-medium text-xs mb-2">Currency</h4>
+      <PopoverContent className="w-40 p-1" align="end">
+        <div className="space-y-0">
           {enabledCurrencies.map(currCode => {
-          const currency = CURRENCY_OPTIONS.find(c => c.code === currCode);
-          if (!currency) return null;
-          return <Button key={currency.code} variant={currentCurrency === currency.code ? "default" : "ghost"} size="sm" className="w-full justify-start gap-2 h-8 text-xs" onClick={() => onCurrencyChange(currency.code)}>
-                <span>{currency.symbol}</span>
+            const currency = CURRENCY_OPTIONS.find(c => c.code === currCode);
+            if (!currency) return null;
+            return (
+              <Button 
+                key={currency.code} 
+                variant={currentCurrency === currency.code ? "default" : "ghost"} 
+                size="sm" 
+                className="w-full justify-start gap-2 h-8 text-xs rounded-sm"
+                onClick={() => onCurrencyChange(currency.code)}
+              >
+                <span>{currency.flag}</span>
                 <span>{currency.code}</span>
-              </Button>;
-        })}
+              </Button>
+            );
+          })}
         </div>
       </PopoverContent>
-    </Popover>;
+    </Popover>
+  );
 }

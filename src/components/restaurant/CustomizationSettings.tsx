@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -250,23 +251,47 @@ export function CustomizationSettings() {
 
         const supabase = getRestaurantSupabase();
 
-        // Load customization settings from individual restaurant database
-        const { data, error } = await supabase
+        // Clean up duplicate records and get the latest one
+        const { data: allRecords, error: fetchAllError } = await supabase
           .from('restaurant_customization')
           .select('*')
-          .maybeSingle();
+          .order('updated_at', { ascending: false });
 
-        if (data && !error) {
-          console.log('Loaded customization data:', data);
-          if (data.theme) {
-            setCustomTheme(data.theme);
-            setSelectedPreset(data.preset || 'light');
+        if (fetchAllError) {
+          console.error('Error fetching customization records:', fetchAllError);
+          return;
+        }
+
+        if (allRecords && allRecords.length > 0) {
+          console.log(`Found ${allRecords.length} customization records, using the latest one`);
+          
+          // Use the most recent record
+          const latestRecord = allRecords[0];
+          
+          if (latestRecord.theme) {
+            setCustomTheme(latestRecord.theme);
+            setSelectedPreset(latestRecord.preset || 'light');
           }
-          if (data.layout) {
-            setSelectedLayout(data.layout);
+          if (latestRecord.layout) {
+            setSelectedLayout(latestRecord.layout);
           }
-        } else if (error) {
-          console.error('Error loading customization:', error);
+
+          // Delete older duplicate records if they exist
+          if (allRecords.length > 1) {
+            const recordsToDelete = allRecords.slice(1).map(record => record.id);
+            console.log(`Cleaning up ${recordsToDelete.length} duplicate records`);
+            
+            const { error: deleteError } = await supabase
+              .from('restaurant_customization')
+              .delete()
+              .in('id', recordsToDelete);
+              
+            if (deleteError) {
+              console.error('Error cleaning up duplicate records:', deleteError);
+            } else {
+              console.log('Successfully cleaned up duplicate records');
+            }
+          }
         }
       } catch (error) {
         console.error('Error in loadData:', error);
@@ -304,21 +329,26 @@ export function CustomizationSettings() {
 
       console.log('Saving customization data:', customizationData);
 
-      // First try to get existing record
-      const { data: existingData, error: fetchError } = await supabase
+      // First, get the most recent record
+      const { data: existingRecords, error: fetchError } = await supabase
         .from('restaurant_customization')
         .select('id')
-        .maybeSingle();
+        .order('updated_at', { ascending: false })
+        .limit(1);
 
       let result;
-      if (existingData?.id) {
-        // Update existing record
+      if (existingRecords && existingRecords.length > 0) {
+        // Update the most recent record
+        const existingId = existingRecords[0].id;
+        console.log('Updating existing record with ID:', existingId);
+        
         result = await supabase
           .from('restaurant_customization')
           .update(customizationData)
-          .eq('id', existingData.id);
+          .eq('id', existingId);
       } else {
         // Insert new record
+        console.log('Inserting new record');
         result = await supabase
           .from('restaurant_customization')
           .insert([customizationData]);

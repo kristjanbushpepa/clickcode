@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -56,14 +57,99 @@ const defaultDarkTheme: Theme = {
   priceColor: '#22c55e'
 };
 
+const greenTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#166534',
+  accentColor: '#16a34a',
+  backgroundColor: '#f7fdf7',
+  cardBackground: '#ffffff',
+  textColor: '#166534',
+  mutedTextColor: '#6b7280',
+  borderColor: '#dcfce7',
+  headingColor: '#14532d',
+  categoryNameColor: '#166534',
+  itemNameColor: '#14532d',
+  descriptionColor: '#6b7280',
+  priceColor: '#059669'
+};
+
+const blueTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#1e3a8a',
+  accentColor: '#3b82f6',
+  backgroundColor: '#f8fafc',
+  cardBackground: '#ffffff',
+  textColor: '#1e3a8a',
+  mutedTextColor: '#6b7280',
+  borderColor: '#dbeafe',
+  headingColor: '#1e40af',
+  categoryNameColor: '#1e3a8a',
+  itemNameColor: '#1e40af',
+  descriptionColor: '#6b7280',
+  priceColor: '#2563eb'
+};
+
+const goldTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#92400e',
+  accentColor: '#f59e0b',
+  backgroundColor: '#fffdf7',
+  cardBackground: '#ffffff',
+  textColor: '#92400e',
+  mutedTextColor: '#6b7280',
+  borderColor: '#fed7aa',
+  headingColor: '#78350f',
+  categoryNameColor: '#92400e',
+  itemNameColor: '#78350f',
+  descriptionColor: '#6b7280',
+  priceColor: '#d97706'
+};
+
+const purpleTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#7c3aed',
+  accentColor: '#8b5cf6',
+  backgroundColor: '#faf8ff',
+  cardBackground: '#ffffff',
+  textColor: '#7c3aed',
+  mutedTextColor: '#6b7280',
+  borderColor: '#e9d5ff',
+  headingColor: '#6b21a8',
+  categoryNameColor: '#7c3aed',
+  itemNameColor: '#6b21a8',
+  descriptionColor: '#6b7280',
+  priceColor: '#9333ea'
+};
+
+const redTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#dc2626',
+  accentColor: '#ef4444',
+  backgroundColor: '#fef8f8',
+  cardBackground: '#ffffff',
+  textColor: '#dc2626',
+  mutedTextColor: '#6b7280',
+  borderColor: '#fecaca',
+  headingColor: '#b91c1c',
+  categoryNameColor: '#dc2626',
+  itemNameColor: '#b91c1c',
+  descriptionColor: '#6b7280',
+  priceColor: '#dc2626'
+};
+
 const CustomizationSettings = () => {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('items');
   const [theme, setTheme] = useState<Theme>(defaultLightTheme);
-  const [selectedPreset, setSelectedPreset] = useState<'light' | 'dark' | 'custom'>('light');
+  const [selectedPreset, setSelectedPreset] = useState<'light' | 'dark' | 'green' | 'blue' | 'gold' | 'purple' | 'red' | 'custom'>('light');
 
   const presetThemes: { [key: string]: Theme } = {
     light: defaultLightTheme,
     dark: defaultDarkTheme,
+    green: greenTheme,
+    blue: blueTheme,
+    gold: goldTheme,
+    purple: purpleTheme,
+    red: redTheme,
   };
 
   const handleLayoutChange = async (layout: 'categories' | 'items') => {
@@ -164,7 +250,7 @@ const CustomizationSettings = () => {
     loadData();
   }, []);
 
-  const handlePresetChange = (preset: 'light' | 'dark') => {
+  const handlePresetChange = (preset: 'light' | 'dark' | 'green' | 'blue' | 'gold' | 'purple' | 'red') => {
     setSelectedPreset(preset);
     setTheme(presetThemes[preset]);
   };
@@ -242,18 +328,62 @@ const CustomizationSettings = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Preset Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             <Button 
               variant={selectedPreset === 'light' ? 'default' : 'outline'}
               onClick={() => handlePresetChange('light')}
+              className="flex flex-col h-16"
             >
-              Light Theme
+              <div className="w-6 h-3 bg-gray-100 border rounded mb-1"></div>
+              Light
             </Button>
             <Button 
               variant={selectedPreset === 'dark' ? 'default' : 'outline'}
               onClick={() => handlePresetChange('dark')}
+              className="flex flex-col h-16"
             >
-              Dark Theme
+              <div className="w-6 h-3 bg-gray-800 border rounded mb-1"></div>
+              Dark
+            </Button>
+            <Button 
+              variant={selectedPreset === 'green' ? 'default' : 'outline'}
+              onClick={() => handlePresetChange('green')}
+              className="flex flex-col h-16"
+            >
+              <div className="w-6 h-3 bg-green-600 border rounded mb-1"></div>
+              Green
+            </Button>
+            <Button 
+              variant={selectedPreset === 'blue' ? 'default' : 'outline'}
+              onClick={() => handlePresetChange('blue')}
+              className="flex flex-col h-16"
+            >
+              <div className="w-6 h-3 bg-blue-600 border rounded mb-1"></div>
+              Blue
+            </Button>
+            <Button 
+              variant={selectedPreset === 'gold' ? 'default' : 'outline'}
+              onClick={() => handlePresetChange('gold')}
+              className="flex flex-col h-16"
+            >
+              <div className="w-6 h-3 bg-yellow-600 border rounded mb-1"></div>
+              Gold
+            </Button>
+            <Button 
+              variant={selectedPreset === 'purple' ? 'default' : 'outline'}
+              onClick={() => handlePresetChange('purple')}
+              className="flex flex-col h-16"
+            >
+              <div className="w-6 h-3 bg-purple-600 border rounded mb-1"></div>
+              Purple
+            </Button>
+            <Button 
+              variant={selectedPreset === 'red' ? 'default' : 'outline'}
+              onClick={() => handlePresetChange('red')}
+              className="flex flex-col h-16"
+            >
+              <div className="w-6 h-3 bg-red-600 border rounded mb-1"></div>
+              Red
             </Button>
           </div>
 
@@ -264,7 +394,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="primaryColor"
                 color={theme.primaryColor}
-                onColorChange={(color: string) => setTheme({ ...theme, primaryColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, primaryColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -272,7 +405,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="accentColor"
                 color={theme.accentColor}
-                onColorChange={(color: string) => setTheme({ ...theme, accentColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, accentColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -280,7 +416,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="backgroundColor"
                 color={theme.backgroundColor}
-                onColorChange={(color: string) => setTheme({ ...theme, backgroundColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, backgroundColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -288,7 +427,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="cardBackground"
                 color={theme.cardBackground}
-                onColorChange={(color: string) => setTheme({ ...theme, cardBackground: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, cardBackground: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -296,7 +438,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="textColor"
                 color={theme.textColor}
-                onColorChange={(color: string) => setTheme({ ...theme, textColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, textColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -304,7 +449,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="mutedTextColor"
                 color={theme.mutedTextColor}
-                onColorChange={(color: string) => setTheme({ ...theme, mutedTextColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, mutedTextColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -312,7 +460,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="borderColor"
                 color={theme.borderColor}
-                onColorChange={(color: string) => setTheme({ ...theme, borderColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, borderColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -320,7 +471,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="headingColor"
                 color={theme.headingColor || theme.textColor}
-                onColorChange={(color: string) => setTheme({ ...theme, headingColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, headingColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -328,7 +482,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="categoryNameColor"
                 color={theme.categoryNameColor || theme.textColor}
-                onColorChange={(color: string) => setTheme({ ...theme, categoryNameColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, categoryNameColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -336,7 +493,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="itemNameColor"
                 color={theme.itemNameColor || theme.textColor}
-                onColorChange={(color: string) => setTheme({ ...theme, itemNameColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, itemNameColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -344,7 +504,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="descriptionColor"
                 color={theme.descriptionColor || theme.mutedTextColor}
-                onColorChange={(color: string) => setTheme({ ...theme, descriptionColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, descriptionColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
             <div>
@@ -352,7 +515,10 @@ const CustomizationSettings = () => {
               <ColorPicker
                 id="priceColor"
                 color={theme.priceColor || theme.accentColor}
-                onColorChange={(color: string) => setTheme({ ...theme, priceColor: color })}
+                onColorChange={(color: string) => {
+                  setTheme({ ...theme, priceColor: color });
+                  setSelectedPreset('custom');
+                }}
               />
             </div>
           </div>

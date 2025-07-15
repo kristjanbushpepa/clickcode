@@ -6,7 +6,7 @@ import { RestaurantSidebar } from '@/components/restaurant/RestaurantSidebar';
 import { ProfileManagement } from '@/components/restaurant/ProfileManagement';
 import { MenuManagement } from '@/components/restaurant/MenuManagement';
 import { QRCodeGenerator } from '@/components/restaurant/QRCodeGenerator';
-import { CustomizationSettings } from '@/components/restaurant/CustomizationSettings';
+import CustomizationSettings from '@/components/restaurant/CustomizationSettings';
 import { TranslationManager } from '@/components/restaurant/TranslationManager';
 import { PopupSettings } from '@/components/restaurant/PopupSettings';
 

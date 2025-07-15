@@ -1,6 +1,6 @@
 # Welcome to your Lovable project
 
-## Project info
+## Project info Albania
 
 **URL**: https://lovable.dev/projects/d68d6feb-97b1-4947-a9c1-94cf489226b0
 

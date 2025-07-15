@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -8,6 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { ColorPicker } from '@/components/ui/color-picker';
+import ThemePreview from './customization/ThemePreview';
 
 interface Theme {
   mode: 'light' | 'dark';
@@ -319,214 +319,234 @@ const CustomizationSettings = () => {
   return (
     <div className="space-y-6">
       {/* Theme Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Theme Customization</CardTitle>
-          <CardDescription>
-            Customize the appearance of your menu to match your brand
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Preset Selection */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            <Button 
-              variant={selectedPreset === 'light' ? 'default' : 'outline'}
-              onClick={() => handlePresetChange('light')}
-              className="flex flex-col h-16"
-            >
-              <div className="w-6 h-3 bg-gray-100 border rounded mb-1"></div>
-              Light
-            </Button>
-            <Button 
-              variant={selectedPreset === 'dark' ? 'default' : 'outline'}
-              onClick={() => handlePresetChange('dark')}
-              className="flex flex-col h-16"
-            >
-              <div className="w-6 h-3 bg-gray-800 border rounded mb-1"></div>
-              Dark
-            </Button>
-            <Button 
-              variant={selectedPreset === 'green' ? 'default' : 'outline'}
-              onClick={() => handlePresetChange('green')}
-              className="flex flex-col h-16"
-            >
-              <div className="w-6 h-3 bg-green-600 border rounded mb-1"></div>
-              Green
-            </Button>
-            <Button 
-              variant={selectedPreset === 'blue' ? 'default' : 'outline'}
-              onClick={() => handlePresetChange('blue')}
-              className="flex flex-col h-16"
-            >
-              <div className="w-6 h-3 bg-blue-600 border rounded mb-1"></div>
-              Blue
-            </Button>
-            <Button 
-              variant={selectedPreset === 'gold' ? 'default' : 'outline'}
-              onClick={() => handlePresetChange('gold')}
-              className="flex flex-col h-16"
-            >
-              <div className="w-6 h-3 bg-yellow-600 border rounded mb-1"></div>
-              Gold
-            </Button>
-            <Button 
-              variant={selectedPreset === 'purple' ? 'default' : 'outline'}
-              onClick={() => handlePresetChange('purple')}
-              className="flex flex-col h-16"
-            >
-              <div className="w-6 h-3 bg-purple-600 border rounded mb-1"></div>
-              Purple
-            </Button>
-            <Button 
-              variant={selectedPreset === 'red' ? 'default' : 'outline'}
-              onClick={() => handlePresetChange('red')}
-              className="flex flex-col h-16"
-            >
-              <div className="w-6 h-3 bg-red-600 border rounded mb-1"></div>
-              Red
-            </Button>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Theme Customization</CardTitle>
+            <CardDescription>
+              Customize the appearance of your menu to match your brand
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Preset Selection */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-3">
+              <Button 
+                variant={selectedPreset === 'light' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('light')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-gray-100 border rounded mb-1"></div>
+                Light
+              </Button>
+              <Button 
+                variant={selectedPreset === 'dark' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('dark')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-gray-800 border rounded mb-1"></div>
+                Dark
+              </Button>
+              <Button 
+                variant={selectedPreset === 'green' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('green')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-green-600 border rounded mb-1"></div>
+                Green
+              </Button>
+              <Button 
+                variant={selectedPreset === 'blue' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('blue')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-blue-600 border rounded mb-1"></div>
+                Blue
+              </Button>
+              <Button 
+                variant={selectedPreset === 'gold' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('gold')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-yellow-600 border rounded mb-1"></div>
+                Gold
+              </Button>
+              <Button 
+                variant={selectedPreset === 'purple' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('purple')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-purple-600 border rounded mb-1"></div>
+                Purple
+              </Button>
+              <Button 
+                variant={selectedPreset === 'red' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('red')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-red-600 border rounded mb-1"></div>
+                Red
+              </Button>
+              {selectedPreset === 'custom' && (
+                <div className="flex items-center justify-center border border-dashed rounded h-16">
+                  <span className="text-xs text-muted-foreground">Custom</span>
+                </div>
+              )}
+            </div>
 
-          {/* Color Customization */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="primaryColor">Primary Color</Label>
-              <ColorPicker
-                id="primaryColor"
-                color={theme.primaryColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, primaryColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
+            {/* Color Customization */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="primaryColor">Primary Color</Label>
+                <ColorPicker
+                  id="primaryColor"
+                  color={theme.primaryColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, primaryColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="accentColor">Accent Color</Label>
+                <ColorPicker
+                  id="accentColor"
+                  color={theme.accentColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, accentColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="backgroundColor">Background Color</Label>
+                <ColorPicker
+                  id="backgroundColor"
+                  color={theme.backgroundColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, backgroundColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="cardBackground">Card Background</Label>
+                <ColorPicker
+                  id="cardBackground"
+                  color={theme.cardBackground}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, cardBackground: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="textColor">Text Color</Label>
+                <ColorPicker
+                  id="textColor"
+                  color={theme.textColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, textColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="mutedTextColor">Muted Text Color</Label>
+                <ColorPicker
+                  id="mutedTextColor"
+                  color={theme.mutedTextColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, mutedTextColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="borderColor">Border Color</Label>
+                <ColorPicker
+                  id="borderColor"
+                  color={theme.borderColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, borderColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="headingColor">Heading Color</Label>
+                <ColorPicker
+                  id="headingColor"
+                  color={theme.headingColor || theme.textColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, headingColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="categoryNameColor">Category Name Color</Label>
+                <ColorPicker
+                  id="categoryNameColor"
+                  color={theme.categoryNameColor || theme.textColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, categoryNameColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="itemNameColor">Item Name Color</Label>
+                <ColorPicker
+                  id="itemNameColor"
+                  color={theme.itemNameColor || theme.textColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, itemNameColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="descriptionColor">Description Color</Label>
+                <ColorPicker
+                  id="descriptionColor"
+                  color={theme.descriptionColor || theme.mutedTextColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, descriptionColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="priceColor">Price Color</Label>
+                <ColorPicker
+                  id="priceColor"
+                  color={theme.priceColor || theme.accentColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, priceColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="accentColor">Accent Color</Label>
-              <ColorPicker
-                id="accentColor"
-                color={theme.accentColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, accentColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="backgroundColor">Background Color</Label>
-              <ColorPicker
-                id="backgroundColor"
-                color={theme.backgroundColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, backgroundColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="cardBackground">Card Background</Label>
-              <ColorPicker
-                id="cardBackground"
-                color={theme.cardBackground}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, cardBackground: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="textColor">Text Color</Label>
-              <ColorPicker
-                id="textColor"
-                color={theme.textColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, textColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="mutedTextColor">Muted Text Color</Label>
-              <ColorPicker
-                id="mutedTextColor"
-                color={theme.mutedTextColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, mutedTextColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="borderColor">Border Color</Label>
-              <ColorPicker
-                id="borderColor"
-                color={theme.borderColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, borderColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="headingColor">Heading Color</Label>
-              <ColorPicker
-                id="headingColor"
-                color={theme.headingColor || theme.textColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, headingColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="categoryNameColor">Category Name Color</Label>
-              <ColorPicker
-                id="categoryNameColor"
-                color={theme.categoryNameColor || theme.textColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, categoryNameColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="itemNameColor">Item Name Color</Label>
-              <ColorPicker
-                id="itemNameColor"
-                color={theme.itemNameColor || theme.textColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, itemNameColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="descriptionColor">Description Color</Label>
-              <ColorPicker
-                id="descriptionColor"
-                color={theme.descriptionColor || theme.mutedTextColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, descriptionColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="priceColor">Price Color</Label>
-              <ColorPicker
-                id="priceColor"
-                color={theme.priceColor || theme.accentColor}
-                onColorChange={(color: string) => {
-                  setTheme({ ...theme, priceColor: color });
-                  setSelectedPreset('custom');
-                }}
-              />
-            </div>
-          </div>
 
-          {/* Save Button */}
-          <Button onClick={handleSaveTheme}>Save Theme</Button>
-        </CardContent>
-      </Card>
+            {/* Save Button */}
+            <Button onClick={handleSaveTheme}>Save Theme</Button>
+          </CardContent>
+        </Card>
+
+        {/* Preview */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Live Preview</CardTitle>
+            <CardDescription>
+              See how your theme changes will look on the menu
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ThemePreview theme={theme} />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Layout Section */}
       <Card>

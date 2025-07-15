@@ -24,16 +24,6 @@ const LayoutPreview = ({ layoutStyle }: LayoutPreviewProps) => {
                 <p className="text-xs text-muted-foreground">Fresh Atlantic salmon</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-2 border rounded">
-              <div className="w-12 h-12 bg-gray-200 rounded"></div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h4 className="font-medium text-sm">Margherita Pizza</h4>
-                  <Badge variant="secondary" className="text-xs">€12.00</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">Classic pizza with mozzarella</p>
-              </div>
-            </div>
           </div>
         );
 
@@ -72,20 +62,6 @@ const LayoutPreview = ({ layoutStyle }: LayoutPreviewProps) => {
                 </div>
               </div>
             </Card>
-            <Card className="overflow-hidden">
-              <div className="w-full h-24 bg-gray-200"></div>
-              <div className="p-3">
-                <div className="flex justify-between items-start mb-1">
-                  <h4 className="font-medium text-sm">Margherita Pizza</h4>
-                  <Badge variant="secondary" className="text-xs">€12.00</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mb-2">Classic pizza with fresh mozzarella</p>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  20min
-                </div>
-              </div>
-            </Card>
           </div>
         );
 
@@ -98,13 +74,6 @@ const LayoutPreview = ({ layoutStyle }: LayoutPreviewProps) => {
                 <span className="text-sm font-medium">€18.50</span>
               </div>
               <p className="text-xs text-muted-foreground">Fresh Atlantic salmon grilled to perfection with herbs</p>
-            </div>
-            <div className="border-b pb-2">
-              <div className="flex justify-between items-start mb-1">
-                <h4 className="font-medium text-sm">Margherita Pizza</h4>
-                <span className="text-sm font-medium">€12.00</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Classic pizza with fresh mozzarella and basil</p>
             </div>
           </div>
         );
@@ -122,20 +91,6 @@ const LayoutPreview = ({ layoutStyle }: LayoutPreviewProps) => {
                     15min
                   </div>
                   <Badge variant="secondary" className="text-xs">€18.50</Badge>
-                </div>
-              </div>
-              <div className="w-20 h-20 bg-gray-200 rounded"></div>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <h4 className="font-medium text-sm mb-1">Margherita Pizza</h4>
-                <p className="text-xs text-muted-foreground mb-2">Classic pizza with fresh mozzarella, tomatoes and basil. Wood-fired to perfection.</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    20min
-                  </div>
-                  <Badge variant="secondary" className="text-xs">€12.00</Badge>
                 </div>
               </div>
               <div className="w-20 h-20 bg-gray-200 rounded"></div>

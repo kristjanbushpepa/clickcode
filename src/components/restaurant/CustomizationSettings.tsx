@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { ColorPicker } from '@/components/ui/color-picker';
 import ThemePreview from './customization/ThemePreview';
+import LayoutPreview from './customization/LayoutPreview';
 
 interface Theme {
   mode: 'light' | 'dark';
@@ -139,6 +139,7 @@ const redTheme: Theme = {
 
 const CustomizationSettings = () => {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('items');
+  const [selectedLayoutStyle, setSelectedLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
   const [theme, setTheme] = useState<Theme>(defaultLightTheme);
   const [selectedPreset, setSelectedPreset] = useState<'light' | 'dark' | 'green' | 'blue' | 'gold' | 'purple' | 'red' | 'custom'>('light');
 
@@ -311,6 +312,66 @@ const CustomizationSettings = () => {
       toast({
         title: "Error",
         description: "Failed to save theme",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleLayoutStyleChange = async (layoutStyle: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine') => {
+    setSelectedLayoutStyle(layoutStyle);
+    
+    try {
+      const supabase = getRestaurantSupabase();
+      
+      const { data: existingRecords, error: fetchError } = await supabase
+        .from('restaurant_customization')
+        .select('id')
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      const updateData = { layout_style: layoutStyle, updated_at: new Date().toISOString() };
+
+      if (existingRecords && existingRecords.length > 0) {
+        const { error } = await supabase
+          .from('restaurant_customization')
+          .update(updateData)
+          .eq('id', existingRecords[0].id);
+          
+        if (error) {
+          console.error('Error updating layout style:', error);
+          toast({
+            title: "Error",
+            description: "Failed to update layout style",
+            variant: "destructive"
+          });
+          return;
+        }
+      } else {
+        const { error } = await supabase
+          .from('restaurant_customization')
+          .insert([updateData]);
+          
+        if (error) {
+          console.error('Error saving layout style:', error);
+          toast({
+            title: "Error", 
+            description: "Failed to save layout style",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      toast({
+        title: "Layout Style Updated",
+        description: "Layout style has been saved successfully"
+      });
+
+    } catch (error) {
+      console.error('Error in handleLayoutStyleChange:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update layout style",
         variant: "destructive"
       });
     }
@@ -556,65 +617,200 @@ const CustomizationSettings = () => {
             Choose how you want your menu to be displayed to customers
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card 
-              className={`cursor-pointer border-2 transition-all ${
-                selectedLayout === 'categories' 
-                  ? 'border-primary bg-primary/5' 
-                  : 'border-muted hover:border-primary/50'
-              }`}
-              onClick={() => handleLayoutChange('categories')}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">Shfaqje me Kategori</h3>
-                  {selectedLayout === 'categories' && (
-                    <Badge variant="default">E Zgjedhur</Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Customers browse by categories first, then see items within each category
-                </p>
-                <div className="space-y-2">
-                  <div className="bg-muted p-2 rounded text-xs">
-                    📱 Mobile-optimized cards
+        <CardContent className="space-y-6">
+          {/* Navigation Style */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">Navigation Style</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card 
+                className={`cursor-pointer border-2 transition-all ${
+                  selectedLayout === 'categories' 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-muted hover:border-primary/50'
+                }`}
+                onClick={() => handleLayoutChange('categories')}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Shfaqje me Kategori</h3>
+                    {selectedLayout === 'categories' && (
+                      <Badge variant="default">E Zgjedhur</Badge>
+                    )}
                   </div>
-                  <div className="bg-muted p-2 rounded text-xs">
-                    🗂️ Category-first navigation
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Customers browse by categories first, then see items within each category
+                  </p>
+                  <div className="space-y-2">
+                    <div className="bg-muted p-2 rounded text-xs">
+                      📱 Mobile-optimized cards
+                    </div>
+                    <div className="bg-muted p-2 rounded text-xs">
+                      🗂️ Category-first navigation
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card 
-              className={`cursor-pointer border-2 transition-all ${
-                selectedLayout === 'items' 
-                  ? 'border-primary bg-primary/5' 
-                  : 'border-muted hover:border-primary/50'
-              }`}
-              onClick={() => handleLayoutChange('items')}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">Lista e Artikujve</h3>
-                  {selectedLayout === 'items' && (
-                    <Badge variant="default">E Zgjedhur</Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  All menu items displayed in a single list with category tabs
-                </p>
-                <div className="space-y-2">
-                  <div className="bg-muted p-2 rounded text-xs">
-                    📋 Complete item list
+              <Card 
+                className={`cursor-pointer border-2 transition-all ${
+                  selectedLayout === 'items' 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-muted hover:border-primary/50'
+                }`}
+                onClick={() => handleLayoutChange('items')}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Lista e Artikujve</h3>
+                    {selectedLayout === 'items' && (
+                      <Badge variant="default">E Zgjedhur</Badge>
+                    )}
                   </div>
-                  <div className="bg-muted p-2 rounded text-xs">
-                    🏷️ Category filtering tabs
+                  <p className="text-sm text-muted-foreground mb-3">
+                    All menu items displayed in a single list with category tabs
+                  </p>
+                  <div className="space-y-2">
+                    <div className="bg-muted p-2 rounded text-xs">
+                      📋 Complete item list
+                    </div>
+                    <div className="bg-muted p-2 rounded text-xs">
+                      🏷️ Category filtering tabs
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Item Display Style */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">Item Display Style</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {/* Compact Style */}
+              <div>
+                <Card 
+                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                    selectedLayoutStyle === 'compact' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => handleLayoutStyleChange('compact')}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Compact</h4>
+                      {selectedLayoutStyle === 'compact' && (
+                        <Badge variant="default" className="text-xs">Active</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Small images, condensed layout
+                    </p>
+                  </CardContent>
+                </Card>
+                <LayoutPreview layoutStyle="compact" />
+              </div>
+
+              {/* Card Grid Style */}
+              <div>
+                <Card 
+                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                    selectedLayoutStyle === 'card-grid' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => handleLayoutStyleChange('card-grid')}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Card Grid</h4>
+                      {selectedLayoutStyle === 'card-grid' && (
+                        <Badge variant="default" className="text-xs">Active</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Grid layout with image on top
+                    </p>
+                  </CardContent>
+                </Card>
+                <LayoutPreview layoutStyle="card-grid" />
+              </div>
+
+              {/* Image Focus Style */}
+              <div>
+                <Card 
+                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                    selectedLayoutStyle === 'image-focus' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => handleLayoutStyleChange('image-focus')}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Image Focus</h4>
+                      {selectedLayoutStyle === 'image-focus' && (
+                        <Badge variant="default" className="text-xs">Active</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Large images, visual emphasis
+                    </p>
+                  </CardContent>
+                </Card>
+                <LayoutPreview layoutStyle="image-focus" />
+              </div>
+
+              {/* Minimal Style */}
+              <div>
+                <Card 
+                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                    selectedLayoutStyle === 'minimal' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => handleLayoutStyleChange('minimal')}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Minimal</h4>
+                      {selectedLayoutStyle === 'minimal' && (
+                        <Badge variant="default" className="text-xs">Active</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Text-only, clean and simple
+                    </p>
+                  </CardContent>
+                </Card>
+                <LayoutPreview layoutStyle="minimal" />
+              </div>
+
+              {/* Magazine Style */}
+              <div>
+                <Card 
+                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                    selectedLayoutStyle === 'magazine' 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => handleLayoutStyleChange('magazine')}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Magazine</h4>
+                      {selectedLayoutStyle === 'magazine' && (
+                        <Badge variant="default" className="text-xs">Active</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Editorial layout with side images
+                    </p>
+                  </CardContent>
+                </Card>
+                <LayoutPreview layoutStyle="magazine" />
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

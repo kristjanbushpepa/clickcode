@@ -95,6 +95,7 @@ const Menu = () => {
   const [currentCurrency, setCurrentCurrency] = useState('ALL');
   const [restaurantSupabase, setRestaurantSupabase] = useState<any>(null);
   const [layoutPreference, setLayoutPreference] = useState<'categories' | 'items'>('items');
+  const [layoutStyle, setLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
 
   console.log('Menu component loaded with restaurantName:', restaurantName);
 
@@ -309,6 +310,11 @@ const Menu = () => {
         console.log('Applying layout preference:', customization.layout);
         setLayoutPreference(customization.layout);
       }
+
+      if (customization.layout_style) {
+        console.log('Applying layout style:', customization.layout_style);
+        setLayoutStyle(customization.layout_style);
+      }
     }
     
     if (!customization?.theme) {
@@ -440,6 +446,232 @@ const Menu = () => {
     color: customTheme.mutedTextColor
   } : {};
 
+  const renderMenuItem = (item: MenuItem, isCompact = false) => {
+    const itemImageUrl = getMenuItemImageUrl(item);
+    
+    switch (layoutStyle) {
+      case 'compact':
+        return (
+          <Card key={item.id} className="p-3 hover:shadow-md transition-shadow border" style={cardStyles}>
+            <div className="flex justify-between items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-1 gap-2">
+                  <h3 className="font-semibold text-sm leading-tight" style={itemNameStyles}>
+                    {getLocalizedText(item, 'name')}
+                  </h3>
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs flex-shrink-0"
+                    style={{ 
+                      backgroundColor: customTheme?.accentColor + '20',
+                      color: priceStyles.color 
+                    }}
+                  >
+                    {formatPrice(item.price, item.currency)}
+                  </Badge>
+                </div>
+                {getLocalizedText(item, 'description') && (
+                  <p className="text-xs mb-2 line-clamp-2" style={descriptionStyles}>
+                    {getLocalizedText(item, 'description')}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {!isCompact && (
+                    <Badge variant="outline" className="text-xs">
+                      {categories.find(cat => cat.id === item.category_id)?.name_sq || 
+                       categories.find(cat => cat.id === item.category_id)?.name}
+                    </Badge>
+                  )}
+                  {item.preparation_time && (
+                    <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                      <Clock className="h-3 w-3" />
+                      {item.preparation_time}min
+                    </div>
+                  )}
+                </div>
+              </div>
+              {itemImageUrl && (
+                <img 
+                  src={itemImageUrl} 
+                  alt={item.name_sq || item.name}
+                  className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                />
+              )}
+            </div>
+          </Card>
+        );
+
+      case 'card-grid':
+        return (
+          <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow border" style={cardStyles}>
+            {itemImageUrl && (
+              <img 
+                src={itemImageUrl} 
+                alt={item.name_sq || item.name}
+                className="w-full h-32 object-cover"
+              />
+            )}
+            <div className="p-3">
+              <h3 className="font-semibold text-sm mb-1 leading-tight" style={itemNameStyles}>
+                {getLocalizedText(item, 'name')}
+              </h3>
+              {getLocalizedText(item, 'description') && (
+                <p className="text-xs mb-2 line-clamp-2" style={descriptionStyles}>
+                  {getLocalizedText(item, 'description')}
+                </p>
+              )}
+              <div className="flex items-center justify-between">
+                <Badge 
+                  variant="secondary" 
+                  className="text-xs"
+                  style={{ 
+                    backgroundColor: customTheme?.accentColor + '20',
+                    color: priceStyles.color 
+                  }}
+                >
+                  {formatPrice(item.price, item.currency)}
+                </Badge>
+                {item.preparation_time && (
+                  <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                    <Clock className="h-3 w-3" />
+                    {item.preparation_time}min
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        );
+
+      case 'image-focus':
+        return (
+          <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow border" style={cardStyles}>
+            {itemImageUrl && (
+              <img 
+                src={itemImageUrl} 
+                alt={item.name_sq || item.name}
+                className="w-full h-40 object-cover"
+              />
+            )}
+            <div className="p-4">
+              <div className="flex items-start justify-between mb-2 gap-2">
+                <h3 className="font-semibold text-base leading-tight" style={itemNameStyles}>
+                  {getLocalizedText(item, 'name')}
+                </h3>
+                <Badge 
+                  variant="secondary" 
+                  className="text-sm flex-shrink-0"
+                  style={{ 
+                    backgroundColor: customTheme?.accentColor + '20',
+                    color: priceStyles.color 
+                  }}
+                >
+                  {formatPrice(item.price, item.currency)}
+                </Badge>
+              </div>
+              {getLocalizedText(item, 'description') && (
+                <p className="text-sm mb-3" style={descriptionStyles}>
+                  {getLocalizedText(item, 'description')}
+                </p>
+              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {!isCompact && (
+                  <Badge variant="outline" className="text-xs">
+                    {categories.find(cat => cat.id === item.category_id)?.name_sq || 
+                     categories.find(cat => cat.id === item.category_id)?.name}
+                  </Badge>
+                )}
+                {item.preparation_time && (
+                  <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                    <Clock className="h-3 w-3" />
+                    {item.preparation_time}min
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        );
+
+      case 'minimal':
+        return (
+          <div key={item.id} className="border-b pb-3 mb-3 hover:bg-muted/20 transition-colors px-2 -mx-2 rounded">
+            <div className="flex items-start justify-between mb-1 gap-2">
+              <h3 className="font-semibold text-sm leading-tight" style={itemNameStyles}>
+                {getLocalizedText(item, 'name')}
+              </h3>
+              <span className="text-sm font-medium flex-shrink-0" style={priceStyles}>
+                {formatPrice(item.price, item.currency)}
+              </span>
+            </div>
+            {getLocalizedText(item, 'description') && (
+              <p className="text-xs mb-2" style={descriptionStyles}>
+                {getLocalizedText(item, 'description')}
+              </p>
+            )}
+            {item.preparation_time && (
+              <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                <Clock className="h-3 w-3" />
+                {item.preparation_time}min
+              </div>
+            )}
+          </div>
+        );
+
+      case 'magazine':
+        return (
+          <Card key={item.id} className="p-4 hover:shadow-md transition-shadow border" style={cardStyles}>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <h3 className="font-semibold text-base mb-2 leading-tight" style={itemNameStyles}>
+                  {getLocalizedText(item, 'name')}
+                </h3>
+                {getLocalizedText(item, 'description') && (
+                  <p className="text-sm mb-3 leading-relaxed" style={descriptionStyles}>
+                    {getLocalizedText(item, 'description')}
+                  </p>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {item.preparation_time && (
+                      <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                        <Clock className="h-3 w-3" />
+                        {item.preparation_time}min
+                      </div>
+                    )}
+                    {!isCompact && (
+                      <Badge variant="outline" className="text-xs">
+                        {categories.find(cat => cat.id === item.category_id)?.name_sq || 
+                         categories.find(cat => cat.id === item.category_id)?.name}
+                      </Badge>
+                    )}
+                  </div>
+                  <Badge 
+                    variant="secondary" 
+                    className="text-sm"
+                    style={{ 
+                      backgroundColor: customTheme?.accentColor + '20',
+                      color: priceStyles.color 
+                    }}
+                  >
+                    {formatPrice(item.price, item.currency)}
+                  </Badge>
+                </div>
+              </div>
+              {itemImageUrl && (
+                <img 
+                  src={itemImageUrl} 
+                  alt={item.name_sq || item.name}
+                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+                />
+              )}
+            </div>
+          </Card>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   if (!restaurantName) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -547,58 +779,16 @@ const Menu = () => {
           </div>
 
           <div className="px-3 py-3">
-            <div className="max-w-sm mx-auto space-y-3">
+            <div className="max-w-sm mx-auto">
               {filteredMenuItems.length === 0 ? (
                 <div className="text-center py-8">
                   <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
                   <p className="text-sm" style={mutedTextStyles}>No items found in this category.</p>
                 </div>
               ) : (
-                filteredMenuItems.map((item) => {
-                  const itemImageUrl = getMenuItemImageUrl(item);
-                  
-                  return (
-                    <Card key={item.id} className="p-3 hover:shadow-md transition-shadow border" style={cardStyles}>
-                      <div className="flex justify-between items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm mb-1 leading-tight" style={itemNameStyles}>
-                            {getLocalizedText(item, 'name')}
-                          </h3>
-                          {getLocalizedText(item, 'description') && (
-                            <p className="text-xs mb-2 line-clamp-2" style={descriptionStyles}>
-                              {getLocalizedText(item, 'description')}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge 
-                              variant="secondary" 
-                              className="text-xs"
-                              style={{ 
-                                backgroundColor: customTheme?.accentColor + '20',
-                                color: priceStyles.color 
-                              }}
-                            >
-                              {formatPrice(item.price, item.currency)}
-                            </Badge>
-                            {item.preparation_time && (
-                              <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
-                                <Clock className="h-3 w-3" />
-                                {item.preparation_time}min
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        {itemImageUrl && (
-                          <img 
-                            src={itemImageUrl} 
-                            alt={item.name_sq || item.name}
-                            className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                          />
-                        )}
-                      </div>
-                    </Card>
-                  );
-                })
+                <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                  {filteredMenuItems.map((item) => renderMenuItem(item, true))}
+                </div>
               )}
             </div>
           </div>
@@ -856,57 +1046,9 @@ const Menu = () => {
                   <p className="text-sm" style={mutedTextStyles}>No items available.</p>
                 </div>
               ) : (
-                filteredMenuItems.map((item) => {
-                  const itemImageUrl = getMenuItemImageUrl(item);
-                  
-                  return (
-                    <Card key={item.id} className="p-3 hover:shadow-md transition-shadow border" style={cardStyles}>
-                      <div className="flex justify-between items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-1 gap-2">
-                            <h3 className="font-semibold text-sm leading-tight" style={itemNameStyles}>
-                              {getLocalizedText(item, 'name')}
-                            </h3>
-                            <Badge 
-                              variant="secondary" 
-                              className="text-xs flex-shrink-0"
-                              style={{ 
-                                backgroundColor: customTheme?.accentColor + '20',
-                                color: priceStyles.color 
-                              }}
-                            >
-                              {formatPrice(item.price, item.currency)}
-                            </Badge>
-                          </div>
-                          {getLocalizedText(item, 'description') && (
-                            <p className="text-xs mb-2 line-clamp-2" style={descriptionStyles}>
-                              {getLocalizedText(item, 'description')}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="outline" className="text-xs">
-                              {categories.find(cat => cat.id === item.category_id)?.name_sq || 
-                               categories.find(cat => cat.id === item.category_id)?.name}
-                            </Badge>
-                            {item.preparation_time && (
-                              <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
-                                <Clock className="h-3 w-3" />
-                                {item.preparation_time}min
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        {itemImageUrl && (
-                          <img 
-                            src={itemImageUrl} 
-                            alt={item.name_sq || item.name}
-                            className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                          />
-                        )}
-                      </div>
-                    </Card>
-                  );
-                })
+                <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                  {filteredMenuItems.map((item) => renderMenuItem(item))}
+                </div>
               )}
             </TabsContent>
 
@@ -924,51 +1066,9 @@ const Menu = () => {
                       <p className="text-sm" style={mutedTextStyles}>No items in this category.</p>
                     </div>
                   ) : (
-                    categoryItems.map((item) => {
-                      const itemImageUrl = getMenuItemImageUrl(item);
-                      
-                      return (
-                        <Card key={item.id} className="p-3 hover:shadow-md transition-shadow border" style={cardStyles}>
-                          <div className="flex justify-between items-start gap-3">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between mb-1 gap-2">
-                                <h3 className="font-semibold text-sm leading-tight" style={itemNameStyles}>
-                                  {getLocalizedText(item, 'name')}
-                                </h3>
-                                <Badge 
-                                  variant="secondary" 
-                                  className="text-xs flex-shrink-0"
-                                  style={{ 
-                                    backgroundColor: customTheme?.accentColor + '20',
-                                    color: priceStyles.color 
-                                  }}
-                                >
-                                  {formatPrice(item.price, item.currency)}
-                                </Badge>
-                              </div>
-                              {getLocalizedText(item, 'description') && (
-                                <p className="text-xs mb-2 line-clamp-2" style={descriptionStyles}>
-                                  {getLocalizedText(item, 'description')}
-                                </p>
-                              )}
-                              {item.preparation_time && (
-                                <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
-                                  <Clock className="h-3 w-3" />
-                                  {item.preparation_time}min
-                                </div>
-                              )}
-                            </div>
-                            {itemImageUrl && (
-                              <img 
-                                src={itemImageUrl} 
-                                alt={item.name_sq || item.name}
-                                className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                              />
-                            )}
-                          </div>
-                        </Card>
-                      );
-                    })
+                    <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                      {categoryItems.map((item) => renderMenuItem(item, true))}
+                    </div>
                   )}
                 </TabsContent>
               );

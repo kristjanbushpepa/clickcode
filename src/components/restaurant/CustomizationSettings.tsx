@@ -714,140 +714,142 @@ const CustomizationSettings = () => {
         </Card>
 
         {/* Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Live Preview</CardTitle>
-            <CardDescription>
-              See how your theme and layout changes will look on the menu
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ThemePreview theme={theme} layoutStyle={selectedLayoutStyle} />
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Live Preview</CardTitle>
+              <CardDescription>
+                See how your theme and layout changes will look on the menu
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ThemePreview theme={theme} layoutStyle={selectedLayoutStyle} />
+            </CardContent>
+          </Card>
+
+          {/* Layout Section - Now under the preview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout Preferences</CardTitle>
+              <CardDescription>
+                Choose how you want your menu to be displayed to customers
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Navigation Style */}
+              <div>
+                <Label className="text-base font-medium mb-3 block">Navigation Style</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card 
+                    className={`cursor-pointer border-2 transition-all ${
+                      selectedLayout === 'categories' 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => handleLayoutChange('categories')}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold">Shfaqje me Kategori</h3>
+                        {selectedLayout === 'categories' && (
+                          <Badge variant="default">E Zgjedhur</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Customers browse by categories first, then see items within each category
+                      </p>
+                      <div className="space-y-2">
+                        <div className="bg-muted p-2 rounded text-xs">
+                          📱 Mobile-optimized cards
+                        </div>
+                        <div className="bg-muted p-2 rounded text-xs">
+                          🗂️ Category-first navigation
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card 
+                    className={`cursor-pointer border-2 transition-all ${
+                      selectedLayout === 'items' 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => handleLayoutChange('items')}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold">Lista e Artikujve</h3>
+                        {selectedLayout === 'items' && (
+                          <Badge variant="default">E Zgjedhur</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        All menu items displayed in a single list with category tabs
+                      </p>
+                      <div className="space-y-2">
+                        <div className="bg-muted p-2 rounded text-xs">
+                          📋 Complete item list
+                        </div>
+                        <div className="bg-muted p-2 rounded text-xs">
+                          🏷️ Category filtering tabs
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Item Display Style - Compact buttons only */}
+              <div>
+                <Label className="text-base font-medium mb-3 block">Item Display Style</Label>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <Button 
+                    variant={selectedLayoutStyle === 'compact' ? 'default' : 'outline'}
+                    onClick={() => handleLayoutStyleChange('compact')}
+                    className="flex flex-col h-16"
+                  >
+                    <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                    Compact
+                  </Button>
+                  <Button 
+                    variant={selectedLayoutStyle === 'card-grid' ? 'default' : 'outline'}
+                    onClick={() => handleLayoutStyleChange('card-grid')}
+                    className="flex flex-col h-16"
+                  >
+                    <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                    Grid
+                  </Button>
+                  <Button 
+                    variant={selectedLayoutStyle === 'image-focus' ? 'default' : 'outline'}
+                    onClick={() => handleLayoutStyleChange('image-focus')}
+                    className="flex flex-col h-16"
+                  >
+                    <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                    Image Focus
+                  </Button>
+                  <Button 
+                    variant={selectedLayoutStyle === 'minimal' ? 'default' : 'outline'}
+                    onClick={() => handleLayoutStyleChange('minimal')}
+                    className="flex flex-col h-16"
+                  >
+                    <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                    Minimal
+                  </Button>
+                  <Button 
+                    variant={selectedLayoutStyle === 'magazine' ? 'default' : 'outline'}
+                    onClick={() => handleLayoutStyleChange('magazine')}
+                    className="flex flex-col h-16"
+                  >
+                    <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                    Magazine
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Layout Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Layout Preferences</CardTitle>
-          <CardDescription>
-            Choose how you want your menu to be displayed to customers
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Navigation Style */}
-          <div>
-            <Label className="text-base font-medium mb-3 block">Navigation Style</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card 
-                className={`cursor-pointer border-2 transition-all ${
-                  selectedLayout === 'categories' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-muted hover:border-primary/50'
-                }`}
-                onClick={() => handleLayoutChange('categories')}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold">Shfaqje me Kategori</h3>
-                    {selectedLayout === 'categories' && (
-                      <Badge variant="default">E Zgjedhur</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Customers browse by categories first, then see items within each category
-                  </p>
-                  <div className="space-y-2">
-                    <div className="bg-muted p-2 rounded text-xs">
-                      📱 Mobile-optimized cards
-                    </div>
-                    <div className="bg-muted p-2 rounded text-xs">
-                      🗂️ Category-first navigation
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card 
-                className={`cursor-pointer border-2 transition-all ${
-                  selectedLayout === 'items' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-muted hover:border-primary/50'
-                }`}
-                onClick={() => handleLayoutChange('items')}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold">Lista e Artikujve</h3>
-                    {selectedLayout === 'items' && (
-                      <Badge variant="default">E Zgjedhur</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    All menu items displayed in a single list with category tabs
-                  </p>
-                  <div className="space-y-2">
-                    <div className="bg-muted p-2 rounded text-xs">
-                      📋 Complete item list
-                    </div>
-                    <div className="bg-muted p-2 rounded text-xs">
-                      🏷️ Category filtering tabs
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Item Display Style - Compact buttons only */}
-          <div>
-            <Label className="text-base font-medium mb-3 block">Item Display Style</Label>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              <Button 
-                variant={selectedLayoutStyle === 'compact' ? 'default' : 'outline'}
-                onClick={() => handleLayoutStyleChange('compact')}
-                className="flex flex-col h-16"
-              >
-                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
-                Compact
-              </Button>
-              <Button 
-                variant={selectedLayoutStyle === 'card-grid' ? 'default' : 'outline'}
-                onClick={() => handleLayoutStyleChange('card-grid')}
-                className="flex flex-col h-16"
-              >
-                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
-                Grid
-              </Button>
-              <Button 
-                variant={selectedLayoutStyle === 'image-focus' ? 'default' : 'outline'}
-                onClick={() => handleLayoutStyleChange('image-focus')}
-                className="flex flex-col h-16"
-              >
-                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
-                Image Focus
-              </Button>
-              <Button 
-                variant={selectedLayoutStyle === 'minimal' ? 'default' : 'outline'}
-                onClick={() => handleLayoutStyleChange('minimal')}
-                className="flex flex-col h-16"
-              >
-                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
-                Minimal
-              </Button>
-              <Button 
-                variant={selectedLayoutStyle === 'magazine' ? 'default' : 'outline'}
-                onClick={() => handleLayoutStyleChange('magazine')}
-                className="flex flex-col h-16"
-              >
-                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
-                Magazine
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

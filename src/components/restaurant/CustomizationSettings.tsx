@@ -23,6 +23,12 @@ interface Theme {
   itemNameColor?: string;
   descriptionColor?: string;
   priceColor?: string;
+  languageSwitchBackground?: string;
+  languageSwitchBorder?: string;
+  languageSwitchText?: string;
+  currencySwitchBackground?: string;
+  currencySwitchBorder?: string;
+  currencySwitchText?: string;
 }
 
 const defaultLightTheme: Theme = {
@@ -38,7 +44,13 @@ const defaultLightTheme: Theme = {
   categoryNameColor: '#1f2937',
   itemNameColor: '#111827',
   descriptionColor: '#6b7280',
-  priceColor: '#059669'
+  priceColor: '#059669',
+  languageSwitchBackground: '#1f2937',
+  languageSwitchBorder: '#4b5563',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#1f2937',
+  currencySwitchBorder: '#4b5563',
+  currencySwitchText: '#ffffff'
 };
 
 const defaultDarkTheme: Theme = {
@@ -54,7 +66,13 @@ const defaultDarkTheme: Theme = {
   categoryNameColor: '#d1d5db',
   itemNameColor: '#f3f4f6',
   descriptionColor: '#9ca3af',
-  priceColor: '#22c55e'
+  priceColor: '#22c55e',
+  languageSwitchBackground: '#1f2937',
+  languageSwitchBorder: '#4b5563',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#1f2937',
+  currencySwitchBorder: '#4b5563',
+  currencySwitchText: '#ffffff'
 };
 
 const greenTheme: Theme = {
@@ -70,7 +88,13 @@ const greenTheme: Theme = {
   categoryNameColor: '#166534',
   itemNameColor: '#14532d',
   descriptionColor: '#6b7280',
-  priceColor: '#059669'
+  priceColor: '#059669',
+  languageSwitchBackground: '#166534',
+  languageSwitchBorder: '#16a34a',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#166534',
+  currencySwitchBorder: '#16a34a',
+  currencySwitchText: '#ffffff'
 };
 
 const blueTheme: Theme = {
@@ -86,7 +110,13 @@ const blueTheme: Theme = {
   categoryNameColor: '#1e3a8a',
   itemNameColor: '#1e40af',
   descriptionColor: '#6b7280',
-  priceColor: '#2563eb'
+  priceColor: '#2563eb',
+  languageSwitchBackground: '#1e3a8a',
+  languageSwitchBorder: '#3b82f6',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#1e3a8a',
+  currencySwitchBorder: '#3b82f6',
+  currencySwitchText: '#ffffff'
 };
 
 const goldTheme: Theme = {
@@ -102,7 +132,13 @@ const goldTheme: Theme = {
   categoryNameColor: '#92400e',
   itemNameColor: '#78350f',
   descriptionColor: '#6b7280',
-  priceColor: '#d97706'
+  priceColor: '#d97706',
+  languageSwitchBackground: '#92400e',
+  languageSwitchBorder: '#f59e0b',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#92400e',
+  currencySwitchBorder: '#f59e0b',
+  currencySwitchText: '#ffffff'
 };
 
 const purpleTheme: Theme = {
@@ -118,7 +154,13 @@ const purpleTheme: Theme = {
   categoryNameColor: '#7c3aed',
   itemNameColor: '#6b21a8',
   descriptionColor: '#6b7280',
-  priceColor: '#9333ea'
+  priceColor: '#9333ea',
+  languageSwitchBackground: '#7c3aed',
+  languageSwitchBorder: '#8b5cf6',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#7c3aed',
+  currencySwitchBorder: '#8b5cf6',
+  currencySwitchText: '#ffffff'
 };
 
 const redTheme: Theme = {
@@ -134,7 +176,13 @@ const redTheme: Theme = {
   categoryNameColor: '#dc2626',
   itemNameColor: '#b91c1c',
   descriptionColor: '#6b7280',
-  priceColor: '#dc2626'
+  priceColor: '#dc2626',
+  languageSwitchBackground: '#dc2626',
+  languageSwitchBorder: '#ef4444',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#dc2626',
+  currencySwitchBorder: '#ef4444',
+  currencySwitchText: '#ffffff'
 };
 
 const CustomizationSettings = () => {
@@ -588,6 +636,72 @@ const CustomizationSettings = () => {
                   color={theme.priceColor || theme.accentColor}
                   onColorChange={(color: string) => {
                     setTheme({ ...theme, priceColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="languageSwitchBackground">Language Switch Background</Label>
+                <ColorPicker
+                  id="languageSwitchBackground"
+                  color={theme.languageSwitchBackground || theme.primaryColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, languageSwitchBackground: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="languageSwitchBorder">Language Switch Border</Label>
+                <ColorPicker
+                  id="languageSwitchBorder"
+                  color={theme.languageSwitchBorder || theme.borderColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, languageSwitchBorder: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="languageSwitchText">Language Switch Text</Label>
+                <ColorPicker
+                  id="languageSwitchText"
+                  color={theme.languageSwitchText || '#ffffff'}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, languageSwitchText: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="currencySwitchBackground">Currency Switch Background</Label>
+                <ColorPicker
+                  id="currencySwitchBackground"
+                  color={theme.currencySwitchBackground || theme.primaryColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, currencySwitchBackground: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="currencySwitchBorder">Currency Switch Border</Label>
+                <ColorPicker
+                  id="currencySwitchBorder"
+                  color={theme.currencySwitchBorder || theme.borderColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, currencySwitchBorder: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="currencySwitchText">Currency Switch Text</Label>
+                <ColorPicker
+                  id="currencySwitchText"
+                  color={theme.currencySwitchText || '#ffffff'}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, currencySwitchText: color });
                     setSelectedPreset('custom');
                   }}
                 />

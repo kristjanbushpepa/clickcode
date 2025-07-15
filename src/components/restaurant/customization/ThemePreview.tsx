@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Phone, Instagram, Globe } from 'lucide-react';
+import { Clock, Phone, Instagram, Globe, ChevronDown } from 'lucide-react';
 
 interface Theme {
   mode: 'light' | 'dark';
@@ -18,6 +18,12 @@ interface Theme {
   itemNameColor?: string;
   descriptionColor?: string;
   priceColor?: string;
+  languageSwitchBackground?: string;
+  languageSwitchBorder?: string;
+  languageSwitchText?: string;
+  currencySwitchBackground?: string;
+  currencySwitchBorder?: string;
+  currencySwitchText?: string;
 }
 
 interface ThemePreviewProps {
@@ -59,6 +65,18 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
 
   const mutedTextStyles = {
     color: theme.mutedTextColor
+  };
+
+  const languageSwitchStyles = {
+    backgroundColor: theme.languageSwitchBackground || theme.primaryColor,
+    borderColor: theme.languageSwitchBorder || theme.borderColor,
+    color: theme.languageSwitchText || '#ffffff'
+  };
+
+  const currencySwitchStyles = {
+    backgroundColor: theme.currencySwitchBackground || theme.primaryColor,
+    borderColor: theme.currencySwitchBorder || theme.borderColor,
+    color: theme.currencySwitchText || '#ffffff'
   };
 
   const renderLayoutStyle = () => {
@@ -174,10 +192,25 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
       >
         <div className="flex justify-between items-start mb-3">
           <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm"></div>
-          <div className="flex gap-3">
-            <Instagram className="h-4 w-4 opacity-80" />
-            <Phone className="h-4 w-4 opacity-80" />
-            <Globe className="h-4 w-4 opacity-80" />
+          <div className="flex gap-2">
+            {/* Language Switch Preview */}
+            <div 
+              className="h-6 px-2 rounded-md flex items-center gap-1 text-xs border"
+              style={languageSwitchStyles}
+            >
+              <span>🇦🇱</span>
+              <span>SQ</span>
+              <ChevronDown className="h-2 w-2" />
+            </div>
+            {/* Currency Switch Preview */}
+            <div 
+              className="h-6 px-2 rounded-md flex items-center gap-1 text-xs border"
+              style={currencySwitchStyles}
+            >
+              <span>🇪🇺</span>
+              <span>EUR</span>
+              <ChevronDown className="h-2 w-2" />
+            </div>
           </div>
         </div>
         

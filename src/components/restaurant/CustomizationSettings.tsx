@@ -241,6 +241,10 @@ const CustomizationSettings = () => {
         if (data.layout) {
           setSelectedLayout(data.layout);
         }
+
+        if (data.layout_style) {
+          setSelectedLayoutStyle(data.layout_style);
+        }
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -600,11 +604,11 @@ const CustomizationSettings = () => {
           <CardHeader>
             <CardTitle>Live Preview</CardTitle>
             <CardDescription>
-              See how your theme changes will look on the menu
+              See how your theme and layout changes will look on the menu
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ThemePreview theme={theme} />
+            <ThemePreview theme={theme} layoutStyle={selectedLayoutStyle} />
           </CardContent>
         </Card>
       </div>
@@ -682,144 +686,50 @@ const CustomizationSettings = () => {
             </div>
           </div>
 
-          {/* Item Display Style - More compact */}
+          {/* Item Display Style - Compact buttons only */}
           <div>
             <Label className="text-base font-medium mb-3 block">Item Display Style</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-              {/* Compact Style */}
-              <div className="space-y-2">
-                <Card 
-                  className={`cursor-pointer border-2 transition-all ${
-                    selectedLayoutStyle === 'compact' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => handleLayoutStyleChange('compact')}
-                >
-                  <CardContent className="p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-xs">Compact</h4>
-                      {selectedLayoutStyle === 'compact' && (
-                        <Badge variant="default" className="text-xs">✓</Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Small images, condensed
-                    </p>
-                  </CardContent>
-                </Card>
-                <div className="scale-75 origin-top">
-                  <LayoutPreview layoutStyle="compact" />
-                </div>
-              </div>
-
-              {/* Card Grid Style */}
-              <div className="space-y-2">
-                <Card 
-                  className={`cursor-pointer border-2 transition-all ${
-                    selectedLayoutStyle === 'card-grid' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => handleLayoutStyleChange('card-grid')}
-                >
-                  <CardContent className="p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-xs">Grid</h4>
-                      {selectedLayoutStyle === 'card-grid' && (
-                        <Badge variant="default" className="text-xs">✓</Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Grid with top images
-                    </p>
-                  </CardContent>
-                </Card>
-                <div className="scale-75 origin-top">
-                  <LayoutPreview layoutStyle="card-grid" />
-                </div>
-              </div>
-
-              {/* Image Focus Style */}
-              <div className="space-y-2">
-                <Card 
-                  className={`cursor-pointer border-2 transition-all ${
-                    selectedLayoutStyle === 'image-focus' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => handleLayoutStyleChange('image-focus')}
-                >
-                  <CardContent className="p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-xs">Image Focus</h4>
-                      {selectedLayoutStyle === 'image-focus' && (
-                        <Badge variant="default" className="text-xs">✓</Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Large images
-                    </p>
-                  </CardContent>
-                </Card>
-                <div className="scale-75 origin-top">
-                  <LayoutPreview layoutStyle="image-focus" />
-                </div>
-              </div>
-
-              {/* Minimal Style */}
-              <div className="space-y-2">
-                <Card 
-                  className={`cursor-pointer border-2 transition-all ${
-                    selectedLayoutStyle === 'minimal' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => handleLayoutStyleChange('minimal')}
-                >
-                  <CardContent className="p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-xs">Minimal</h4>
-                      {selectedLayoutStyle === 'minimal' && (
-                        <Badge variant="default" className="text-xs">✓</Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Text-only, clean
-                    </p>
-                  </CardContent>
-                </Card>
-                <div className="scale-75 origin-top">
-                  <LayoutPreview layoutStyle="minimal" />
-                </div>
-              </div>
-
-              {/* Magazine Style */}
-              <div className="space-y-2">
-                <Card 
-                  className={`cursor-pointer border-2 transition-all ${
-                    selectedLayoutStyle === 'magazine' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => handleLayoutStyleChange('magazine')}
-                >
-                  <CardContent className="p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-xs">Magazine</h4>
-                      {selectedLayoutStyle === 'magazine' && (
-                        <Badge variant="default" className="text-xs">✓</Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Editorial layout
-                    </p>
-                  </CardContent>
-                </Card>
-                <div className="scale-75 origin-top">
-                  <LayoutPreview layoutStyle="magazine" />
-                </div>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <Button 
+                variant={selectedLayoutStyle === 'compact' ? 'default' : 'outline'}
+                onClick={() => handleLayoutStyleChange('compact')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                Compact
+              </Button>
+              <Button 
+                variant={selectedLayoutStyle === 'card-grid' ? 'default' : 'outline'}
+                onClick={() => handleLayoutStyleChange('card-grid')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                Grid
+              </Button>
+              <Button 
+                variant={selectedLayoutStyle === 'image-focus' ? 'default' : 'outline'}
+                onClick={() => handleLayoutStyleChange('image-focus')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                Image Focus
+              </Button>
+              <Button 
+                variant={selectedLayoutStyle === 'minimal' ? 'default' : 'outline'}
+                onClick={() => handleLayoutStyleChange('minimal')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                Minimal
+              </Button>
+              <Button 
+                variant={selectedLayoutStyle === 'magazine' ? 'default' : 'outline'}
+                onClick={() => handleLayoutStyleChange('magazine')}
+                className="flex flex-col h-16"
+              >
+                <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
+                Magazine
+              </Button>
             </div>
           </div>
         </CardContent>

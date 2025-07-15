@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { createRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -88,14 +88,13 @@ interface Restaurant {
 
 const Menu = () => {
   const { restaurantName } = useParams();
-  const [searchParams] = useSearchParams();
-  const layout = searchParams.get('layout') || 'items';
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [customTheme, setCustomTheme] = useState<MenuTheme | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState('sq');
   const [currentCurrency, setCurrentCurrency] = useState('ALL');
   const [restaurantSupabase, setRestaurantSupabase] = useState<any>(null);
+  const [layoutPreference, setLayoutPreference] = useState<'categories' | 'items'>('items');
 
   console.log('Menu component loaded with restaurantName:', restaurantName);
 
@@ -282,7 +281,9 @@ const Menu = () => {
       const { data, error } = await restaurantSupabase
         .from('restaurant_customization')
         .select('*')
-        .single();
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (error) {
         console.log('No customization found, using defaults');
@@ -296,12 +297,21 @@ const Menu = () => {
     retry: 0
   });
 
-  // Apply theme when customization loads
+  // Apply theme and layout when customization loads
   useEffect(() => {
-    if (customization?.theme) {
-      console.log('Applying theme:', customization.theme);
-      setCustomTheme(customization.theme);
-    } else {
+    if (customization) {
+      if (customization.theme) {
+        console.log('Applying theme:', customization.theme);
+        setCustomTheme(customization.theme);
+      }
+      
+      if (customization.layout) {
+        console.log('Applying layout preference:', customization.layout);
+        setLayoutPreference(customization.layout);
+      }
+    }
+    
+    if (!customization?.theme) {
       console.log('Using default light theme');
       // Set default light theme with new text colors
       setCustomTheme({
@@ -496,7 +506,7 @@ const Menu = () => {
   }
 
   // Categories layout with enhanced theme
-  if (layout === 'categories') {
+  if (layoutPreference === 'categories') {
     if (selectedCategory) {
       const currentCategory = categories.find(cat => cat.id === selectedCategory);
       
@@ -738,7 +748,7 @@ const Menu = () => {
     );
   }
 
-  // Items layout with enhanced theme
+  // Items layout with enhanced theme (default)
   return (
     <div className="min-h-screen" style={themeStyles}>
       <div className="relative">

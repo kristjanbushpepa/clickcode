@@ -617,7 +617,7 @@ const CustomizationSettings = () => {
             Choose how you want your menu to be displayed to customers
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           {/* Navigation Style */}
           <div>
             <Label className="text-base font-medium mb-3 block">Navigation Style</Label>
@@ -682,133 +682,143 @@ const CustomizationSettings = () => {
             </div>
           </div>
 
-          {/* Item Display Style */}
+          {/* Item Display Style - More compact */}
           <div>
             <Label className="text-base font-medium mb-3 block">Item Display Style</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
               {/* Compact Style */}
-              <div>
+              <div className="space-y-2">
                 <Card 
-                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                  className={`cursor-pointer border-2 transition-all ${
                     selectedLayoutStyle === 'compact' 
                       ? 'border-primary bg-primary/5' 
                       : 'border-muted hover:border-primary/50'
                   }`}
                   onClick={() => handleLayoutStyleChange('compact')}
                 >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">Compact</h4>
+                  <CardContent className="p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-xs">Compact</h4>
                       {selectedLayoutStyle === 'compact' && (
-                        <Badge variant="default" className="text-xs">Active</Badge>
+                        <Badge variant="default" className="text-xs">✓</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Small images, condensed layout
+                    <p className="text-xs text-muted-foreground">
+                      Small images, condensed
                     </p>
                   </CardContent>
                 </Card>
-                <LayoutPreview layoutStyle="compact" />
+                <div className="scale-75 origin-top">
+                  <LayoutPreview layoutStyle="compact" />
+                </div>
               </div>
 
               {/* Card Grid Style */}
-              <div>
+              <div className="space-y-2">
                 <Card 
-                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                  className={`cursor-pointer border-2 transition-all ${
                     selectedLayoutStyle === 'card-grid' 
                       ? 'border-primary bg-primary/5' 
                       : 'border-muted hover:border-primary/50'
                   }`}
                   onClick={() => handleLayoutStyleChange('card-grid')}
                 >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">Card Grid</h4>
+                  <CardContent className="p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-xs">Grid</h4>
                       {selectedLayoutStyle === 'card-grid' && (
-                        <Badge variant="default" className="text-xs">Active</Badge>
+                        <Badge variant="default" className="text-xs">✓</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Grid layout with image on top
+                    <p className="text-xs text-muted-foreground">
+                      Grid with top images
                     </p>
                   </CardContent>
                 </Card>
-                <LayoutPreview layoutStyle="card-grid" />
+                <div className="scale-75 origin-top">
+                  <LayoutPreview layoutStyle="card-grid" />
+                </div>
               </div>
 
               {/* Image Focus Style */}
-              <div>
+              <div className="space-y-2">
                 <Card 
-                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                  className={`cursor-pointer border-2 transition-all ${
                     selectedLayoutStyle === 'image-focus' 
                       ? 'border-primary bg-primary/5' 
                       : 'border-muted hover:border-primary/50'
                   }`}
                   onClick={() => handleLayoutStyleChange('image-focus')}
                 >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">Image Focus</h4>
+                  <CardContent className="p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-xs">Image Focus</h4>
                       {selectedLayoutStyle === 'image-focus' && (
-                        <Badge variant="default" className="text-xs">Active</Badge>
+                        <Badge variant="default" className="text-xs">✓</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Large images, visual emphasis
+                    <p className="text-xs text-muted-foreground">
+                      Large images
                     </p>
                   </CardContent>
                 </Card>
-                <LayoutPreview layoutStyle="image-focus" />
+                <div className="scale-75 origin-top">
+                  <LayoutPreview layoutStyle="image-focus" />
+                </div>
               </div>
 
               {/* Minimal Style */}
-              <div>
+              <div className="space-y-2">
                 <Card 
-                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                  className={`cursor-pointer border-2 transition-all ${
                     selectedLayoutStyle === 'minimal' 
                       ? 'border-primary bg-primary/5' 
                       : 'border-muted hover:border-primary/50'
                   }`}
                   onClick={() => handleLayoutStyleChange('minimal')}
                 >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">Minimal</h4>
+                  <CardContent className="p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-xs">Minimal</h4>
                       {selectedLayoutStyle === 'minimal' && (
-                        <Badge variant="default" className="text-xs">Active</Badge>
+                        <Badge variant="default" className="text-xs">✓</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Text-only, clean and simple
+                    <p className="text-xs text-muted-foreground">
+                      Text-only, clean
                     </p>
                   </CardContent>
                 </Card>
-                <LayoutPreview layoutStyle="minimal" />
+                <div className="scale-75 origin-top">
+                  <LayoutPreview layoutStyle="minimal" />
+                </div>
               </div>
 
               {/* Magazine Style */}
-              <div>
+              <div className="space-y-2">
                 <Card 
-                  className={`cursor-pointer border-2 transition-all mb-2 ${
+                  className={`cursor-pointer border-2 transition-all ${
                     selectedLayoutStyle === 'magazine' 
                       ? 'border-primary bg-primary/5' 
                       : 'border-muted hover:border-primary/50'
                   }`}
                   onClick={() => handleLayoutStyleChange('magazine')}
                 >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">Magazine</h4>
+                  <CardContent className="p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="font-medium text-xs">Magazine</h4>
                       {selectedLayoutStyle === 'magazine' && (
-                        <Badge variant="default" className="text-xs">Active</Badge>
+                        <Badge variant="default" className="text-xs">✓</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Editorial layout with side images
+                    <p className="text-xs text-muted-foreground">
+                      Editorial layout
                     </p>
                   </CardContent>
                 </Card>
-                <LayoutPreview layoutStyle="magazine" />
+                <div className="scale-75 origin-top">
+                  <LayoutPreview layoutStyle="magazine" />
+                </div>
               </div>
             </div>
           </div>

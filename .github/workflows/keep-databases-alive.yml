@@ -4,7 +4,7 @@ name: Keep Restaurant Databases Alive
 on:
   schedule:
     # Run at 18:30 UTC on Wednesday and Sunday
-    - cron: '30 18 * * 3,0'
+    - cron: '40 18 * * 3,0'
   workflow_dispatch: # Allow manual trigger
 
 jobs:

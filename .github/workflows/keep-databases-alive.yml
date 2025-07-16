@@ -3,8 +3,8 @@ name: Keep Restaurant Databases Alive
 
 on:
   schedule:
-    # Run every 6 days at 2 AM UTC to prevent 7-day timeout
-    - cron: '0 2 */6 * *'
+    # Run at 18:30 UTC on Wednesday and Sunday
+    - cron: '30 18 * * 3,0'
   workflow_dispatch: # Allow manual trigger
 
 jobs:

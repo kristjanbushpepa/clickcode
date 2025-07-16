@@ -557,7 +557,9 @@ const EnhancedMenu = () => {
                     <Facebook className="h-4 w-4 opacity-80 hover:opacity-100" />
                   </a>
                 )}
-                <Globe className="h-4 w-4 opacity-80" />
+                {(profile?.social_media_links?.google_maps || profile?.email) && (
+                  <Globe className="h-4 w-4 opacity-80" />
+                )}
               </div>
             )}
           </div>

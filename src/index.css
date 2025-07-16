@@ -38,11 +38,15 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Futuristic gradients and effects */
+    /* Modern gradients and effects */
     --gradient-primary: linear-gradient(135deg, hsl(197 100% 48%), hsl(267 84% 81%));
     --gradient-secondary: linear-gradient(135deg, hsl(220 27% 98%), hsl(220 20% 92%));
+    --gradient-card: linear-gradient(135deg, hsl(220 27% 98%), hsl(220 20% 95%));
     --glow-primary: 0 0 20px hsl(197 100% 48% / 0.3);
     --glow-accent: 0 0 20px hsl(267 84% 81% / 0.3);
+    --glow-soft: 0 4px 20px hsl(220 20% 88% / 0.6);
+    --shadow-elevated: 0 8px 32px hsl(220 20% 88% / 0.3);
+    --shadow-floating: 0 12px 40px hsl(220 20% 88% / 0.4);
 
     --sidebar-background: 220 25% 96%;
     --sidebar-foreground: 220 15% 15%;
@@ -83,11 +87,15 @@ All colors MUST be HSL.
     --input: 220 20% 15%;
     --ring: 197 100% 60%;
 
-    /* Futuristic gradients and effects for dark mode */
+    /* Modern gradients and effects for dark mode */
     --gradient-primary: linear-gradient(135deg, hsl(197 100% 60%), hsl(267 84% 70%));
     --gradient-secondary: linear-gradient(135deg, hsl(220 25% 8%), hsl(220 20% 12%));
+    --gradient-card: linear-gradient(135deg, hsl(220 25% 8%), hsl(220 20% 10%));
     --glow-primary: 0 0 30px hsl(197 100% 60% / 0.4);
     --glow-accent: 0 0 30px hsl(267 84% 70% / 0.4);
+    --glow-soft: 0 4px 20px hsl(220 20% 15% / 0.6);
+    --shadow-elevated: 0 8px 32px hsl(220 20% 15% / 0.3);
+    --shadow-floating: 0 12px 40px hsl(220 20% 15% / 0.4);
 
     --sidebar-background: 220 25% 5%;
     --sidebar-foreground: 220 27% 90%;
@@ -107,5 +115,138 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Modern Menu Animations and Effects */
+@layer components {
+  .menu-card {
+    @apply relative overflow-hidden rounded-xl border border-border/60 bg-card 
+           backdrop-blur-sm transition-all duration-300 ease-out 
+           hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5;
+  }
+
+  .menu-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 
+           opacity-0 transition-opacity duration-300;
+  }
+
+  .menu-card:hover::before {
+    @apply opacity-100;
+  }
+
+  .menu-image {
+    @apply w-full h-full object-cover transition-transform duration-500 ease-out;
+  }
+
+  .menu-card:hover .menu-image {
+    @apply scale-105;
+  }
+
+  .category-card {
+    @apply relative overflow-hidden rounded-xl border border-border/60 bg-card 
+           backdrop-blur-sm transition-all duration-300 ease-out 
+           hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5
+           cursor-pointer;
+  }
+
+  .category-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 
+           opacity-0 transition-opacity duration-300;
+  }
+
+  .category-card:hover::before {
+    @apply opacity-100;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .stagger-animation {
+    animation: staggerFade 0.8s ease-out forwards;
+  }
+
+  .floating-header {
+    @apply backdrop-blur-lg bg-background/80 shadow-lg;
+  }
+
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/10 border border-white/20;
+  }
+
+  .menu-skeleton {
+    @apply animate-pulse bg-gradient-to-r from-muted/50 to-muted/30 rounded-lg;
+  }
+
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .blur-load {
+    @apply blur-sm transition-all duration-300;
+  }
+
+  .blur-load.loaded {
+    @apply blur-0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes staggerFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
   }
 }

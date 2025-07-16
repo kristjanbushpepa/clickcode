@@ -5,7 +5,7 @@ on:
   schedule:
     # Test run: Run at 18:32 UTC today for immediate testing
     # Then run at 18:30 UTC on Sunday as planned
-    - cron: '32 18 * * *'  # Every day at 18:32 UTC (temporary for testing)
+    - cron: '53 18 * * *'  # Every day at 18:32 UTC (temporary for testing)
     - cron: '30 18 * * 0'  # Sunday at 18:30 UTC (permanent schedule)
   workflow_dispatch: # Allow manual trigger
 

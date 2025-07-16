@@ -31,6 +31,7 @@ import { PopupModal } from '@/components/menu/PopupModal';
 import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import MenuItemPopup from '@/components/menu/MenuItemPopup';
+import MenuHeader from '@/components/menu/MenuHeader';
 
 interface Category {
   id: string;
@@ -461,109 +462,29 @@ const EnhancedMenu = () => {
   }
 
   // Enhanced header component
-  const MenuHeader = () => (
-    <div className="relative">
-      {bannerImageUrl && (
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bannerImageUrl})` }}
-        >
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-      )}
-      
-      <div 
-        className="relative px-3 py-4 safe-area-top text-white"
-        style={{ 
-          backgroundColor: bannerImageUrl ? 'transparent' : customTheme?.primaryColor
-        }}
-      >
-        <div className="max-w-sm mx-auto">
-          <div className="flex justify-between items-start mb-3">
-            <div className="flex items-center gap-3">
-              {selectedCategory && layoutPreference === 'categories' && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setSelectedCategory(null)}
-                  className="text-white hover:bg-white/20 p-2 h-8 w-8"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              )}
-              {logoImageUrl && (
-                <img 
-                  src={logoImageUrl} 
-                  alt={profile?.name} 
-                  className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1"
-                />
-              )}
-            </div>
-            <div className="flex gap-1">
-              <LanguageSwitch 
-                restaurantSupabase={restaurantSupabase} 
-                currentLanguage={currentLanguage}
-                onLanguageChange={setCurrentLanguage}
-              />
-              <CurrencySwitch 
-                restaurantSupabase={restaurantSupabase} 
-                currentCurrency={currentCurrency}
-                onCurrencyChange={setCurrentCurrency}
-              />
-            </div>
-          </div>
-          
-          <div className="text-center slide-up">
-            <h1 className="text-lg font-bold mb-1 uppercase tracking-wide" style={headingStyles}>
-              {selectedCategory && layoutPreference === 'categories' 
-                ? getLocalizedText(categories.find(cat => cat.id === selectedCategory), 'name')
-                : profile?.name || 'Restaurant Menu'
-              }
-            </h1>
-            {profile?.address && !selectedCategory && (
-              <div className="flex items-center justify-center gap-1 text-xs opacity-80 uppercase tracking-wide mb-2">
-                <MapPin className="h-3 w-3" />
-                {profile.address.split(',')[0] || profile.address}
-              </div>
-            )}
-            
-            {!selectedCategory && (
-              <div className="flex justify-center gap-3 mb-1">
-                {profile?.social_media_links?.instagram && (
-                  <a 
-                    href={profile.social_media_links.instagram} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover-lift"
-                  >
-                    <Instagram className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>
-                )}
-                {profile?.phone && (
-                  <a 
-                    href={`tel:${profile.phone}`}
-                    className="hover-lift"
-                  >
-                    <Phone className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>
-                )}
-                {profile?.social_media_links?.facebook && (
-                  <a 
-                    href={profile.social_media_links.facebook} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover-lift"
-                  >
-                    <Facebook className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>
-                )}
-                <Globe className="h-4 w-4 opacity-80" />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+  const CustomMenuHeader = () => (
+    <MenuHeader
+      restaurantName={selectedCategory && layoutPreference === 'categories' 
+        ? getLocalizedText(categories.find(cat => cat.id === selectedCategory), 'name')
+        : profile?.name || 'Restaurant Menu'
+      }
+      restaurantLocation={profile?.address?.split(',')[0] || profile?.address}
+      restaurantPhone={profile?.phone}
+      restaurantInstagram={profile?.social_media_links?.instagram?.replace('https://instagram.com/', '')}
+      restaurantWebsite={profile?.social_media_links?.facebook ? 'Website' : undefined}
+      logoUrl={logoImageUrl}
+      bannerLayout={customization?.banner_layout || 'classic'}
+      logoLayout={customization?.logo_layout || 'left'}
+      theme={customTheme}
+      currentLanguage={currentLanguage}
+      currentCurrency={currentCurrency}
+      onLanguageChange={() => {
+        // Handle language change
+      }}
+      onCurrencyChange={() => {
+        // Handle currency change
+      }}
+    />
   );
 
   // Enhanced search component
@@ -590,7 +511,7 @@ const EnhancedMenu = () => {
     if (selectedCategory) {
       return (
         <div className="min-h-screen smooth-scroll" style={themeStyles}>
-          <MenuHeader />
+          <CustomMenuHeader />
           <div className="px-3 py-3">
             <div className="max-w-sm mx-auto">
               {filteredMenuItems.length === 0 ? (
@@ -626,7 +547,7 @@ const EnhancedMenu = () => {
 
     return (
       <div className="min-h-screen smooth-scroll" style={themeStyles}>
-        <MenuHeader />
+        <CustomMenuHeader />
         <SearchBar />
         <div className="px-3 pb-6">
           <div className="max-w-sm mx-auto">
@@ -688,7 +609,7 @@ const EnhancedMenu = () => {
   // Items layout (default)
   return (
     <div className="min-h-screen smooth-scroll" style={themeStyles}>
-      <MenuHeader />
+      <CustomMenuHeader />
       <div className="px-3 py-3">
         <div className="max-w-sm mx-auto">
           <Tabs defaultValue="all" className="w-full">

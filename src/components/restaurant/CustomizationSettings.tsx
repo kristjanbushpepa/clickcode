@@ -211,6 +211,8 @@ const vintageGoldTheme: Theme = {
 const CustomizationSettings = () => {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('items');
   const [selectedLayoutStyle, setSelectedLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus'>('compact');
+  const [selectedBannerLayout, setSelectedBannerLayout] = useState<'classic' | 'modern' | 'minimal' | 'gradient' | 'image-overlay'>('classic');
+  const [selectedLogoLayout, setSelectedLogoLayout] = useState<'left' | 'center' | 'right' | 'top-center' | 'overlay'>('left');
   const [theme, setTheme] = useState<Theme>(modernMinimalTheme);
   const [selectedPreset, setSelectedPreset] = useState<'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'custom'>('minimal');
 
@@ -316,6 +318,14 @@ const CustomizationSettings = () => {
 
         if (data.layout_style) {
           setSelectedLayoutStyle(data.layout_style);
+        }
+
+        if (data.banner_layout) {
+          setSelectedBannerLayout(data.banner_layout);
+        }
+
+        if (data.logo_layout) {
+          setSelectedLogoLayout(data.logo_layout);
         }
       }
     } catch (error) {
@@ -448,6 +458,126 @@ const CustomizationSettings = () => {
       toast({
         title: "Error",
         description: "Failed to update layout style",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleBannerLayoutChange = async (bannerLayout: 'classic' | 'modern' | 'minimal' | 'gradient' | 'image-overlay') => {
+    setSelectedBannerLayout(bannerLayout);
+    
+    try {
+      const supabase = getRestaurantSupabase();
+      
+      const { data: existingRecords, error: fetchError } = await supabase
+        .from('restaurant_customization')
+        .select('id')
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      const updateData = { banner_layout: bannerLayout, updated_at: new Date().toISOString() };
+
+      if (existingRecords && existingRecords.length > 0) {
+        const { error } = await supabase
+          .from('restaurant_customization')
+          .update(updateData)
+          .eq('id', existingRecords[0].id);
+          
+        if (error) {
+          console.error('Error updating banner layout:', error);
+          toast({
+            title: "Error",
+            description: "Failed to update banner layout",
+            variant: "destructive"
+          });
+          return;
+        }
+      } else {
+        const { error } = await supabase
+          .from('restaurant_customization')
+          .insert([updateData]);
+          
+        if (error) {
+          console.error('Error saving banner layout:', error);
+          toast({
+            title: "Error", 
+            description: "Failed to save banner layout",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      toast({
+        title: "Banner Layout Updated",
+        description: "Banner layout has been saved successfully"
+      });
+
+    } catch (error) {
+      console.error('Error in handleBannerLayoutChange:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update banner layout",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleLogoLayoutChange = async (logoLayout: 'left' | 'center' | 'right' | 'top-center' | 'overlay') => {
+    setSelectedLogoLayout(logoLayout);
+    
+    try {
+      const supabase = getRestaurantSupabase();
+      
+      const { data: existingRecords, error: fetchError } = await supabase
+        .from('restaurant_customization')
+        .select('id')
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      const updateData = { logo_layout: logoLayout, updated_at: new Date().toISOString() };
+
+      if (existingRecords && existingRecords.length > 0) {
+        const { error } = await supabase
+          .from('restaurant_customization')
+          .update(updateData)
+          .eq('id', existingRecords[0].id);
+          
+        if (error) {
+          console.error('Error updating logo layout:', error);
+          toast({
+            title: "Error",
+            description: "Failed to update logo layout",
+            variant: "destructive"
+          });
+          return;
+        }
+      } else {
+        const { error } = await supabase
+          .from('restaurant_customization')
+          .insert([updateData]);
+          
+        if (error) {
+          console.error('Error saving logo layout:', error);
+          toast({
+            title: "Error", 
+            description: "Failed to save logo layout",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      toast({
+        title: "Logo Layout Updated",
+        description: "Logo layout has been saved successfully"
+      });
+
+    } catch (error) {
+      console.error('Error in handleLogoLayoutChange:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update logo layout",
         variant: "destructive"
       });
     }
@@ -899,6 +1029,118 @@ const CustomizationSettings = () => {
                   >
                     <div className="w-6 h-3 bg-gradient-to-br from-gray-300 to-gray-400 border rounded mb-1"></div>
                     Photo
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Banner & Header Customization */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Banner & Header Layout</CardTitle>
+              <CardDescription>
+                Customize how your restaurant header and banner appear
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Banner Layout */}
+              <div>
+                <Label className="text-base font-medium mb-3 block">Banner Style</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <Button 
+                    variant={selectedBannerLayout === 'classic' ? 'default' : 'outline'}
+                    onClick={() => handleBannerLayoutChange('classic')}
+                    className="flex flex-col h-20 p-2"
+                  >
+                    <div className="w-full h-6 bg-gray-800 rounded-t mb-1"></div>
+                    <div className="w-full h-2 bg-gray-200 rounded-b"></div>
+                    <span className="text-xs font-medium mt-1">Classic</span>
+                  </Button>
+                  <Button 
+                    variant={selectedBannerLayout === 'modern' ? 'default' : 'outline'}
+                    onClick={() => handleBannerLayoutChange('modern')}
+                    className="flex flex-col h-20 p-2"
+                  >
+                    <div className="w-full h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t mb-1"></div>
+                    <div className="w-full h-2 bg-gray-100 rounded-b"></div>
+                    <span className="text-xs font-medium mt-1">Modern</span>
+                  </Button>
+                  <Button 
+                    variant={selectedBannerLayout === 'minimal' ? 'default' : 'outline'}
+                    onClick={() => handleBannerLayoutChange('minimal')}
+                    className="flex flex-col h-20 p-2"
+                  >
+                    <div className="w-full h-6 bg-white border rounded-t mb-1"></div>
+                    <div className="w-full h-2 bg-gray-50 rounded-b"></div>
+                    <span className="text-xs font-medium mt-1">Minimal</span>
+                  </Button>
+                  <Button 
+                    variant={selectedBannerLayout === 'gradient' ? 'default' : 'outline'}
+                    onClick={() => handleBannerLayoutChange('gradient')}
+                    className="flex flex-col h-20 p-2"
+                  >
+                    <div className="w-full h-6 bg-gradient-to-br from-orange-400 to-red-500 rounded-t mb-1"></div>
+                    <div className="w-full h-2 bg-gray-200 rounded-b"></div>
+                    <span className="text-xs font-medium mt-1">Gradient</span>
+                  </Button>
+                  <Button 
+                    variant={selectedBannerLayout === 'image-overlay' ? 'default' : 'outline'}
+                    onClick={() => handleBannerLayoutChange('image-overlay')}
+                    className="flex flex-col h-20 p-2"
+                  >
+                    <div className="w-full h-6 bg-gradient-to-br from-gray-600 to-gray-800 rounded-t mb-1 relative">
+                      <div className="absolute inset-0 bg-black/30 rounded-t"></div>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-b"></div>
+                    <span className="text-xs font-medium mt-1">Image Overlay</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Logo Position */}
+              <div>
+                <Label className="text-base font-medium mb-3 block">Logo Position</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button 
+                    variant={selectedLogoLayout === 'left' ? 'default' : 'outline'}
+                    onClick={() => handleLogoLayoutChange('left')}
+                    className="flex flex-col h-16 p-2"
+                  >
+                    <div className="w-full h-4 bg-gray-200 rounded flex items-center justify-start px-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded"></div>
+                    </div>
+                    <span className="text-xs font-medium mt-1">Left</span>
+                  </Button>
+                  <Button 
+                    variant={selectedLogoLayout === 'center' ? 'default' : 'outline'}
+                    onClick={() => handleLogoLayoutChange('center')}
+                    className="flex flex-col h-16 p-2"
+                  >
+                    <div className="w-full h-4 bg-gray-200 rounded flex items-center justify-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded"></div>
+                    </div>
+                    <span className="text-xs font-medium mt-1">Center</span>
+                  </Button>
+                  <Button 
+                    variant={selectedLogoLayout === 'right' ? 'default' : 'outline'}
+                    onClick={() => handleLogoLayoutChange('right')}
+                    className="flex flex-col h-16 p-2"
+                  >
+                    <div className="w-full h-4 bg-gray-200 rounded flex items-center justify-end px-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded"></div>
+                    </div>
+                    <span className="text-xs font-medium mt-1">Right</span>
+                  </Button>
+                  <Button 
+                    variant={selectedLogoLayout === 'top-center' ? 'default' : 'outline'}
+                    onClick={() => handleLogoLayoutChange('top-center')}
+                    className="flex flex-col h-16 p-2"
+                  >
+                    <div className="w-full h-4 bg-gray-200 rounded flex flex-col items-center justify-center">
+                      <div className="w-2 h-1 bg-blue-500 rounded"></div>
+                    </div>
+                    <span className="text-xs font-medium mt-1">Top Center</span>
                   </Button>
                 </div>
               </div>

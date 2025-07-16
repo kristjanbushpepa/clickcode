@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
@@ -30,6 +31,7 @@ export function CurrencySettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({});
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
 
   // Fetch currency settings
   const { data: currencySettings, isLoading } = useQuery({
@@ -89,6 +91,12 @@ export function CurrencySettings() {
   React.useEffect(() => {
     if (currencySettings?.exchange_rates) {
       setExchangeRates(currencySettings.exchange_rates);
+      // Initialize input values with the actual exchange rates
+      const initialInputValues: Record<string, string> = {};
+      Object.entries(currencySettings.exchange_rates).forEach(([currency, rate]) => {
+        initialInputValues[currency] = rate.toString();
+      });
+      setInputValues(initialInputValues);
     }
   }, [currencySettings]);
 
@@ -115,20 +123,43 @@ export function CurrencySettings() {
     });
   };
 
-  const handleExchangeRateChange = (currency: string, rate: string) => {
-    const numericRate = parseFloat(rate);
-    if (isNaN(numericRate)) return;
+  const handleExchangeRateInputChange = (currency: string, value: string) => {
+    // Update the input value immediately for better UX
+    setInputValues(prev => ({ ...prev, [currency]: value }));
     
-    const newRates = { ...exchangeRates, [currency]: numericRate };
-    setExchangeRates(newRates);
+    // Only update the actual exchange rate if it's a valid number
+    const numericRate = parseFloat(value);
+    if (!isNaN(numericRate) && numericRate > 0) {
+      setExchangeRates(prev => ({ ...prev, [currency]: numericRate }));
+    }
   };
 
   const handleSaveRates = () => {
+    // Validate all input values before saving
+    const validatedRates: Record<string, number> = {};
+    let hasInvalidRates = false;
+
+    Object.entries(inputValues).forEach(([currency, value]) => {
+      const numericRate = parseFloat(value);
+      if (!isNaN(numericRate) && numericRate > 0) {
+        validatedRates[currency] = numericRate;
+      } else if (value.trim() !== '') {
+        hasInvalidRates = true;
+        toast({
+          title: 'Gabim në kursin e këmbimit',
+          description: `Kursi për ${currency} duhet të jetë një numër pozitiv`,
+          variant: 'destructive'
+        });
+      }
+    });
+
+    if (hasInvalidRates) return;
+
     updateSettingsMutation.mutate({
       default_currency: currencySettings?.default_currency || 'ALL',
       supported_currencies: currencySettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
       enabled_currencies: currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
-      exchange_rates: exchangeRates
+      exchange_rates: validatedRates
     });
   };
 
@@ -196,6 +227,8 @@ export function CurrencySettings() {
             {CURRENCY_OPTIONS.map((currency) => {
               const isBaseCurrency = currency.code === (currencySettings?.default_currency || 'ALL');
               const isEnabled = currencySettings?.enabled_currencies?.includes(currency.code) ?? true;
+              const inputValue = isBaseCurrency ? '1.000000' : (inputValues[currency.code] || '0');
+              
               return (
                 <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
@@ -215,12 +248,13 @@ export function CurrencySettings() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">1 {currencySettings?.default_currency || 'ALL'} =</span>
                     <Input
-                      type="number"
-                      step="0.000001"
-                      className="w-24"
-                      value={isBaseCurrency ? '1.000000' : (exchangeRates[currency.code] || 0).toString()}
-                      onChange={(e) => handleExchangeRateChange(currency.code, e.target.value)}
+                      type="text"
+                      step="any"
+                      className="w-28"
+                      value={inputValue}
+                      onChange={(e) => handleExchangeRateInputChange(currency.code, e.target.value)}
                       disabled={isBaseCurrency || !isEnabled}
+                      placeholder="0.000000"
                     />
                     <span className="text-sm font-medium">{currency.code}</span>
                   </div>

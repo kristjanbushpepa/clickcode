@@ -634,12 +634,10 @@ const EnhancedMenu = () => {
                 {filteredCategories.map((category, index) => {
                   const categoryItems = menuItems.filter(item => item.category_id === category.id);
                   
-                  return (
-                    <div
-                      key={category.id}
-                      className="stagger-animation"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
+                   return (
+                     <div
+                       key={category.id}
+                     >
                       <Card 
                         className="category-card h-28 border"
                         style={{

@@ -3,10 +3,10 @@ name: Keep Restaurant Databases Alive
 
 on:
   schedule:
-    # Test run: Run at 18:58 UTC today for immediate testing
-    # Then run at 18:30 UTC on Sunday as planned
-    - cron: '58 18 * * *'  # Every day at 18:58 UTC (temporary for testing)
+    # Run every 10 minutes for more reliable testing
+    - cron: '*/10 * * * *'  # Every 10 minutes (temporary for testing)
     - cron: '30 18 * * 0'  # Sunday at 18:30 UTC (permanent schedule)
+    - cron: '30 18 * * 3'  # Wednesday at 18:30 UTC (permanent schedule)
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - name: Get restaurant list
         id: restaurants
         run: |
-          echo "Fetching restaurant list..."
+          echo "Fetching restaurant list at $(date)..."
           
           # Call the edge function to get restaurant data
           response=$(curl -s -X GET \
@@ -32,7 +32,7 @@ jobs:
           restaurants=$(echo "$response" | jq -r '.restaurants // []')
           count=$(echo "$restaurants" | jq 'length')
           
-          echo "Found $count restaurants"
+          echo "Found $count restaurants at $(date)"
           
           if [ "$count" -gt 0 ]; then
             echo "matrix={\"include\":$(echo "$restaurants" | jq -c .)}" >> $GITHUB_OUTPUT
@@ -52,7 +52,7 @@ jobs:
     steps:
       - name: Ping ${{ matrix.name }}
         run: |
-          echo "Pinging restaurant: ${{ matrix.name }}"
+          echo "Pinging restaurant: ${{ matrix.name }} at $(date)"
           echo "URL: ${{ matrix.url }}"
           
           # Call the keep-alive function
@@ -72,9 +72,9 @@ jobs:
           success=$(echo "$response" | jq -r '.success // false')
           
           if [ "$success" = "true" ]; then
-            echo "✅ Successfully pinged ${{ matrix.name }}"
+            echo "✅ Successfully pinged ${{ matrix.name }} at $(date)"
           else
-            echo "❌ Failed to ping ${{ matrix.name }}"
+            echo "❌ Failed to ping ${{ matrix.name }} at $(date)"
             error=$(echo "$response" | jq -r '.error // "Unknown error"')
             echo "Error: $error"
             exit 1
@@ -87,6 +87,7 @@ jobs:
     steps:
       - name: Summary
         run: |
+          echo "=== Keep-Alive Job Summary at $(date) ==="
           if [ "${{ needs.get-restaurants.outputs.has-restaurants }}" = "false" ]; then
             echo "No restaurants found to ping"
           elif [ "${{ needs.ping-restaurants.result }}" = "success" ]; then

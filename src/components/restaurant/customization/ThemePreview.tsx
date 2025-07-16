@@ -28,7 +28,7 @@ interface Theme {
 
 interface ThemePreviewProps {
   theme: Theme;
-  layoutStyle?: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine';
+  layoutStyle?: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus';
 }
 
 const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => {
@@ -175,6 +175,78 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
               </div>
               <div className="w-16 h-16 bg-gray-200 rounded flex-shrink-0"></div>
             </div>
+          </div>
+        );
+
+      case 'modern-card':
+        return (
+          <div className="space-y-4">
+            <Card className="overflow-hidden border-0 shadow-lg" style={{...cardStyles, borderRadius: '16px'}}>
+              <div className="relative">
+                <div className="w-full h-24 bg-gradient-to-br from-gray-100 to-gray-200"></div>
+                <div className="absolute top-2 right-2">
+                  <Badge variant="secondary" className="text-xs backdrop-blur-sm" style={{ backgroundColor: theme.accentColor + '90', color: '#ffffff' }}>
+                    €18.50
+                  </Badge>
+                </div>
+              </div>
+              <div className="p-4">
+                <h4 className="font-semibold text-sm mb-2" style={itemNameStyles}>Grilled Salmon</h4>
+                <p className="text-xs mb-3 line-clamp-2" style={descriptionStyles}>Fresh Atlantic salmon grilled to perfection with herbs and lemon.</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                    <Clock className="h-3 w-3" />
+                    15min
+                  </div>
+                  <div className="w-2 h-2 rounded-full" style={{backgroundColor: theme.accentColor}}></div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        );
+
+      case 'elegant-list':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 p-3 rounded-lg border-l-4" style={{...cardStyles, borderLeftColor: theme.accentColor}}>
+              <div className="w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex-shrink-0"></div>
+              <div className="flex-1">
+                <div className="flex items-start justify-between mb-1">
+                  <h4 className="font-medium text-sm" style={itemNameStyles}>Grilled Salmon</h4>
+                  <span className="text-sm font-semibold" style={priceStyles}>€18.50</span>
+                </div>
+                <p className="text-xs mb-2 line-clamp-1" style={descriptionStyles}>Fresh Atlantic salmon grilled to perfection</p>
+                <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                  <Clock className="h-3 w-3" />
+                  15min
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'photo-focus':
+        return (
+          <div className="space-y-4">
+            <Card className="overflow-hidden" style={cardStyles}>
+              <div className="relative">
+                <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200"></div>
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent text-white">
+                  <h4 className="font-semibold text-sm mb-1">Grilled Salmon</h4>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-xs">
+                      <Clock className="h-3 w-3" />
+                      15min
+                    </div>
+                    <span className="text-sm font-semibold">€18.50</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3">
+                <p className="text-xs line-clamp-2" style={descriptionStyles}>Fresh Atlantic salmon grilled to perfection with herbs and lemon.</p>
+              </div>
+            </Card>
           </div>
         );
 

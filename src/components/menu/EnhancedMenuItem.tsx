@@ -39,7 +39,7 @@ interface MenuItem {
 
 interface EnhancedMenuItemProps {
   item: MenuItem;
-  layoutStyle: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine';
+  layoutStyle: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus';
   customTheme?: MenuTheme;
   formatPrice: (price: number, currency: string) => string;
   getLocalizedText: (item: any, field: string) => string;
@@ -430,12 +430,215 @@ export const EnhancedMenuItem = ({
               </div>
             </CardContent>
           </Card>
-        );
+      );
 
-      default:
-        return null;
-    }
-  };
+    case 'modern-card':
+      return (
+        <div 
+          className={`group relative overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer ${
+            !item.is_available ? 'opacity-60' : ''
+          }`}
+          style={{
+            backgroundColor: customTheme?.cardBackground || '#ffffff',
+            borderColor: customTheme?.borderColor || '#e5e7eb',
+            transform: index !== undefined ? `translateY(${index * 10}px)` : 'none',
+          }}
+          onClick={() => onClick?.(item)}
+        >
+          <div className="relative">
+            {itemImageUrl && (
+              <LazyImage 
+                src={itemImageUrl} 
+                alt={getLocalizedText(item, 'name')}
+                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                onLoad={() => {}}
+              />
+            )}
+            {!itemImageUrl && (
+              <div className="w-full h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                <span className="text-slate-400 text-sm">No Image</span>
+              </div>
+            )}
+            <div className="absolute top-3 right-3">
+              <div 
+                className="px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm"
+                style={{
+                  backgroundColor: customTheme?.accentColor || '#3b82f6',
+                  color: '#ffffff'
+                }}
+              >
+                {formatPrice(item.price, item.currency)}
+              </div>
+            </div>
+            {!item.is_available && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <span className="text-white text-sm font-medium">Unavailable</span>
+              </div>
+            )}
+          </div>
+          <div className="p-4">
+            <h3 
+              className="font-semibold text-base mb-2 line-clamp-1"
+              style={{ color: customTheme?.itemNameColor || '#1f2937' }}
+            >
+              {getLocalizedText(item, 'name')}
+            </h3>
+            <p 
+              className="text-sm mb-3 line-clamp-2"
+              style={{ color: customTheme?.descriptionColor || '#6b7280' }}
+            >
+              {getLocalizedText(item, 'description') || 'No description available'}
+            </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs">
+                {item.preparation_time && (
+                  <span 
+                    className="flex items-center gap-1"
+                    style={{ color: customTheme?.mutedTextColor || '#6b7280' }}
+                  >
+                    <Clock className="h-3 w-3" />
+                    {item.preparation_time}min
+                  </span>
+                )}
+              </div>
+              <div 
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: customTheme?.accentColor || '#3b82f6' }}
+              />
+            </div>
+          </div>
+        </div>
+      );
+
+    case 'elegant-list':
+      return (
+        <div 
+          className={`group flex items-center gap-4 p-4 rounded-lg border-l-4 hover:shadow-md transition-all duration-200 cursor-pointer ${
+            !item.is_available ? 'opacity-60' : ''
+          }`}
+          style={{
+            backgroundColor: customTheme?.cardBackground || '#ffffff',
+            borderLeftColor: customTheme?.accentColor || '#3b82f6',
+            borderColor: customTheme?.borderColor || '#e5e7eb'
+          }}
+          onClick={() => onClick?.(item)}
+        >
+          <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+            {itemImageUrl ? (
+              <LazyImage 
+                src={itemImageUrl} 
+                alt={getLocalizedText(item, 'name')}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onLoad={() => {}}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                <span className="text-slate-400 text-xs">No Image</span>
+              </div>
+            )}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-1">
+              <h3 
+                className="font-medium text-base line-clamp-1"
+                style={{ color: customTheme?.itemNameColor || '#1f2937' }}
+              >
+                {getLocalizedText(item, 'name')}
+              </h3>
+              <span 
+                className="text-base font-semibold ml-2 flex-shrink-0"
+                style={{ color: customTheme?.priceColor || '#3b82f6' }}
+              >
+                {formatPrice(item.price, item.currency)}
+              </span>
+            </div>
+            <p 
+              className="text-sm mb-2 line-clamp-1"
+              style={{ color: customTheme?.descriptionColor || '#6b7280' }}
+            >
+              {getLocalizedText(item, 'description') || 'No description available'}
+            </p>
+            <div className="flex items-center gap-3 text-xs">
+              {item.preparation_time && (
+                <span 
+                  className="flex items-center gap-1"
+                  style={{ color: customTheme?.mutedTextColor || '#6b7280' }}
+                >
+                  <Clock className="h-3 w-3" />
+                  {item.preparation_time}min
+                </span>
+              )}
+              {!item.is_available && (
+                <span className="text-red-500 font-medium">Unavailable</span>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+
+    case 'photo-focus':
+      return (
+        <div 
+          className={`group relative overflow-hidden rounded-lg cursor-pointer hover:shadow-lg transition-all duration-300 ${
+            !item.is_available ? 'opacity-60' : ''
+          }`}
+          style={{
+            backgroundColor: customTheme?.cardBackground || '#ffffff',
+            borderColor: customTheme?.borderColor || '#e5e7eb',
+          }}
+          onClick={() => onClick?.(item)}
+        >
+          <div className="relative">
+            {itemImageUrl ? (
+              <LazyImage 
+                src={itemImageUrl} 
+                alt={getLocalizedText(item, 'name')}
+                className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                onLoad={() => {}}
+              />
+            ) : (
+              <div className="w-full h-40 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                <span className="text-slate-400 text-sm">No Image</span>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300"></div>
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
+              <h3 className="font-semibold text-base mb-1 line-clamp-1">
+                {getLocalizedText(item, 'name')}
+              </h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs">
+                  {item.preparation_time && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {item.preparation_time}min
+                    </span>
+                  )}
+                </div>
+                <span className="text-base font-semibold">{formatPrice(item.price, item.currency)}</span>
+              </div>
+            </div>
+            {!item.is_available && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <span className="text-white text-sm font-medium">Unavailable</span>
+              </div>
+            )}
+          </div>
+          <div className="p-3">
+            <p 
+              className="text-sm line-clamp-2"
+              style={{ color: customTheme?.descriptionColor || '#6b7280' }}
+            >
+              {getLocalizedText(item, 'description') || 'No description available'}
+            </p>
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
+};
 
   return renderItemContent();
 };

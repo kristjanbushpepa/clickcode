@@ -31,174 +31,198 @@ interface Theme {
   currencySwitchText?: string;
 }
 
-const defaultLightTheme: Theme = {
+// Modern Theme Presets
+const modernMinimalTheme: Theme = {
   mode: 'light',
-  primaryColor: '#1f2937',
-  accentColor: '#3b82f6',
+  primaryColor: '#0c0c0c',
+  accentColor: '#2563eb',
   backgroundColor: '#ffffff',
-  cardBackground: '#ffffff',
-  textColor: '#1f2937',
-  mutedTextColor: '#6b7280',
-  borderColor: '#e5e7eb',
+  cardBackground: '#fafafa',
+  textColor: '#0c0c0c',
+  mutedTextColor: '#666666',
+  borderColor: '#e5e5e5',
   headingColor: '#ffffff',
-  categoryNameColor: '#1f2937',
-  itemNameColor: '#111827',
-  descriptionColor: '#6b7280',
-  priceColor: '#059669',
-  languageSwitchBackground: '#1f2937',
-  languageSwitchBorder: '#4b5563',
-  languageSwitchText: '#ffffff',
-  currencySwitchBackground: '#1f2937',
-  currencySwitchBorder: '#4b5563',
-  currencySwitchText: '#ffffff'
-};
-
-const defaultDarkTheme: Theme = {
-  mode: 'dark',
-  primaryColor: '#d1d5db',
-  accentColor: '#60a5fa',
-  backgroundColor: '#111827',
-  cardBackground: '#1f2937',
-  textColor: '#d1d5db',
-  mutedTextColor: '#9ca3af',
-  borderColor: '#374151',
-  headingColor: '#ffffff',
-  categoryNameColor: '#d1d5db',
-  itemNameColor: '#f3f4f6',
-  descriptionColor: '#9ca3af',
-  priceColor: '#22c55e',
-  languageSwitchBackground: '#1f2937',
-  languageSwitchBorder: '#4b5563',
-  languageSwitchText: '#ffffff',
-  currencySwitchBackground: '#1f2937',
-  currencySwitchBorder: '#4b5563',
-  currencySwitchText: '#ffffff'
-};
-
-const greenTheme: Theme = {
-  mode: 'light',
-  primaryColor: '#166534',
-  accentColor: '#16a34a',
-  backgroundColor: '#f7fdf7',
-  cardBackground: '#ffffff',
-  textColor: '#166534',
-  mutedTextColor: '#6b7280',
-  borderColor: '#dcfce7',
-  headingColor: '#ffffff',
-  categoryNameColor: '#166534',
-  itemNameColor: '#14532d',
-  descriptionColor: '#6b7280',
-  priceColor: '#059669',
-  languageSwitchBackground: '#166534',
-  languageSwitchBorder: '#16a34a',
-  languageSwitchText: '#ffffff',
-  currencySwitchBackground: '#166534',
-  currencySwitchBorder: '#16a34a',
-  currencySwitchText: '#ffffff'
-};
-
-const blueTheme: Theme = {
-  mode: 'light',
-  primaryColor: '#1e3a8a',
-  accentColor: '#3b82f6',
-  backgroundColor: '#f8fafc',
-  cardBackground: '#ffffff',
-  textColor: '#1e3a8a',
-  mutedTextColor: '#6b7280',
-  borderColor: '#dbeafe',
-  headingColor: '#ffffff',
-  categoryNameColor: '#1e3a8a',
-  itemNameColor: '#1e40af',
-  descriptionColor: '#6b7280',
+  categoryNameColor: '#0c0c0c',
+  itemNameColor: '#0c0c0c',
+  descriptionColor: '#666666',
   priceColor: '#2563eb',
-  languageSwitchBackground: '#1e3a8a',
-  languageSwitchBorder: '#3b82f6',
+  languageSwitchBackground: '#0c0c0c',
+  languageSwitchBorder: '#e5e5e5',
   languageSwitchText: '#ffffff',
-  currencySwitchBackground: '#1e3a8a',
-  currencySwitchBorder: '#3b82f6',
+  currencySwitchBackground: '#0c0c0c',
+  currencySwitchBorder: '#e5e5e5',
   currencySwitchText: '#ffffff'
 };
 
-const goldTheme: Theme = {
+const oceanBreezTheme: Theme = {
   mode: 'light',
-  primaryColor: '#92400e',
-  accentColor: '#f59e0b',
-  backgroundColor: '#fffdf7',
+  primaryColor: '#0369a1',
+  accentColor: '#0ea5e9',
+  backgroundColor: '#f0f9ff',
   cardBackground: '#ffffff',
-  textColor: '#92400e',
-  mutedTextColor: '#6b7280',
+  textColor: '#0c4a6e',
+  mutedTextColor: '#64748b',
+  borderColor: '#bae6fd',
+  headingColor: '#ffffff',
+  categoryNameColor: '#0369a1',
+  itemNameColor: '#0c4a6e',
+  descriptionColor: '#64748b',
+  priceColor: '#0ea5e9',
+  languageSwitchBackground: '#0369a1',
+  languageSwitchBorder: '#0ea5e9',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#0369a1',
+  currencySwitchBorder: '#0ea5e9',
+  currencySwitchText: '#ffffff'
+};
+
+const sunsetTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#ea580c',
+  accentColor: '#f97316',
+  backgroundColor: '#fff7ed',
+  cardBackground: '#ffffff',
+  textColor: '#c2410c',
+  mutedTextColor: '#78716c',
   borderColor: '#fed7aa',
   headingColor: '#ffffff',
-  categoryNameColor: '#92400e',
-  itemNameColor: '#78350f',
-  descriptionColor: '#6b7280',
-  priceColor: '#d97706',
-  languageSwitchBackground: '#92400e',
-  languageSwitchBorder: '#f59e0b',
+  categoryNameColor: '#ea580c',
+  itemNameColor: '#c2410c',
+  descriptionColor: '#78716c',
+  priceColor: '#f97316',
+  languageSwitchBackground: '#ea580c',
+  languageSwitchBorder: '#f97316',
   languageSwitchText: '#ffffff',
-  currencySwitchBackground: '#92400e',
-  currencySwitchBorder: '#f59e0b',
+  currencySwitchBackground: '#ea580c',
+  currencySwitchBorder: '#f97316',
   currencySwitchText: '#ffffff'
 };
 
-const purpleTheme: Theme = {
+const forestGreenTheme: Theme = {
   mode: 'light',
-  primaryColor: '#7c3aed',
-  accentColor: '#8b5cf6',
-  backgroundColor: '#faf8ff',
+  primaryColor: '#059669',
+  accentColor: '#10b981',
+  backgroundColor: '#f0fdf4',
   cardBackground: '#ffffff',
-  textColor: '#7c3aed',
+  textColor: '#047857',
+  mutedTextColor: '#6b7280',
+  borderColor: '#bbf7d0',
+  headingColor: '#ffffff',
+  categoryNameColor: '#059669',
+  itemNameColor: '#047857',
+  descriptionColor: '#6b7280',
+  priceColor: '#10b981',
+  languageSwitchBackground: '#059669',
+  languageSwitchBorder: '#10b981',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#059669',
+  currencySwitchBorder: '#10b981',
+  currencySwitchText: '#ffffff'
+};
+
+const royalPurpleTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#6b21a8',
+  accentColor: '#8b5cf6',
+  backgroundColor: '#faf5ff',
+  cardBackground: '#ffffff',
+  textColor: '#581c87',
   mutedTextColor: '#6b7280',
   borderColor: '#e9d5ff',
   headingColor: '#ffffff',
-  categoryNameColor: '#7c3aed',
-  itemNameColor: '#6b21a8',
+  categoryNameColor: '#6b21a8',
+  itemNameColor: '#581c87',
   descriptionColor: '#6b7280',
-  priceColor: '#9333ea',
-  languageSwitchBackground: '#7c3aed',
+  priceColor: '#8b5cf6',
+  languageSwitchBackground: '#6b21a8',
   languageSwitchBorder: '#8b5cf6',
   languageSwitchText: '#ffffff',
-  currencySwitchBackground: '#7c3aed',
+  currencySwitchBackground: '#6b21a8',
   currencySwitchBorder: '#8b5cf6',
   currencySwitchText: '#ffffff'
 };
 
-const redTheme: Theme = {
+const elegantDarkTheme: Theme = {
+  mode: 'dark',
+  primaryColor: '#1e293b',
+  accentColor: '#3b82f6',
+  backgroundColor: '#0f172a',
+  cardBackground: '#1e293b',
+  textColor: '#f1f5f9',
+  mutedTextColor: '#94a3b8',
+  borderColor: '#334155',
+  headingColor: '#f1f5f9',
+  categoryNameColor: '#f1f5f9',
+  itemNameColor: '#f1f5f9',
+  descriptionColor: '#94a3b8',
+  priceColor: '#3b82f6',
+  languageSwitchBackground: '#1e293b',
+  languageSwitchBorder: '#334155',
+  languageSwitchText: '#f1f5f9',
+  currencySwitchBackground: '#1e293b',
+  currencySwitchBorder: '#334155',
+  currencySwitchText: '#f1f5f9'
+};
+
+const rosePinkTheme: Theme = {
   mode: 'light',
-  primaryColor: '#dc2626',
-  accentColor: '#ef4444',
-  backgroundColor: '#fef8f8',
+  primaryColor: '#be185d',
+  accentColor: '#ec4899',
+  backgroundColor: '#fdf2f8',
   cardBackground: '#ffffff',
-  textColor: '#dc2626',
+  textColor: '#9f1239',
   mutedTextColor: '#6b7280',
-  borderColor: '#fecaca',
+  borderColor: '#f9a8d4',
   headingColor: '#ffffff',
-  categoryNameColor: '#dc2626',
-  itemNameColor: '#b91c1c',
+  categoryNameColor: '#be185d',
+  itemNameColor: '#9f1239',
   descriptionColor: '#6b7280',
-  priceColor: '#dc2626',
-  languageSwitchBackground: '#dc2626',
-  languageSwitchBorder: '#ef4444',
+  priceColor: '#ec4899',
+  languageSwitchBackground: '#be185d',
+  languageSwitchBorder: '#ec4899',
   languageSwitchText: '#ffffff',
-  currencySwitchBackground: '#dc2626',
-  currencySwitchBorder: '#ef4444',
+  currencySwitchBackground: '#be185d',
+  currencySwitchBorder: '#ec4899',
+  currencySwitchText: '#ffffff'
+};
+
+const vintageGoldTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#a16207',
+  accentColor: '#ca8a04',
+  backgroundColor: '#fffbeb',
+  cardBackground: '#ffffff',
+  textColor: '#92400e',
+  mutedTextColor: '#78716c',
+  borderColor: '#fde68a',
+  headingColor: '#ffffff',
+  categoryNameColor: '#a16207',
+  itemNameColor: '#92400e',
+  descriptionColor: '#78716c',
+  priceColor: '#ca8a04',
+  languageSwitchBackground: '#a16207',
+  languageSwitchBorder: '#ca8a04',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#a16207',
+  currencySwitchBorder: '#ca8a04',
   currencySwitchText: '#ffffff'
 };
 
 const CustomizationSettings = () => {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('items');
-  const [selectedLayoutStyle, setSelectedLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
-  const [theme, setTheme] = useState<Theme>(defaultLightTheme);
-  const [selectedPreset, setSelectedPreset] = useState<'light' | 'dark' | 'green' | 'blue' | 'gold' | 'purple' | 'red' | 'custom'>('light');
+  const [selectedLayoutStyle, setSelectedLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus'>('compact');
+  const [theme, setTheme] = useState<Theme>(modernMinimalTheme);
+  const [selectedPreset, setSelectedPreset] = useState<'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'custom'>('minimal');
 
   const presetThemes: { [key: string]: Theme } = {
-    light: defaultLightTheme,
-    dark: defaultDarkTheme,
-    green: greenTheme,
-    blue: blueTheme,
-    gold: goldTheme,
-    purple: purpleTheme,
-    red: redTheme,
+    minimal: modernMinimalTheme,
+    ocean: oceanBreezTheme,
+    sunset: sunsetTheme,
+    forest: forestGreenTheme,
+    royal: royalPurpleTheme,
+    dark: elegantDarkTheme,
+    rose: rosePinkTheme,
+    vintage: vintageGoldTheme,
   };
 
   const handleLayoutChange = async (layout: 'categories' | 'items') => {
@@ -303,7 +327,7 @@ const CustomizationSettings = () => {
     loadData();
   }, []);
 
-  const handlePresetChange = (preset: 'light' | 'dark' | 'green' | 'blue' | 'gold' | 'purple' | 'red') => {
+  const handlePresetChange = (preset: 'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage') => {
     setSelectedPreset(preset);
     setTheme(presetThemes[preset]);
   };
@@ -369,7 +393,7 @@ const CustomizationSettings = () => {
     }
   };
 
-  const handleLayoutStyleChange = async (layoutStyle: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine') => {
+  const handleLayoutStyleChange = async (layoutStyle: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus') => {
     setSelectedLayoutStyle(layoutStyle);
     
     try {
@@ -441,63 +465,71 @@ const CustomizationSettings = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Preset Selection */}
+            {/* Modern Theme Presets */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-3">
               <Button 
-                variant={selectedPreset === 'light' ? 'default' : 'outline'}
-                onClick={() => handlePresetChange('light')}
-                className="flex flex-col h-16"
+                variant={selectedPreset === 'minimal' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('minimal')}
+                className="flex flex-col h-20 p-2"
               >
-                <div className="w-6 h-3 bg-gray-100 border rounded mb-1"></div>
-                Light
+                <div className="w-full h-4 bg-gradient-to-r from-slate-100 to-slate-200 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Minimal</span>
+              </Button>
+              <Button 
+                variant={selectedPreset === 'ocean' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('ocean')}
+                className="flex flex-col h-20 p-2"
+              >
+                <div className="w-full h-4 bg-gradient-to-r from-blue-400 to-blue-600 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Ocean</span>
+              </Button>
+              <Button 
+                variant={selectedPreset === 'sunset' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('sunset')}
+                className="flex flex-col h-20 p-2"
+              >
+                <div className="w-full h-4 bg-gradient-to-r from-orange-400 to-orange-600 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Sunset</span>
+              </Button>
+              <Button 
+                variant={selectedPreset === 'forest' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('forest')}
+                className="flex flex-col h-20 p-2"
+              >
+                <div className="w-full h-4 bg-gradient-to-r from-green-400 to-green-600 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Forest</span>
+              </Button>
+              <Button 
+                variant={selectedPreset === 'royal' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('royal')}
+                className="flex flex-col h-20 p-2"
+              >
+                <div className="w-full h-4 bg-gradient-to-r from-purple-400 to-purple-600 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Royal</span>
               </Button>
               <Button 
                 variant={selectedPreset === 'dark' ? 'default' : 'outline'}
                 onClick={() => handlePresetChange('dark')}
-                className="flex flex-col h-16"
+                className="flex flex-col h-20 p-2"
               >
-                <div className="w-6 h-3 bg-gray-800 border rounded mb-1"></div>
-                Dark
+                <div className="w-full h-4 bg-gradient-to-r from-slate-700 to-slate-900 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Dark</span>
               </Button>
               <Button 
-                variant={selectedPreset === 'green' ? 'default' : 'outline'}
-                onClick={() => handlePresetChange('green')}
-                className="flex flex-col h-16"
+                variant={selectedPreset === 'rose' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('rose')}
+                className="flex flex-col h-20 p-2"
               >
-                <div className="w-6 h-3 bg-green-600 border rounded mb-1"></div>
-                Green
+                <div className="w-full h-4 bg-gradient-to-r from-pink-400 to-pink-600 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Rose</span>
               </Button>
               <Button 
-                variant={selectedPreset === 'blue' ? 'default' : 'outline'}
-                onClick={() => handlePresetChange('blue')}
-                className="flex flex-col h-16"
+                variant={selectedPreset === 'vintage' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('vintage')}
+                className="flex flex-col h-20 p-2"
               >
-                <div className="w-6 h-3 bg-blue-600 border rounded mb-1"></div>
-                Blue
-              </Button>
-              <Button 
-                variant={selectedPreset === 'gold' ? 'default' : 'outline'}
-                onClick={() => handlePresetChange('gold')}
-                className="flex flex-col h-16"
-              >
-                <div className="w-6 h-3 bg-yellow-600 border rounded mb-1"></div>
-                Gold
-              </Button>
-              <Button 
-                variant={selectedPreset === 'purple' ? 'default' : 'outline'}
-                onClick={() => handlePresetChange('purple')}
-                className="flex flex-col h-16"
-              >
-                <div className="w-6 h-3 bg-purple-600 border rounded mb-1"></div>
-                Purple
-              </Button>
-              <Button 
-                variant={selectedPreset === 'red' ? 'default' : 'outline'}
-                onClick={() => handlePresetChange('red')}
-                className="flex flex-col h-16"
-              >
-                <div className="w-6 h-3 bg-red-600 border rounded mb-1"></div>
-                Red
+                <div className="w-full h-4 bg-gradient-to-r from-amber-400 to-amber-600 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Vintage</span>
               </Button>
               {selectedPreset === 'custom' && (
                 <div className="flex items-center justify-center border border-dashed rounded h-16">
@@ -803,7 +835,7 @@ const CustomizationSettings = () => {
               {/* Item Display Style - Compact buttons only */}
               <div>
                 <Label className="text-base font-medium mb-3 block">Item Display Style</Label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <Button 
                     variant={selectedLayoutStyle === 'compact' ? 'default' : 'outline'}
                     onClick={() => handleLayoutStyleChange('compact')}
@@ -843,6 +875,30 @@ const CustomizationSettings = () => {
                   >
                     <div className="w-6 h-3 bg-gray-200 border rounded mb-1"></div>
                     Magazine
+                  </Button>
+                  <Button 
+                    variant={selectedLayoutStyle === 'modern-card' ? 'default' : 'outline'}
+                    onClick={() => handleLayoutStyleChange('modern-card')}
+                    className="flex flex-col h-16"
+                  >
+                    <div className="w-6 h-3 bg-gradient-to-br from-gray-100 to-gray-200 border rounded mb-1"></div>
+                    Modern
+                  </Button>
+                  <Button 
+                    variant={selectedLayoutStyle === 'elegant-list' ? 'default' : 'outline'}
+                    onClick={() => handleLayoutStyleChange('elegant-list')}
+                    className="flex flex-col h-16"
+                  >
+                    <div className="w-6 h-3 bg-gray-200 border-l-2 border-l-blue-500 rounded mb-1"></div>
+                    Elegant
+                  </Button>
+                  <Button 
+                    variant={selectedLayoutStyle === 'photo-focus' ? 'default' : 'outline'}
+                    onClick={() => handleLayoutStyleChange('photo-focus')}
+                    className="flex flex-col h-16"
+                  >
+                    <div className="w-6 h-3 bg-gradient-to-br from-gray-300 to-gray-400 border rounded mb-1"></div>
+                    Photo
                   </Button>
                 </div>
               </div>

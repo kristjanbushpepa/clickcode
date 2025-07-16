@@ -14,7 +14,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -35,21 +35,21 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-card/80 backdrop-blur-md shadow-lg border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <Building2 className="h-8 w-8 text-blue-600" />
+              <Building2 className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 10px hsl(var(--primary) / 0.3))' }} />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Digital Menu Admin</h1>
-                <p className="text-sm text-gray-500">Restaurant Management System</p>
+                <h1 className="text-2xl font-bold text-foreground">Digital Menu Admin</h1>
+                <p className="text-sm text-muted-foreground">Restaurant Management System</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">Welcome, {user.email}</span>
-              <Button variant="ghost" size="sm" onClick={signOut}>
+              <span className="text-sm text-muted-foreground">Welcome, {user.email}</span>
+              <Button variant="ghost" size="sm" onClick={signOut} className="hover:bg-secondary">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </Button>
@@ -62,41 +62,45 @@ const AdminDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center">
-              <Building2 className="h-8 w-8 text-blue-600" />
+              <Building2 className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Restaurants</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Restaurants</p>
+                <p className="text-2xl font-bold text-foreground">0</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-green-600" />
+              <Users className="h-8 w-8 text-accent-foreground" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--accent) / 0.3))' }} />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Active Connections</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
+                <p className="text-sm font-medium text-muted-foreground">Active Connections</p>
+                <p className="text-2xl font-bold text-foreground">0</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center">
-              <Activity className="h-8 w-8 text-purple-600" />
+              <Activity className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Recent Activity</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
+                <p className="text-sm font-medium text-muted-foreground">Recent Activity</p>
+                <p className="text-2xl font-bold text-foreground">0</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Restaurant Management Section */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl border border-border">
+          <div className="px-6 py-4 border-b border-border">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-medium text-gray-900">Restaurants</h2>
-              <Button onClick={() => setShowAddDialog(true)}>
+              <h2 className="text-lg font-medium text-foreground">Restaurants</h2>
+              <Button 
+                onClick={() => setShowAddDialog(true)} 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+                style={{ boxShadow: 'var(--glow-primary)' }}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Restaurant
               </Button>

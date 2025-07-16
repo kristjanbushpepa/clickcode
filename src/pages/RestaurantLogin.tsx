@@ -100,14 +100,15 @@ const RestaurantLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 px-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"></div>
+      <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-md border-border shadow-2xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Building2 className="h-12 w-12 text-green-600" />
+            <Building2 className="h-12 w-12 text-primary" style={{ filter: 'drop-shadow(0 0 10px hsl(var(--primary) / 0.3))' }} />
           </div>
-          <CardTitle className="text-2xl font-bold">Restaurant Login</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-bold text-foreground">Restaurant Login</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Sign in to access your restaurant's digital menu dashboard
           </CardDescription>
         </CardHeader>
@@ -169,8 +170,9 @@ const RestaurantLogin = () => {
 
             <Button 
               type="submit" 
-              className="w-full bg-green-600 hover:bg-green-700"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
               disabled={isLoading}
+              style={{ boxShadow: 'var(--glow-primary)' }}
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>

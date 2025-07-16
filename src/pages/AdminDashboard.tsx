@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,8 +7,9 @@ import AdminSetup from '@/components/admin/AdminSetup';
 import RestaurantList from '@/components/admin/RestaurantList';
 import AddRestaurantDialog from '@/components/admin/AddRestaurantDialog';
 import CompanySettings from '@/components/admin/CompanySettings';
+import { DatabaseMonitoring } from '@/components/admin/DatabaseMonitoring';
 import { Button } from '@/components/ui/button';
-import { Plus, LogOut, Users, Building2, Activity, Settings } from 'lucide-react';
+import { Plus, LogOut, Users, Building2, Activity, Settings, Database } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user, isAdmin, hasAdminUsers, signOut, loading } = useAuth();
@@ -78,6 +80,16 @@ const AdminDashboard = () => {
               Dashboard
             </Link>
             <Link 
+              to="/admin/database-monitoring" 
+              className={`border-b-2 py-4 px-1 text-sm font-medium ${
+                location.pathname === '/admin/database-monitoring' 
+                  ? 'border-primary text-primary' 
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+              }`}
+            >
+              Database Monitoring
+            </Link>
+            <Link 
               to="/admin/company-settings" 
               className={`border-b-2 py-4 px-1 text-sm font-medium ${
                 location.pathname === '/admin/company-settings' 
@@ -146,6 +158,7 @@ const AdminDashboard = () => {
               </div>
             </>
           } />
+          <Route path="/database-monitoring" element={<DatabaseMonitoring />} />
           <Route path="/company-settings" element={<CompanySettings />} />
         </Routes>
       </main>

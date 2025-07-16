@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminSetup from '@/components/admin/AdminSetup';
@@ -12,6 +12,7 @@ import { Plus, LogOut, Users, Building2, Activity, Settings } from 'lucide-react
 const AdminDashboard = () => {
   const { user, isAdmin, hasAdminUsers, signOut, loading } = useAuth();
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const location = useLocation();
 
   console.log('AdminDashboard - Auth state:', { user: user?.email, isAdmin, hasAdminUsers, loading });
 
@@ -66,12 +67,26 @@ const AdminDashboard = () => {
       <nav className="bg-card/50 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
-            <a href="#" className="border-b-2 border-primary text-primary py-4 px-1 text-sm font-medium">
+            <Link 
+              to="/admin" 
+              className={`border-b-2 py-4 px-1 text-sm font-medium ${
+                location.pathname === '/admin' 
+                  ? 'border-primary text-primary' 
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+              }`}
+            >
               Dashboard
-            </a>
-            <a href="#company-settings" className="border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300 py-4 px-1 text-sm font-medium">
+            </Link>
+            <Link 
+              to="/admin/company-settings" 
+              className={`border-b-2 py-4 px-1 text-sm font-medium ${
+                location.pathname === '/admin/company-settings' 
+                  ? 'border-primary text-primary' 
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+              }`}
+            >
               Company Settings
-            </a>
+            </Link>
           </div>
         </div>
       </nav>

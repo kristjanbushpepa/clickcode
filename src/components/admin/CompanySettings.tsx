@@ -42,27 +42,40 @@ const CompanySettings = () => {
     }
   });
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading, error } = useQuery({
     queryKey: ['company-settings'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('company_settings')
         .select('*')
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
-      return data as CompanySettings;
+      return data as CompanySettings | null;
     },
   });
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: Partial<CompanySettings>) => {
-      const { error } = await supabase
-        .from('company_settings')
-        .update(data)
-        .eq('id', formData.id);
-      
-      if (error) throw error;
+      if (settings?.id) {
+        // Update existing record
+        const { error } = await supabase
+          .from('company_settings')
+          .update(data)
+          .eq('id', settings.id);
+        
+        if (error) throw error;
+      } else {
+        // Create new record
+        const { error } = await supabase
+          .from('company_settings')
+          .insert({
+            ...data,
+            company_name: data.company_name || 'Click Code'
+          });
+        
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['company-settings'] });
@@ -120,6 +133,17 @@ const CompanySettings = () => {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">Error loading company settings:</p>
+          <p className="text-sm text-gray-600">{error.message}</p>
+        </div>
       </div>
     );
   }

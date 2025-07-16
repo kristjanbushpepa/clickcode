@@ -18,6 +18,7 @@ import { PopupModal } from '@/components/menu/PopupModal';
 import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import MenuItemPopup from '@/components/menu/MenuItemPopup';
+
 interface Category {
   id: string;
   name: string;
@@ -27,6 +28,7 @@ interface Category {
   display_order: number;
   is_active: boolean;
 }
+
 interface MenuItem {
   id: string;
   category_id: string;
@@ -44,6 +46,7 @@ interface MenuItem {
   preparation_time?: number;
   display_order: number;
 }
+
 interface RestaurantProfile {
   id: string;
   name: string;
@@ -51,6 +54,7 @@ interface RestaurantProfile {
   address?: string;
   phone?: string;
   email?: string;
+  website?: string;
   logo_url?: string;
   banner_url?: string;
   logo_path?: string;
@@ -62,6 +66,7 @@ interface RestaurantProfile {
     whatsapp?: string;
   };
 }
+
 interface MenuTheme {
   mode: 'light' | 'dark';
   primaryColor: string;
@@ -77,12 +82,14 @@ interface MenuTheme {
   descriptionColor?: string;
   priceColor?: string;
 }
+
 interface Restaurant {
   id: string;
   name: string;
   supabase_url: string;
   supabase_anon_key: string;
 }
+
 const EnhancedMenu = () => {
   const {
     restaurantName
@@ -440,7 +447,9 @@ const EnhancedMenu = () => {
                 {profile?.social_media_links?.facebook && <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer" className="hover-lift">
                     <Facebook className="h-4 w-4 opacity-80 hover:opacity-100" />
                   </a>}
-                {profile?.social_media_links?.google_maps || profile?.email}
+                {profile?.website && <a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover-lift">
+                    <Globe className="h-4 w-4 opacity-80 hover:opacity-100" />
+                  </a>}
               </div>}
           </div>
         </div>
@@ -580,4 +589,5 @@ const EnhancedMenu = () => {
       {selectedMenuItem && <MenuItemPopup item={selectedMenuItem} isOpen={!!selectedMenuItem} onClose={() => setSelectedMenuItem(null)} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} customTheme={customTheme} />}
     </div>;
 };
+
 export default EnhancedMenu;

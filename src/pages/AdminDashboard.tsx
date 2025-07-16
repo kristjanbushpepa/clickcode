@@ -13,6 +13,8 @@ const AdminDashboard = () => {
   const { user, isAdmin, hasAdminUsers, signOut, loading } = useAuth();
   const [showAddDialog, setShowAddDialog] = useState(false);
 
+  console.log('AdminDashboard - Auth state:', { user: user?.email, isAdmin, hasAdminUsers, loading });
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

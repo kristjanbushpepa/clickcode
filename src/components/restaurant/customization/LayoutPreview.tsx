@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock } from 'lucide-react';
 
 interface LayoutPreviewProps {
-  layoutStyle: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine';
+  layoutStyle: 'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus';
 }
 
 const LayoutPreview = ({ layoutStyle }: LayoutPreviewProps) => {
@@ -95,6 +95,78 @@ const LayoutPreview = ({ layoutStyle }: LayoutPreviewProps) => {
               </div>
               <div className="w-20 h-20 bg-gray-200 rounded"></div>
             </div>
+          </div>
+        );
+
+      case 'modern-card':
+        return (
+          <div className="space-y-4">
+            <Card className="overflow-hidden border-0 shadow-lg rounded-2xl">
+              <div className="relative">
+                <div className="w-full h-20 bg-gradient-to-br from-gray-100 to-gray-200"></div>
+                <div className="absolute top-2 right-2">
+                  <Badge variant="secondary" className="text-xs backdrop-blur-sm bg-blue-500/90 text-white">
+                    €18.50
+                  </Badge>
+                </div>
+              </div>
+              <div className="p-3">
+                <h4 className="font-semibold text-sm mb-2">Grilled Salmon</h4>
+                <p className="text-xs text-muted-foreground mb-3">Fresh Atlantic salmon grilled to perfection</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    15min
+                  </div>
+                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        );
+
+      case 'elegant-list':
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center gap-4 p-3 rounded-lg border-l-4 border-l-blue-500 bg-gray-50">
+              <div className="w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex-shrink-0"></div>
+              <div className="flex-1">
+                <div className="flex items-start justify-between mb-1">
+                  <h4 className="font-medium text-sm">Grilled Salmon</h4>
+                  <span className="text-sm font-semibold text-blue-600">€18.50</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-2">Fresh Atlantic salmon grilled to perfection</p>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  15min
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'photo-focus':
+        return (
+          <div className="space-y-4">
+            <Card className="overflow-hidden">
+              <div className="relative">
+                <div className="w-full h-24 bg-gradient-to-br from-gray-100 to-gray-200"></div>
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent text-white">
+                  <h4 className="font-semibold text-sm mb-1">Grilled Salmon</h4>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-xs">
+                      <Clock className="h-3 w-3" />
+                      15min
+                    </div>
+                    <span className="text-sm font-semibold">€18.50</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3">
+                <p className="text-xs text-muted-foreground">Fresh Atlantic salmon grilled to perfection with herbs and lemon.</p>
+              </div>
+            </Card>
           </div>
         );
 

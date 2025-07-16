@@ -31,9 +31,7 @@ const RestaurantDashboard = () => {
               <Route path="/translations" element={<TranslationManager />} />
               <Route path="/qr-generator" element={<QRCodeGenerator />} />
               <Route path="/popup" element={<PopupSettings />} />
-              <Route path="/analytics" element={<div>Analytics (Coming Soon)</div>} />
               <Route path="/customization" element={<CustomizationSettings />} />
-              <Route path="/settings" element={<div>Settings (Coming Soon)</div>} />
             </Routes>
           </main>
         </div>

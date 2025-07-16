@@ -18,8 +18,38 @@ interface Restaurant {
   created_at: string;
 }
 
+interface CompanySettings {
+  id: string;
+  company_name: string;
+  logo_url?: string;
+  google_form_url?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  social_media?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    website?: string;
+  };
+}
+
 const Index = () => {
   const navigate = useNavigate();
+  
+  // Fetch company settings
+  const { data: companySettings } = useQuery({
+    queryKey: ['company-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('company_settings')
+        .select('*')
+        .single();
+      
+      if (error) throw error;
+      return data as CompanySettings;
+    },
+  });
+
   const { data: restaurants, isLoading } = useQuery({
     queryKey: ['public-restaurants'],
     queryFn: async () => {
@@ -41,6 +71,17 @@ const Index = () => {
     }
   };
 
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById('features-section');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handlePricingClick = () => {
+    navigate('/contact');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -57,16 +98,31 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img 
-                src="/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png" 
-                alt="Click Code Logo" 
+                src={companySettings?.logo_url || "/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png"}
+                alt={`${companySettings?.company_name || 'Click Code'} Logo`}
                 className="h-8 w-8 sm:h-10 sm:w-10"
               />
-              <span className="text-xl sm:text-2xl font-bold text-primary">Click Code</span>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Button variant="ghost" className="text-foreground hover:text-primary text-sm sm:text-base">Features</Button>
-              <Button variant="ghost" className="text-foreground hover:text-primary text-sm sm:text-base">Pricing</Button>
-              <Button variant="outline" className="border-primary text-primary hover:bg-primary/10 text-sm sm:text-base px-3 sm:px-4">
+              <Button 
+                variant="ghost" 
+                className="text-foreground hover:text-primary text-sm sm:text-base"
+                onClick={scrollToFeatures}
+              >
+                Features
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="text-foreground hover:text-primary text-sm sm:text-base"
+                onClick={handlePricingClick}
+              >
+                Pricing
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-primary text-primary hover:bg-primary/10 text-sm sm:text-base px-3 sm:px-4"
+                onClick={() => navigate('/contact')}
+              >
                 Contact Us
               </Button>
             </div>
@@ -81,14 +137,14 @@ const Index = () => {
           <div className="max-w-4xl mx-auto">
             <div className="relative inline-block mb-6 sm:mb-8">
               <img 
-                src="/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png" 
-                alt="Click Code Hero Logo" 
+                src={companySettings?.logo_url || "/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png"}
+                alt={`${companySettings?.company_name || 'Click Code'} Hero Logo`}
                 className="h-16 w-16 sm:h-24 sm:w-24 mx-auto filter drop-shadow-lg"
                 style={{ filter: 'drop-shadow(0 0 15px hsl(var(--primary) / 0.3))' }}
               />
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-4 sm:mb-6">
-              Welcome to <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Click Code</span>
+              Welcome to <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{companySettings?.company_name || 'Click Code'}</span>
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
               Transform your restaurant with our cutting-edge digital menu platform. Create stunning QR code menus, 
@@ -117,7 +173,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 sm:py-16 bg-card/50">
+      <section id="features-section" className="py-12 sm:py-16 bg-card/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -298,11 +354,11 @@ const Index = () => {
             <div className="sm:col-span-2 lg:col-span-2 text-center sm:text-left">
               <div className="flex items-center justify-center sm:justify-start mb-4">
                 <img 
-                  src="/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png" 
-                  alt="Click Code" 
+                  src={companySettings?.logo_url || "/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png"}
+                  alt={companySettings?.company_name || 'Click Code'}
                   className="h-6 sm:h-8 w-auto mr-2 sm:mr-3"
                 />
-                <span className="text-xl sm:text-2xl font-bold text-primary">Click Code</span>
+                <span className="text-xl sm:text-2xl font-bold text-primary">{companySettings?.company_name || 'Click Code'}</span>
               </div>
               <p className="text-muted-foreground mb-4 text-sm sm:text-base max-w-md mx-auto sm:mx-0">
                 The most advanced digital menu platform for modern restaurants. Increase engagement, 
@@ -335,7 +391,7 @@ const Index = () => {
           
           <div className="border-t border-border pt-6 sm:pt-8 text-center">
             <p className="text-sm text-muted-foreground">
-              © 2024 Click Code. All rights reserved. Building the future of digital dining.
+              © 2024 {companySettings?.company_name || 'Click Code'}. All rights reserved. Building the future of digital dining.
             </p>
           </div>
         </div>

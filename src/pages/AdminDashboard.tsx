@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminSetup from '@/components/admin/AdminSetup';
 import RestaurantList from '@/components/admin/RestaurantList';
 import AddRestaurantDialog from '@/components/admin/AddRestaurantDialog';
+import CompanySettings from '@/components/admin/CompanySettings';
 import { Button } from '@/components/ui/button';
-import { Plus, LogOut, Users, Building2, Activity } from 'lucide-react';
+import { Plus, LogOut, Users, Building2, Activity, Settings } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user, isAdmin, hasAdminUsers, signOut, loading } = useAuth();
@@ -58,56 +60,77 @@ const AdminDashboard = () => {
         </div>
       </header>
 
+      {/* Navigation */}
+      <nav className="bg-card/50 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8">
+            <a href="#" className="border-b-2 border-primary text-primary py-4 px-1 text-sm font-medium">
+              Dashboard
+            </a>
+            <a href="#company-settings" className="border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300 py-4 px-1 text-sm font-medium">
+              Company Settings
+            </a>
+          </div>
+        </div>
+      </nav>
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
-            <div className="flex items-center">
-              <Building2 className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Total Restaurants</p>
-                <p className="text-2xl font-bold text-foreground">0</p>
+        <Routes>
+          <Route path="/" element={
+            <>
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-center">
+                    <Building2 className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Total Restaurants</p>
+                      <p className="text-2xl font-bold text-foreground">0</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-center">
+                    <Users className="h-8 w-8 text-accent-foreground" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--accent) / 0.3))' }} />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Active Connections</p>
+                      <p className="text-2xl font-bold text-foreground">0</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-center">
+                    <Activity className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Recent Activity</p>
+                      <p className="text-2xl font-bold text-foreground">0</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
-            <div className="flex items-center">
-              <Users className="h-8 w-8 text-accent-foreground" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--accent) / 0.3))' }} />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Active Connections</p>
-                <p className="text-2xl font-bold text-foreground">0</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
-            <div className="flex items-center">
-              <Activity className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Recent Activity</p>
-                <p className="text-2xl font-bold text-foreground">0</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Restaurant Management Section */}
-        <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl border border-border">
-          <div className="px-6 py-4 border-b border-border">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-medium text-foreground">Restaurants</h2>
-              <Button 
-                onClick={() => setShowAddDialog(true)} 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
-                style={{ boxShadow: 'var(--glow-primary)' }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Restaurant
-              </Button>
-            </div>
-          </div>
-          <RestaurantList />
-        </div>
+              {/* Restaurant Management Section */}
+              <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl border border-border">
+                <div className="px-6 py-4 border-b border-border">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-medium text-foreground">Restaurants</h2>
+                    <Button 
+                      onClick={() => setShowAddDialog(true)} 
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+                      style={{ boxShadow: 'var(--glow-primary)' }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Restaurant
+                    </Button>
+                  </div>
+                </div>
+                <RestaurantList />
+              </div>
+            </>
+          } />
+          <Route path="/company-settings" element={<CompanySettings />} />
+        </Routes>
       </main>
 
       <AddRestaurantDialog 

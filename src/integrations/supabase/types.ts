@@ -92,6 +92,42 @@ export type Database = {
         }
         Relationships: []
       }
+      company_settings: {
+        Row: {
+          company_name: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          google_form_url: string | null
+          id: string
+          logo_url: string | null
+          social_media: Json | null
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          google_form_url?: string | null
+          id?: string
+          logo_url?: string | null
+          social_media?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          google_form_url?: string | null
+          id?: string
+          logo_url?: string | null
+          social_media?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       restaurants: {
         Row: {
           address: string | null

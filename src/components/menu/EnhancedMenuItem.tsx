@@ -47,6 +47,7 @@ interface EnhancedMenuItemProps {
   categoryName?: string;
   isCompact?: boolean;
   index?: number;
+  onClick?: (item: MenuItem) => void;
 }
 
 const LazyImage = ({ src, alt, className, onLoad }: { 
@@ -106,7 +107,8 @@ export const EnhancedMenuItem = ({
   getMenuItemImageUrl,
   categoryName,
   isCompact = false,
-  index = 0
+  index = 0,
+  onClick
 }: EnhancedMenuItemProps) => {
   const itemImageUrl = getMenuItemImageUrl(item);
   
@@ -137,8 +139,9 @@ export const EnhancedMenuItem = ({
       case 'compact':
         return (
           <Card 
-            className="menu-card"
+            className="menu-card cursor-pointer hover:shadow-md transition-shadow"
             style={cardStyles}
+            onClick={() => onClick?.(item)}
           >
             <CardContent className="p-3">
               <div className="flex justify-between items-start gap-3">
@@ -197,8 +200,9 @@ export const EnhancedMenuItem = ({
       case 'card-grid':
         return (
           <Card 
-            className="menu-card"
+            className="menu-card cursor-pointer hover:shadow-md transition-shadow"
             style={cardStyles}
+            onClick={() => onClick?.(item)}
           >
             {itemImageUrl && (
               <div className="relative">
@@ -255,8 +259,9 @@ export const EnhancedMenuItem = ({
       case 'image-focus':
         return (
           <Card 
-            className="menu-card"
+            className="menu-card cursor-pointer hover:shadow-md transition-shadow"
             style={cardStyles}
+            onClick={() => onClick?.(item)}
           >
             {itemImageUrl && (
               <div className="relative">
@@ -320,7 +325,8 @@ export const EnhancedMenuItem = ({
       case 'minimal':
         return (
           <div 
-            className="border-b pb-3 mb-3 hover:bg-muted/20 transition-colors px-2 -mx-2 rounded"
+            className="border-b pb-3 mb-3 hover:bg-muted/20 transition-colors px-2 -mx-2 rounded cursor-pointer"
+            onClick={() => onClick?.(item)}
           >
             <div className="flex items-start justify-between mb-1 gap-2">
               <div className="flex items-center gap-2">
@@ -359,8 +365,9 @@ export const EnhancedMenuItem = ({
       case 'magazine':
         return (
           <Card 
-            className="menu-card"
+            className="menu-card cursor-pointer hover:shadow-md transition-shadow"
             style={cardStyles}
+            onClick={() => onClick?.(item)}
           >
             <CardContent className="p-4">
               <div className="flex gap-4">

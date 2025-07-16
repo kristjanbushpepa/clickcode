@@ -30,6 +30,7 @@ import { MenuFooter } from '@/components/menu/MenuFooter';
 import { PopupModal } from '@/components/menu/PopupModal';
 import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
+import MenuItemPopup from '@/components/menu/MenuItemPopup';
 
 interface Category {
   id: string;
@@ -111,6 +112,7 @@ const EnhancedMenu = () => {
   const [restaurantSupabase, setRestaurantSupabase] = useState<any>(null);
   const [layoutPreference, setLayoutPreference] = useState<'categories' | 'items'>('items');
   const [layoutStyle, setLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
+  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
 
   // Restaurant lookup query
   const { data: restaurant, isLoading: restaurantLoading, error: restaurantError } = useQuery({
@@ -392,6 +394,10 @@ const EnhancedMenu = () => {
     return item[languageField] || item[field] || '';
   }, [currentLanguage]);
 
+  const handleMenuItemClick = useCallback((item: MenuItem) => {
+    setSelectedMenuItem(item);
+  }, []);
+
   // Theme styles
   const themeStyles = useMemo(() => customTheme ? {
     backgroundColor: customTheme.backgroundColor,
@@ -595,18 +601,19 @@ const EnhancedMenu = () => {
               ) : (
                 <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
                   {filteredMenuItems.map((item, index) => (
-                    <EnhancedMenuItem
-                      key={item.id}
-                      item={item}
-                      layoutStyle={layoutStyle}
-                      customTheme={customTheme}
-                      formatPrice={formatPrice}
-                      getLocalizedText={getLocalizedText}
-                      getMenuItemImageUrl={getMenuItemImageUrl}
-                      categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name}
-                      isCompact={true}
-                      index={index}
-                    />
+                     <EnhancedMenuItem
+                       key={item.id}
+                       item={item}
+                       layoutStyle={layoutStyle}
+                       customTheme={customTheme}
+                       formatPrice={formatPrice}
+                       getLocalizedText={getLocalizedText}
+                       getMenuItemImageUrl={getMenuItemImageUrl}
+                       categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name}
+                       isCompact={true}
+                       index={index}
+                       onClick={handleMenuItemClick}
+                     />
                   ))}
                 </div>
               )}
@@ -717,17 +724,18 @@ const EnhancedMenu = () => {
               ) : (
                 <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
                   {filteredMenuItems.map((item, index) => (
-                    <EnhancedMenuItem
-                      key={item.id}
-                      item={item}
-                      layoutStyle={layoutStyle}
-                      customTheme={customTheme}
-                      formatPrice={formatPrice}
-                      getLocalizedText={getLocalizedText}
-                      getMenuItemImageUrl={getMenuItemImageUrl}
-                      categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name}
-                      index={index}
-                    />
+                     <EnhancedMenuItem
+                       key={item.id}
+                       item={item}
+                       layoutStyle={layoutStyle}
+                       customTheme={customTheme}
+                       formatPrice={formatPrice}
+                       getLocalizedText={getLocalizedText}
+                       getMenuItemImageUrl={getMenuItemImageUrl}
+                       categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name}
+                       index={index}
+                       onClick={handleMenuItemClick}
+                     />
                   ))}
                 </div>
               )}
@@ -749,18 +757,19 @@ const EnhancedMenu = () => {
                   ) : (
                     <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
                       {categoryItems.map((item, index) => (
-                        <EnhancedMenuItem
-                          key={item.id}
-                          item={item}
-                          layoutStyle={layoutStyle}
-                          customTheme={customTheme}
-                          formatPrice={formatPrice}
-                          getLocalizedText={getLocalizedText}
-                          getMenuItemImageUrl={getMenuItemImageUrl}
-                          categoryName={getLocalizedText(category, 'name')}
-                          isCompact={true}
-                          index={index}
-                        />
+                         <EnhancedMenuItem
+                           key={item.id}
+                           item={item}
+                           layoutStyle={layoutStyle}
+                           customTheme={customTheme}
+                           formatPrice={formatPrice}
+                           getLocalizedText={getLocalizedText}
+                           getMenuItemImageUrl={getMenuItemImageUrl}
+                           categoryName={getLocalizedText(category, 'name')}
+                           isCompact={true}
+                           index={index}
+                           onClick={handleMenuItemClick}
+                         />
                       ))}
                     </div>
                   )}
@@ -778,6 +787,20 @@ const EnhancedMenu = () => {
         <PopupModal 
           settings={popupSettings}
           restaurantName={restaurant.name}
+        />
+      )}
+
+      {/* Menu Item Detail Popup */}
+      {selectedMenuItem && (
+        <MenuItemPopup
+          item={selectedMenuItem}
+          isOpen={!!selectedMenuItem}
+          onClose={() => setSelectedMenuItem(null)}
+          formatPrice={formatPrice}
+          getLocalizedText={getLocalizedText}
+          getMenuItemImageUrl={getMenuItemImageUrl}
+          categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name}
+          customTheme={customTheme}
         />
       )}
     </div>

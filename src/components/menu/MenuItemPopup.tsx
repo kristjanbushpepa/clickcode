@@ -82,20 +82,20 @@ const MenuItemPopup: React.FC<MenuItemPopupProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={dialogStyles}>
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2" style={titleStyles}>
+      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto p-4 m-4" style={dialogStyles}>
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg font-bold flex items-center gap-2" style={titleStyles}>
             {getLocalizedText(item, 'name')}
             {item.is_featured && (
-              <Star className="h-5 w-5 text-yellow-500 fill-current" />
+              <Star className="h-4 w-4 text-yellow-500 fill-current" />
             )}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Image */}
           {itemImageUrl && (
-            <div className="w-full h-64 md:h-80 rounded-lg overflow-hidden">
+            <div className="w-full h-48 rounded-lg overflow-hidden">
               <img 
                 src={itemImageUrl} 
                 alt={getLocalizedText(item, 'name')}
@@ -104,58 +104,45 @@ const MenuItemPopup: React.FC<MenuItemPopupProps> = ({
             </div>
           )}
 
-          {/* Price and Basic Info */}
+          {/* Price and Time Row */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge 
-                variant="secondary" 
-                className="text-lg font-semibold px-3 py-1"
-                style={priceStyles}
-              >
-                {formatPrice(item.price, item.currency)}
-              </Badge>
+            <Badge 
+              variant="secondary" 
+              className="text-base font-semibold px-2 py-1"
+              style={priceStyles}
+            >
+              {formatPrice(item.price, item.currency)}
+            </Badge>
+            
+            <div className="flex items-center gap-3">
+              {item.preparation_time && (
+                <div className="flex items-center gap-1 text-sm" style={descriptionStyles}>
+                  <Clock className="h-3 w-3" />
+                  {item.preparation_time}min
+                </div>
+              )}
               {item.is_featured && (
-                <Badge className="bg-yellow-500/90 text-black text-sm font-medium">
+                <Badge className="bg-yellow-500/90 text-black text-xs px-2">
                   Featured
                 </Badge>
               )}
             </div>
-            
-            {item.preparation_time && (
-              <div className="flex items-center gap-1 text-sm" style={descriptionStyles}>
-                <Clock className="h-4 w-4" />
-                {item.preparation_time} min
-              </div>
-            )}
           </div>
-
-          {/* Category */}
-          {categoryName && (
-            <div className="flex items-center gap-2">
-              <Tag className="h-4 w-4" style={descriptionStyles} />
-              <Badge variant="outline" className="text-sm">
-                {categoryName}
-              </Badge>
-            </div>
-          )}
 
           {/* Description */}
           {getLocalizedText(item, 'description') && (
-            <div>
-              <h4 className="font-medium mb-2" style={titleStyles}>Description</h4>
-              <p className="leading-relaxed" style={descriptionStyles}>
-                {getLocalizedText(item, 'description')}
-              </p>
-            </div>
+            <p className="text-sm leading-relaxed" style={descriptionStyles}>
+              {getLocalizedText(item, 'description')}
+            </p>
           )}
 
           {/* Allergens */}
           {item.allergens && item.allergens.length > 0 && (
             <div>
-              <h4 className="font-medium mb-2" style={titleStyles}>Allergens</h4>
-              <div className="flex flex-wrap gap-2">
+              <div className="text-sm font-medium mb-1" style={titleStyles}>Allergens</div>
+              <div className="flex flex-wrap gap-1">
                 {item.allergens.map((allergen, index) => (
-                  <Badge key={index} variant="destructive" className="text-xs">
+                  <Badge key={index} variant="destructive" className="text-xs px-1 py-0">
                     ⚠️ {allergen}
                   </Badge>
                 ))}
@@ -163,13 +150,13 @@ const MenuItemPopup: React.FC<MenuItemPopupProps> = ({
             </div>
           )}
 
-          {/* Item Status */}
-          <div className="flex items-center gap-2 pt-2 border-t" style={{ borderColor: customTheme?.borderColor }}>
+          {/* Status */}
+          <div className="pt-1 border-t" style={{ borderColor: customTheme?.borderColor }}>
             <Badge 
               variant={item.is_available ? "default" : "secondary"}
               className="text-xs"
             >
-              {item.is_available ? "Available" : "Currently Unavailable"}
+              {item.is_available ? "Available" : "Unavailable"}
             </Badge>
           </div>
         </div>

@@ -44,6 +44,20 @@ export function MediaUpload({ register, setValue, watch }: MediaUploadProps) {
   const logoPath = watch('logo_path');
   const bannerPath = watch('banner_path');
 
+  const handleLogoChange = (path: string | null) => {
+    setValue('logo_path', path);
+    if (!path) {
+      setValue('logo_url', undefined);
+    }
+  };
+
+  const handleBannerChange = (path: string | null) => {
+    setValue('banner_path', path);
+    if (!path) {
+      setValue('banner_url', undefined);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -52,20 +66,20 @@ export function MediaUpload({ register, setValue, watch }: MediaUploadProps) {
           Imazhet
         </CardTitle>
         <CardDescription>
-          Ngarkoni logon dhe bannerin e restorantit tuaj
+          Ngarkoni logon dhe bannerin e restorantit tuaj. Mund të fshini imazhet duke klikuar butonin e fshirjes.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ImageUpload
             currentImagePath={logoPath}
-            onImageChange={(path) => setValue('logo_path', path)}
+            onImageChange={handleLogoChange}
             label="Logoja e Restorantit"
           />
 
           <ImageUpload
             currentImagePath={bannerPath}
-            onImageChange={(path) => setValue('banner_path', path)}
+            onImageChange={handleBannerChange}
             label="Banneri i Restorantit"
           />
         </div>

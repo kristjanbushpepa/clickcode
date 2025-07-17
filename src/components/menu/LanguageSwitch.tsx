@@ -50,7 +50,7 @@ export function LanguageSwitch({
   currentLanguage,
   onLanguageChange
 }: LanguageSwitchProps) {
-  // Fetch language settings
+  // Fetch language settings with shorter stale time for better reactivity
   const {
     data: languageSettings
   } = useQuery({
@@ -67,11 +67,21 @@ export function LanguageSwitch({
       }
       return data as LanguageSettings | null;
     },
-    enabled: !!restaurantSupabase
+    enabled: !!restaurantSupabase,
+    staleTime: 30 * 1000, // Reduced to 30 seconds for faster updates
+    refetchInterval: 60 * 1000 // Refetch every minute to catch dashboard changes
   });
 
   const supportedLanguages = languageSettings?.supported_ui_languages || ['sq', 'en'];
   const currentLangData = LANGUAGE_OPTIONS.find(lang => lang.code === currentLanguage);
+
+  // Auto-switch to main language if current language is not supported
+  useEffect(() => {
+    if (languageSettings?.main_ui_language && 
+        !supportedLanguages.includes(currentLanguage)) {
+      onLanguageChange(languageSettings.main_ui_language);
+    }
+  }, [languageSettings, supportedLanguages, currentLanguage, onLanguageChange]);
 
   return (
     <Popover>

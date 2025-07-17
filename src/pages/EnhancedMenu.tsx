@@ -257,10 +257,29 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 0,
-    staleTime: 5 * 60 * 1000
+    staleTime: 30 * 1000 // Reduced for faster customization updates
   });
 
-  // Currency settings query
+  // Language settings query - now separate for better control
+  const {
+    data: languageSettings
+  } = useQuery({
+    queryKey: ['language_settings_menu', restaurant?.supabase_url],
+    queryFn: async () => {
+      if (!restaurantSupabase) return null;
+      const {
+        data,
+        error
+      } = await restaurantSupabase.from('language_settings').select('*').maybeSingle();
+      if (error) return null;
+      return data;
+    },
+    enabled: !!restaurantSupabase,
+    staleTime: 30 * 1000, // Reduced for faster updates
+    refetchInterval: 60 * 1000 // Refetch every minute
+  });
+
+  // Currency settings query - now separate for better control
   const {
     data: currencySettings
   } = useQuery({
@@ -275,7 +294,8 @@ const EnhancedMenu = () => {
       return data;
     },
     enabled: !!restaurantSupabase,
-    staleTime: 5 * 60 * 1000
+    staleTime: 30 * 1000, // Reduced for faster updates
+    refetchInterval: 60 * 1000 // Refetch every minute
   });
 
   // Popup settings query
@@ -320,6 +340,21 @@ const EnhancedMenu = () => {
     enabled: !!restaurantSupabase,
     staleTime: 5 * 60 * 1000
   });
+
+  // Initialize language and currency from settings
+  useEffect(() => {
+    if (languageSettings?.main_ui_language && 
+        languageSettings.supported_ui_languages?.includes(languageSettings.main_ui_language)) {
+      setCurrentLanguage(languageSettings.main_ui_language);
+    }
+  }, [languageSettings]);
+
+  useEffect(() => {
+    if (currencySettings?.default_currency && 
+        currencySettings.enabled_currencies?.includes(currencySettings.default_currency)) {
+      setCurrentCurrency(currencySettings.default_currency);
+    }
+  }, [currencySettings]);
 
   // Apply theme and layout when customization loads
   useEffect(() => {

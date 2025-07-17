@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,7 +50,7 @@ export function CurrencySwitch({
   currentCurrency,
   onCurrencyChange
 }: CurrencySwitchProps) {
-  // Fetch currency settings
+  // Fetch currency settings with shorter stale time for better reactivity
   const {
     data: currencySettings
   } = useQuery({
@@ -67,11 +67,21 @@ export function CurrencySwitch({
       }
       return data as CurrencySettings | null;
     },
-    enabled: !!restaurantSupabase
+    enabled: !!restaurantSupabase,
+    staleTime: 30 * 1000, // Reduced to 30 seconds for faster updates
+    refetchInterval: 60 * 1000 // Refetch every minute to catch dashboard changes
   });
 
   const enabledCurrencies = currencySettings?.enabled_currencies || ['ALL', 'EUR'];
   const currentCurrencyData = CURRENCY_OPTIONS.find(curr => curr.code === currentCurrency);
+
+  // Auto-switch to default currency if current currency is not enabled
+  useEffect(() => {
+    if (currencySettings?.default_currency && 
+        !enabledCurrencies.includes(currentCurrency)) {
+      onCurrencyChange(currencySettings.default_currency);
+    }
+  }, [currencySettings, enabledCurrencies, currentCurrency, onCurrencyChange]);
 
   return (
     <Popover>

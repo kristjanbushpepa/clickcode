@@ -99,25 +99,25 @@ const sunsetTheme: Theme = {
 };
 
 const forestGreenTheme: Theme = {
-  mode: 'light',
-  primaryColor: '#059669',
-  accentColor: '#10b981',
-  backgroundColor: '#f0fdf4',
-  cardBackground: '#ffffff',
-  textColor: '#047857',
-  mutedTextColor: '#6b7280',
-  borderColor: '#bbf7d0',
-  headingColor: '#ffffff',
-  categoryNameColor: '#059669',
-  itemNameColor: '#047857',
-  descriptionColor: '#6b7280',
-  priceColor: '#10b981',
-  languageSwitchBackground: '#059669',
-  languageSwitchBorder: '#10b981',
-  languageSwitchText: '#ffffff',
-  currencySwitchBackground: '#059669',
-  currencySwitchBorder: '#10b981',
-  currencySwitchText: '#ffffff'
+  mode: 'dark',
+  primaryColor: '#2d4a3d',
+  accentColor: '#f2e7c7',
+  backgroundColor: '#1a2e25',
+  cardBackground: '#2d4a3d',
+  textColor: '#f2e7c7',
+  mutedTextColor: '#c7b899',
+  borderColor: '#3d5a4d',
+  headingColor: '#f2e7c7',
+  categoryNameColor: '#f2e7c7',
+  itemNameColor: '#f2e7c7',
+  descriptionColor: '#c7b899',
+  priceColor: '#f2e7c7',
+  languageSwitchBackground: '#2d4a3d',
+  languageSwitchBorder: '#3d5a4d',
+  languageSwitchText: '#f2e7c7',
+  currencySwitchBackground: '#2d4a3d',
+  currencySwitchBorder: '#3d5a4d',
+  currencySwitchText: '#f2e7c7'
 };
 
 const royalPurpleTheme: Theme = {
@@ -496,7 +496,7 @@ const CustomizationSettings = () => {
                 onClick={() => handlePresetChange('forest')}
                 className="flex flex-col h-20 p-2"
               >
-                <div className="w-full h-4 bg-gradient-to-r from-green-400 to-green-600 border rounded mb-1"></div>
+                <div className="w-full h-4 bg-gradient-to-r from-green-800 to-yellow-100 border rounded mb-1"></div>
                 <span className="text-xs font-medium">Forest</span>
               </Button>
               <Button 

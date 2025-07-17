@@ -120,6 +120,20 @@ All colors MUST be HSL.
 
 /* Modern Menu Animations and Effects */
 @layer components {
+  /* Safe area handling for iOS devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .viewport-fill {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+  }
+  
   .menu-card {
     @apply relative overflow-hidden rounded-xl border border-border/60 bg-card 
            backdrop-blur-sm transition-all duration-300 ease-out 

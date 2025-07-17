@@ -518,7 +518,13 @@ const EnhancedMenu = () => {
   // Categories layout
   if (layoutPreference === 'categories') {
     if (selectedCategory) {
-      return <div className="min-h-screen smooth-scroll" style={themeStyles}>
+      return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+          {/* Viewport background fill */}
+          <div 
+            className="fixed inset-0 -z-10" 
+            style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
+          />
+          
           <MenuHeader />
           <div className="px-3 py-3">
             <div className="max-w-sm mx-auto">
@@ -533,7 +539,13 @@ const EnhancedMenu = () => {
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
         </div>;
     }
-    return <div className="min-h-screen smooth-scroll" style={themeStyles}>
+    return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+        {/* Viewport background fill */}
+        <div 
+          className="fixed inset-0 -z-10" 
+          style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
+        />
+        
         <MenuHeader />
         <SearchBar />
         <div className="px-3 pb-6">
@@ -578,7 +590,13 @@ const EnhancedMenu = () => {
   }
 
   // Items layout (default)
-  return <div className="min-h-screen smooth-scroll" style={themeStyles}>
+  return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+      {/* Viewport background fill */}
+      <div 
+        className="fixed inset-0 -z-10" 
+        style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
+      />
+      
       <MenuHeader />
       <div className="px-3 py-3">
         <div className="max-w-sm mx-auto">

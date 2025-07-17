@@ -1,56 +1,28 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { createRestaurantSupabase } from '@/utils/restaurantDatabase';
+import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Facebook, ArrowLeft, Star, MapPin, ChefHat } from 'lucide-react';
-import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameConversion';
-import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
-import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
-import { MenuFooter } from '@/components/menu/MenuFooter';
-import { PopupModal } from '@/components/menu/PopupModal';
-import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
-import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
-import MenuItemPopup from '@/components/menu/MenuItemPopup';
-
-interface PopupSettings {
-  enabled: boolean;
-  type: 'cta' | 'wheel';
-  title: string;
-  description: string;
-  link: string;
-  buttonText: string;
-  showAfterSeconds: number;
-  dailyLimit: number;
-  wheelSettings: {
-    enabled: boolean;
-    unlockType: 'free' | 'link';
-    unlockText: string;
-    unlockButtonText: string;
-    unlockLink: string;
-    rewards: Array<{
-      text: string;
-      chance: number;
-      color: string;
-    }>;
-  };
-}
+import { Search } from 'lucide-react';
+import { Restaurant } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Category {
   id: string;
   name: string;
   name_sq?: string;
+  name_it?: string;
+  name_de?: string;
+  name_fr?: string;
+  name_zh?: string;
   description?: string;
   description_sq?: string;
+  description_it?: string;
+  description_de?: string;
+  description_fr?: string;
+  description_zh?: string;
   display_order: number;
   is_active: boolean;
-  image_url?: string;
   image_path?: string;
 }
 
@@ -59,11 +31,18 @@ interface MenuItem {
   category_id: string;
   name: string;
   name_sq?: string;
+  name_it?: string;
+  name_de?: string;
+  name_fr?: string;
+  name_zh?: string;
   description?: string;
   description_sq?: string;
+  description_it?: string;
+  description_de?: string;
+  description_fr?: string;
+  description_zh?: string;
   price: number;
   currency: string;
-  image_url?: string;
   image_path?: string;
   is_available: boolean;
   is_featured: boolean;
@@ -72,782 +51,231 @@ interface MenuItem {
   display_order: number;
 }
 
-interface RestaurantProfile {
-  id: string;
-  name: string;
-  description?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  website?: string;
-  logo_url?: string;
-  banner_url?: string;
-  logo_path?: string;
-  banner_path?: string;
-  social_media_links?: {
-    instagram?: string;
-    facebook?: string;
-    tiktok?: string;
-    whatsapp?: string;
-  };
-}
-
-interface MenuTheme {
-  mode: 'light' | 'dark';
-  primaryColor: string;
-  accentColor: string;
-  backgroundColor: string;
-  cardBackground: string;
-  textColor: string;
-  mutedTextColor: string;
-  borderColor: string;
-  headingColor?: string;
-  categoryNameColor?: string;
-  itemNameColor?: string;
-  itemCategoryNameColor?: string;
-  descriptionColor?: string;
-  priceColor?: string;
-}
-
-interface Restaurant {
-  id: string;
-  name: string;
-  supabase_url: string;
-  supabase_anon_key: string;
-}
-
-const EnhancedMenu = () => {
-  const {
-    restaurantName
-  } = useParams();
+export default function EnhancedMenu() {
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [customTheme, setCustomTheme] = useState<MenuTheme | null>(null);
-  const [currentLanguage, setCurrentLanguage] = useState('sq');
-  const [currentCurrency, setCurrentCurrency] = useState('ALL');
-  const [restaurantSupabase, setRestaurantSupabase] = useState<any>(null);
-  const [layoutPreference, setLayoutPreference] = useState<'categories' | 'items'>('items');
-  const [layoutStyle, setLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
-  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
+  const { currentLanguage } = useLanguage();
+  const [restaurantSupabase, setRestaurantSupabase] = useState(getRestaurantSupabase());
 
-  // Restaurant lookup query
-  const {
-    data: restaurant,
-    isLoading: restaurantLoading,
-    error: restaurantError
-  } = useQuery({
-    queryKey: ['restaurant-lookup', restaurantName],
-    queryFn: async () => {
-      if (!restaurantName) throw new Error('Restaurant name not provided');
-      const possibleNames = generatePossibleNames(restaurantName);
-      for (const name of possibleNames) {
-        const {
-          data,
-          error
-        } = await supabase.from('restaurants').select('id, name, supabase_url, supabase_anon_key').eq('name', name).maybeSingle();
-        if (data && !error) {
-          return data as Restaurant;
-        }
-      }
-      const convertedName = convertUrlToRestaurantName(restaurantName);
-      const {
-        data,
-        error
-      } = await supabase.from('restaurants').select('id, name, supabase_url, supabase_anon_key').ilike('name', `%${convertedName}%`).maybeSingle();
-      if (error || !data) {
-        throw new Error(`Restaurant "${restaurantName}" not found`);
-      }
-      return data as Restaurant;
-    },
-    enabled: !!restaurantName,
-    retry: 1,
-    staleTime: 5 * 60 * 1000 // 5 minutes
-  });
-
-  // Create restaurant supabase client
   useEffect(() => {
-    if (restaurant) {
-      const client = createRestaurantSupabase(restaurant.supabase_url, restaurant.supabase_anon_key);
-      setRestaurantSupabase(client);
-    }
-  }, [restaurant]);
-
-  // Profile query
-  const {
-    data: profile,
-    isLoading: profileLoading
-  } = useQuery({
-    queryKey: ['restaurant-profile', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) throw new Error('Restaurant database not available');
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('restaurant_profile').select('*').single();
-      if (error) throw error;
-      return data as RestaurantProfile;
-    },
-    enabled: !!restaurantSupabase,
-    retry: 1,
-    staleTime: 5 * 60 * 1000
-  });
-
-  // Categories query - now includes image fields
-  const {
-    data: categories = [],
-    isLoading: categoriesLoading
-  } = useQuery({
-    queryKey: ['categories', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return [];
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('categories').select('*').eq('is_active', true).order('display_order');
-      if (error) return [];
-      return data as Category[];
-    },
-    enabled: !!restaurantSupabase,
-    retry: 1,
-    staleTime: 2 * 60 * 1000
-  });
-
-  // Menu items query
-  const {
-    data: menuItems = [],
-    isLoading: itemsLoading
-  } = useQuery({
-    queryKey: ['menu-items', restaurant?.supabase_url, selectedCategory],
-    queryFn: async () => {
-      if (!restaurantSupabase) return [];
-      let query = restaurantSupabase.from('menu_items').select('*').eq('is_available', true).order('is_featured', {
-        ascending: false
-      }).order('display_order');
-      if (selectedCategory) {
-        query = query.eq('category_id', selectedCategory);
-      }
-      const {
-        data,
-        error
-      } = await query;
-      if (error) return [];
-      return data as MenuItem[];
-    },
-    enabled: !!restaurantSupabase,
-    retry: 1,
-    staleTime: 2 * 60 * 1000
-  });
-
-  // Customization query
-  const {
-    data: customization
-  } = useQuery({
-    queryKey: ['customization', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return null;
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('restaurant_customization').select('*').order('updated_at', {
-        ascending: false
-      }).limit(1).maybeSingle();
-      if (error) return null;
-      return data;
-    },
-    enabled: !!restaurantSupabase,
-    retry: 0,
-    staleTime: 5 * 60 * 1000
-  });
-
-  // Currency settings query
-  const {
-    data: currencySettings
-  } = useQuery({
-    queryKey: ['currency_settings_menu', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return null;
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('currency_settings').select('*').maybeSingle();
-      if (error) return null;
-      return data;
-    },
-    enabled: !!restaurantSupabase,
-    staleTime: 5 * 60 * 1000
-  });
-
-  // Popup settings query
-  const {
-    data: popupSettings
-  } = useQuery({
-    queryKey: ['popup_settings_menu', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return null;
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('popup_settings').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle();
-      
-      if (error) {
-        console.error('Error loading popup settings:', error);
-        return null;
-      }
-      
-      if (!data) return null;
-      
-      // Map database fields to component interface
-      return {
-        enabled: data.enabled,
-        type: data.type,
-        title: data.title,
-        description: data.description,
-        link: data.link || '',
-        buttonText: data.button_text,
-        showAfterSeconds: data.show_after_seconds || 3,
-        dailyLimit: data.daily_limit || 1,
-        wheelSettings: {
-          enabled: data.wheel_enabled,
-          unlockType: data.wheel_unlock_type || 'free',
-          unlockText: data.wheel_unlock_text,
-          unlockButtonText: data.wheel_unlock_button_text,
-          unlockLink: data.wheel_unlock_link || '',
-          rewards: data.wheel_rewards || []
-        }
-      } as PopupSettings;
-    },
-    enabled: !!restaurantSupabase,
-    staleTime: 5 * 60 * 1000
-  });
-
-  // Apply theme and layout when customization loads
-  useEffect(() => {
-    if (customization) {
-      if (customization.theme) {
-        setCustomTheme(customization.theme);
-      }
-      if (customization.layout) {
-        setLayoutPreference(customization.layout);
-      }
-      if (customization.layout_style) {
-        setLayoutStyle(customization.layout_style);
-      }
-    }
-    if (!customization?.theme) {
-      setCustomTheme({
-        mode: 'light',
-        primaryColor: '#1f2937',
-        accentColor: '#3b82f6',
-        backgroundColor: '#ffffff',
-        cardBackground: '#ffffff',
-        textColor: '#1f2937',
-        mutedTextColor: '#6b7280',
-        borderColor: '#e5e7eb',
-        headingColor: '#111827',
-        categoryNameColor: '#1f2937',
-        itemNameColor: '#111827',
-        itemCategoryNameColor: '#6b7280',
-        descriptionColor: '#6b7280',
-        priceColor: '#059669'
-      });
-    }
-  }, [customization]);
-
-  // Image URL helpers
-  const getImageUrl = useCallback((imagePath: string) => {
-    if (!imagePath || !restaurantSupabase) return null;
-    const {
-      data
-    } = restaurantSupabase.storage.from('restaurant-images').getPublicUrl(imagePath);
-    return data.publicUrl;
-  }, [restaurantSupabase]);
-  const getDisplayImageUrl = useCallback((imagePath?: string, imageUrl?: string) => {
-    if (imagePath) {
-      return getImageUrl(imagePath);
-    }
-    return imageUrl || null;
-  }, [getImageUrl]);
-  const getMenuItemImageUrl = useCallback((item: MenuItem) => {
-    return getDisplayImageUrl(item.image_path, item.image_url);
-  }, [getDisplayImageUrl]);
-  const getCategoryImageUrl = useCallback((category: Category) => {
-    return getDisplayImageUrl(category.image_path, category.image_url);
-  }, [getDisplayImageUrl]);
-
-  // Memoized computed values
-  const bannerImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null, [profile, getDisplayImageUrl]);
-  const logoImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null, [profile, getDisplayImageUrl]);
-  const filteredMenuItems = useMemo(() => {
-    let itemsToFilter = menuItems;
-    
-    // If we're in categories mode and have a selected category, filter by category
-    if (layoutPreference === 'categories' && selectedCategory) {
-      itemsToFilter = menuItems.filter(item => item.category_id === selectedCategory);
-    }
-    
-    // Then apply search filter
-    return itemsToFilter.filter(item => 
-      (item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [menuItems, searchTerm, selectedCategory, layoutPreference]);
-  const filteredCategories = useMemo(() => {
-    if (!searchTerm) {
-      return categories;
-    }
-    
-    // If searching in categories mode without a selected category, show categories that match search
-    // or categories that have items matching the search
-    const categoriesWithMatchingItems = categories.filter(category => {
-      const categoryMatches = (category.name_sq || category.name).toLowerCase().includes(searchTerm.toLowerCase());
-      const hasMatchingItems = menuItems.some(item => 
-        item.category_id === category.id && 
-        ((item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) || 
-         (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-      return categoryMatches || hasMatchingItems;
-    });
-    
-    return categoriesWithMatchingItems;
-  }, [categories, searchTerm, menuItems]);
-
-  // Utility functions
-  const formatPrice = useCallback((price: number, originalCurrency: string) => {
-    if (!currencySettings || currentCurrency === originalCurrency) {
-      return `${price.toFixed(2)} ${currentCurrency}`;
-    }
-    const exchangeRates = currencySettings.exchange_rates || {};
-    const originalRate = exchangeRates[originalCurrency] || 1;
-    const targetRate = exchangeRates[currentCurrency] || 1;
-    const convertedPrice = price / originalRate * targetRate;
-    const symbols: Record<string, string> = {
-      'ALL': 'L',
-      'EUR': '€',
-      'USD': '$',
-      'GBP': '£',
-      'CHF': 'CHF'
-    };
-    const symbol = symbols[currentCurrency] || currentCurrency;
-    return `${convertedPrice.toFixed(2)} ${symbol}`;
-  }, [currencySettings, currentCurrency]);
-  const getLocalizedText = useCallback((item: any, field: string) => {
-    const languageField = `${field}_${currentLanguage}`;
-    return item[languageField] || item[field] || '';
-  }, [currentLanguage]);
-  const handleMenuItemClick = useCallback((item: MenuItem) => {
-    setSelectedMenuItem(item);
+    setRestaurantSupabase(getRestaurantSupabase());
   }, []);
 
-  // Theme styles
-  const themeStyles = useMemo(() => customTheme ? {
-    backgroundColor: customTheme.backgroundColor,
-    color: customTheme.textColor
-  } : {}, [customTheme]);
-  const cardStyles = useMemo(() => customTheme ? {
-    backgroundColor: customTheme.cardBackground,
-    borderColor: customTheme.borderColor,
-    color: customTheme.textColor
-  } : {}, [customTheme]);
-  const headingStyles = useMemo(() => customTheme ? {
-    color: customTheme.headingColor || customTheme.textColor
-  } : {}, [customTheme]);
-  const categoryNameStyles = useMemo(() => customTheme ? {
-    color: customTheme.categoryNameColor || customTheme.textColor
-  } : {}, [customTheme]);
-  const itemCategoryNameStyles = useMemo(() => customTheme ? {
-    color: customTheme.itemCategoryNameColor || customTheme.mutedTextColor
-  } : {}, [customTheme]);
-  const mutedTextStyles = useMemo(() => customTheme ? {
-    color: customTheme.mutedTextColor
-  } : {}, [customTheme]);
+  const { isLoading: restaurantLoading, error: restaurantError } = useQuery({
+    queryKey: ['restaurant'],
+    queryFn: async () => {
+      if (!restaurantSupabase) return null;
+      const { data, error } = await restaurantSupabase
+        .from('restaurants')
+        .select('*')
+        .single();
 
-  // Enhanced category card component
-  const CategoryCard = ({ category, categoryItems, index }: { 
-    category: Category; 
-    categoryItems: MenuItem[]; 
-    index: number;
-  }) => {
-    // Get category image first, then fallback to first item image, then restaurant logo
-    const categoryImageUrl = useMemo(() => {
-      // First check if category has its own image
-      const categoryImage = getCategoryImageUrl(category);
-      if (categoryImage) {
-        return categoryImage;
+      if (error) {
+        console.error('Restaurant fetch error:', error);
+        throw error;
       }
-      
-      // If no category image, get the first item image from this category as fallback
-      const firstItemWithImage = categoryItems.find(item => 
-        getMenuItemImageUrl(item)
-      );
-      
-      if (firstItemWithImage) {
-        return getMenuItemImageUrl(firstItemWithImage);
-      }
-      
-      // Finally fallback to restaurant logo
-      return logoImageUrl;
-    }, [category, categoryItems, logoImageUrl]);
+      setRestaurant(data);
+      return data;
+    },
+    retry: false,
+  });
 
-    return (
-      <Card 
-        className="group relative h-40 border overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-        style={{
-          borderColor: customTheme?.borderColor,
-          backgroundColor: customTheme?.cardBackground
-        }}
-        onClick={() => setSelectedCategory(category.id)}
-      >
-        {/* Background Image */}
-        {categoryImageUrl ? (
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${categoryImageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
-            <div 
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(135deg, ${customTheme?.accentColor}40, ${customTheme?.primaryColor}30)`
-              }}
-            />
-          </div>
-        ) : (
-          // Default styled background when no image
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10)`
-            }}
-          >
-            <div className="absolute top-4 right-4 opacity-20">
-              <ChefHat className="h-12 w-12" style={{ color: customTheme?.accentColor }} />
-            </div>
-          </div>
-        )}
-        
-        <CardContent className="relative p-4 h-full flex flex-col justify-between z-10">
-          <div>
-            <h3 className="font-bold text-lg mb-2 line-clamp-2 drop-shadow-sm" style={{
-              color: customTheme?.categoryNameColor || customTheme?.textColor
-            }}>
-              {getLocalizedText(category, 'name')}
-            </h3>
-            
-            {category.description && (
-              <p className="text-sm opacity-90 line-clamp-2 mb-3 drop-shadow-sm" style={{
-                color: customTheme?.descriptionColor || customTheme?.mutedTextColor
-              }}>
-                {getLocalizedText(category, 'description')}
-              </p>
-            )}
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge 
-                variant="secondary" 
-                className="text-xs"
-                style={{
-                  backgroundColor: customTheme?.accentColor + '20',
-                  color: customTheme?.accentColor,
-                  borderColor: customTheme?.accentColor + '40'
-                }}
-              >
-                {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
-              </Badge>
-              
-              {categoryItems.some(item => item.is_featured) && (
-                <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              )}
-            </div>
-            
-            <div className="flex items-center text-sm opacity-75">
-              <ArrowLeft 
-                className="h-4 w-4 rotate-180 group-hover:translate-x-1 transition-transform duration-300" 
-                style={{ color: customTheme?.textColor }}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  const { isLoading: categoriesLoading, error: categoriesError } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      if (!restaurantSupabase) return null;
+      const { data, error } = await restaurantSupabase
+        .from('categories')
+        .select('*')
+        .order('display_order');
+
+      if (error) {
+        console.error('Categories fetch error:', error);
+        throw error;
+      }
+      setCategories(data || []);
+      return data || [];
+    },
+    retry: false,
+  });
+
+  const { isLoading: menuItemsLoading, error: menuItemsError } = useQuery({
+    queryKey: ['menu_items'],
+    queryFn: async () => {
+      if (!restaurantSupabase) return null;
+      const { data, error } = await restaurantSupabase
+        .from('menu_items')
+        .select('*')
+        .order('display_order');
+
+      if (error) {
+        console.error('Menu items fetch error:', error);
+        throw error;
+      }
+      setMenuItems(data || []);
+      return data || [];
+    },
+    retry: false,
+  });
+
+  const getImageUrl = (imagePath: string | null): string | null => {
+    if (!imagePath || !restaurantSupabase) return null;
+    const { data } = restaurantSupabase.storage
+      .from('restaurant-images')
+      .getPublicUrl(imagePath);
+    return data.publicUrl;
   };
 
-  // Loading states
-  if (!restaurantName) {
-    return <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center max-w-sm mx-auto fade-in">
-          <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-3" />
-          <h1 className="text-xl font-bold mb-3">Invalid Menu Link</h1>
-          <p className="text-sm text-muted-foreground">This menu link is not valid or has expired.</p>
-        </div>
-      </div>;
-  }
-  if (restaurantLoading) {
-    return <MenuLoadingSkeleton layoutStyle={layoutStyle} />;
-  }
-  if (restaurantError || !restaurant) {
-    return <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center max-w-sm mx-auto fade-in">
-          <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-3" />
-          <h1 className="text-xl font-bold mb-3">Restaurant Not Found</h1>
-          <p className="text-sm text-muted-foreground mb-3">
-            Could not find restaurant matching "{restaurantName}".
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Please check the URL or contact the restaurant.
-          </p>
-        </div>
-      </div>;
-  }
-  if (profileLoading || categoriesLoading) {
-    return <MenuLoadingSkeleton layoutStyle={layoutStyle} />;
+  if (restaurantLoading || categoriesLoading || menuItemsLoading) {
+    return <div className="flex justify-center p-8">Duke ngarkuar...</div>;
   }
 
-  // Enhanced MenuHeader component
-  const MenuHeader = () => <div className="relative">
-      {bannerImageUrl && <div className="absolute inset-0 bg-cover bg-center" style={{
-      backgroundImage: `url(${bannerImageUrl})`
-    }}>
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>}
-      
-      <div className="relative px-3 py-4 safe-area-top text-white" style={{
-      backgroundColor: bannerImageUrl ? 'transparent' : customTheme?.primaryColor
-    }}>
-        <div className="max-w-sm mx-auto">
-          <div className="flex justify-between items-start mb-3">
-            <div className="flex items-center gap-3">
-              {selectedCategory && layoutPreference === 'categories' && <Button variant="ghost" size="sm" onClick={() => {
-                  setSelectedCategory(null);
-                  setSearchTerm(''); // Clear search when going back to categories
-                }} className="text-white hover:bg-white/20 p-2 h-8 w-8">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>}
-              {logoImageUrl && <img src={logoImageUrl} alt={profile?.name} className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1" />}
-            </div>
-            <div className="flex gap-1">
-              <LanguageSwitch restaurantSupabase={restaurantSupabase} currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} />
-              <CurrencySwitch restaurantSupabase={restaurantSupabase} currentCurrency={currentCurrency} onCurrencyChange={setCurrentCurrency} />
-            </div>
-          </div>
-          
-          <div className="text-center slide-up">
-            <h1 className="text-lg font-bold mb-1 uppercase tracking-wide" style={{
-              color: customTheme?.headingColor || customTheme?.textColor
-            }}>
-              {selectedCategory && layoutPreference === 'categories' ? getLocalizedText(categories.find(cat => cat.id === selectedCategory), 'name') : profile?.name || 'Restaurant Menu'}
-            </h1>
-            {profile?.address && !selectedCategory && <div className="flex items-center justify-center gap-1 text-xs opacity-80 uppercase tracking-wide mb-2">
-                <MapPin className="h-3 w-3" />
-                {profile.address.split(',')[0] || profile.address}
-              </div>}
-            
-            {!selectedCategory && <div className="flex justify-center gap-3 mb-1">
-                {profile?.social_media_links?.instagram && <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer" className="hover-lift">
-                    <Instagram className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>}
-                {profile?.phone && <a href={`tel:${profile.phone}`} className="hover-lift">
-                    <Phone className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>}
-                {profile?.social_media_links?.facebook && <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer" className="hover-lift">
-                    <Facebook className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>}
-                {profile?.website && <a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover-lift">
-                    <Globe className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>}
-              </div>}
-          </div>
-        </div>
-      </div>
-    </div>;
-
-  // Enhanced SearchBar component - now available in all categories views
-  const SearchBar = () => {
-    // Show search bar in categories mode (both main view and category-specific view)
-    if (layoutPreference !== 'categories') {
-      return null;
-    }
-    
-    const placeholder = selectedCategory 
-      ? "Search items in this category" 
-      : "Search categories and items";
-    
+  if (restaurantError || categoriesError || menuItemsError) {
     return (
-      <div className="px-3 py-3">
-        <div className="max-w-sm mx-auto relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={{
-            color: customTheme?.mutedTextColor
-          }} />
-          <Input 
-            placeholder={placeholder}
-            value={searchTerm} 
-            onChange={e => setSearchTerm(e.target.value)} 
-            className="pl-10 h-10 border backdrop-blur-sm" 
-            style={{
-              backgroundColor: customTheme?.cardBackground,
-              borderColor: customTheme?.borderColor,
-              color: customTheme?.textColor
-            }} 
-          />
-        </div>
+      <div className="flex justify-center p-8">
+        Gabim: {restaurantError?.message || categoriesError?.message || menuItemsError?.message}
       </div>
     );
+  }
+
+  const getLocalizedText = (item: any, field: string, language: string): string => {
+    const localizedField = `${field}_${language}`;
+    return item[localizedField] || item[field] || '';
   };
 
-  // Categories layout
-  if (layoutPreference === 'categories') {
-    if (selectedCategory) {
-      return <div className="viewport-fill smooth-scroll" style={{
-        backgroundColor: customTheme?.backgroundColor,
-        color: customTheme?.textColor
-      }}>
-          {/* Viewport background fill */}
-          <div 
-            className="fixed inset-0 -z-10" 
-            style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
-          />
-          
-          <MenuHeader />
-          <SearchBar />
-          <div className="px-3 py-3">
-            <div className="max-w-sm mx-auto">
-              {filteredMenuItems.length === 0 ? <div className="text-center py-8 fade-in">
-                  <Utensils className="h-10 w-10 mx-auto mb-3" style={{
-                    color: customTheme?.mutedTextColor
-                  }} />
-                  <p className="text-sm" style={{
-                    color: customTheme?.mutedTextColor
-                  }}>
-                    {searchTerm ? 'No items found matching your search.' : 'No items found in this category.'}
-                  </p>
-                </div> : <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
-                  {filteredMenuItems.map((item, index) => <EnhancedMenuItem key={item.id} item={item} layoutStyle={layoutStyle} customTheme={customTheme} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} isCompact={true} index={index} onClick={handleMenuItemClick} />)}
-                </div>}
-            </div>
-          </div>
-          <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
-        </div>;
-    }
-    
-    return <div className="viewport-fill smooth-scroll" style={{
-      backgroundColor: customTheme?.backgroundColor,
-      color: customTheme?.textColor
-    }}>
-        {/* Viewport background fill */}
-        <div 
-          className="fixed inset-0 -z-10" 
-          style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
+  const filteredCategories = categories.filter((category) =>
+    getLocalizedText(category, 'name', currentLanguage).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredMenuItems = menuItems.filter((item) =>
+    (selectedCategory ? item.category_id === selectedCategory : true)
+  );
+
+  const renderCategories = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">{restaurant?.name}</h2>
+        <p className="text-muted-foreground mb-6">{restaurant?.description}</p>
+      </div>
+
+      <div className="relative mb-6">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Kërko kategoritë..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
         />
-        
-        <MenuHeader />
-        <SearchBar />
-        <div className="px-4 pb-6">
-          <div className="max-w-2xl mx-auto">
-            {filteredCategories.length === 0 ? <div className="text-center py-12 fade-in">
-                <Utensils className="h-12 w-12 mx-auto mb-4" style={{
-                  color: customTheme?.mutedTextColor
-                }} />
-                <h3 className="text-xl font-semibold mb-3" style={{
-                  color: customTheme?.headingColor || customTheme?.textColor
-                }}>
-                  {searchTerm ? 'No results found' : 'Menu Coming Soon'}
-                </h3>
-                <p className="text-base" style={{
-                  color: customTheme?.mutedTextColor
-                }}>
-                  {searchTerm ? 'Try searching for something else.' : 'The menu is being prepared and will be available shortly.'}
-                </p>
-              </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredCategories.map((category, index) => {
-              const categoryItems = menuItems.filter(item => item.category_id === category.id);
-              return <div 
-                      key={category.id} 
-                      className="fade-in"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <CategoryCard 
-                        category={category} 
-                        categoryItems={categoryItems} 
-                        index={index} 
-                      />
-                    </div>;
-            })}
-              </div>}
-          </div>
-        </div>
-        <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
-      </div>;
-  }
-
-  // Items layout (default)
-  return <div className="viewport-fill smooth-scroll" style={themeStyles}>
-      {/* Viewport background fill */}
-      <div 
-        className="fixed inset-0 -z-10" 
-        style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
-      />
-      
-      <MenuHeader />
-      <div className="px-3 py-3">
-        <div className="max-w-sm mx-auto">
-          <Tabs defaultValue="all" className="w-full">
-            <ScrollArea className="w-full whitespace-nowrap">
-              <TabsList className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm" style={{
-              backgroundColor: customTheme?.accentColor + '20',
-              borderColor: customTheme?.accentColor
-            }}>
-                <TabsTrigger value="all" className="text-xs h-7 px-3 flex-shrink-0">
-                  All
-                </TabsTrigger>
-                {filteredCategories.map(category => <TabsTrigger key={category.id} value={category.id} className="text-xs h-7 px-3 flex-shrink-0">
-                    {getLocalizedText(category, 'name')}
-                  </TabsTrigger>)}
-              </TabsList>
-              <ScrollBar orientation="horizontal" className="mt-2" />
-            </ScrollArea>
-
-            <TabsContent value="all" className="space-y-3 mt-4">
-              <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
-                All Items
-              </h3>
-              {menuItems.length === 0 ? <div className="text-center py-8 fade-in">
-                  <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
-                  <p className="text-sm" style={mutedTextStyles}>No items available.</p>
-                </div> : <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
-                  {filteredMenuItems.map((item, index) => <EnhancedMenuItem key={item.id} item={item} layoutStyle={layoutStyle} customTheme={customTheme} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} index={index} onClick={handleMenuItemClick} />)}
-                </div>}
-            </TabsContent>
-
-            {filteredCategories.map(category => {
-            const categoryItems = menuItems.filter(item => item.category_id === category.id);
-            return <TabsContent key={category.id} value={category.id} className="space-y-3 mt-4">
-                  <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
-                    {getLocalizedText(category, 'name')}
-                  </h3>
-                  {categoryItems.length === 0 ? <div className="text-center py-8 fade-in">
-                      <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
-                      <p className="text-sm" style={mutedTextStyles}>No items in this category.</p>
-                    </div> : <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
-                      {categoryItems.map((item, index) => <EnhancedMenuItem key={item.id} item={item} layoutStyle={layoutStyle} customTheme={customTheme} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={getLocalizedText(category, 'name')} isCompact={true} index={index} onClick={handleMenuItemClick} />)}
-                    </div>}
-                </TabsContent>;
-          })}
-          </Tabs>
-        </div>
       </div>
 
-      <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
-      
-      {/* Popup Modal */}
-      {popupSettings && restaurant && <PopupModal settings={popupSettings} restaurantName={restaurant.name} />}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredCategories.map((category) => {
+          const categoryImageUrl = getImageUrl(category.image_path);
+          
+          return (
+            <Card
+              key={category.id}
+              className="cursor-pointer hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+              onClick={() => setSelectedCategory(category.id)}
+            >
+              {categoryImageUrl ? (
+                <div className="h-48 w-full overflow-hidden">
+                  <img
+                    src={categoryImageUrl}
+                    alt={getLocalizedText(category, 'name', currentLanguage)}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-48 w-full bg-card"></div>
+              )}
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold mb-2">
+                  {getLocalizedText(category, 'name', currentLanguage)}
+                </h3>
+                {getLocalizedText(category, 'description', currentLanguage) && (
+                  <p className="text-sm text-muted-foreground">
+                    {getLocalizedText(category, 'description', currentLanguage)}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
 
-      {/* Menu Item Detail Popup */}
-      {selectedMenuItem && <MenuItemPopup item={selectedMenuItem} isOpen={!!selectedMenuItem} onClose={() => setSelectedMenuItem(null)} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} customTheme={customTheme} />}
-    </div>;
-};
+  const renderMenuItems = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">
+          {selectedCategory
+            ? getLocalizedText(
+                categories.find((cat) => cat.id === selectedCategory) || {},
+                'name',
+                currentLanguage
+              )
+            : 'Të gjitha Artikujt'}
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          {selectedCategory
+            ? getLocalizedText(
+                categories.find((cat) => cat.id === selectedCategory) || {},
+                'description',
+                currentLanguage
+              )
+            : 'Shfleto të gjitha artikujt e restorantit'}
+        </p>
+      </div>
 
-export default EnhancedMenu;
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredMenuItems.map((item) => {
+          const itemImageUrl = getImageUrl(item.image_path);
+          return (
+            <Card key={item.id}>
+              {itemImageUrl ? (
+                <div className="h-48 w-full overflow-hidden">
+                  <img
+                    src={itemImageUrl}
+                    alt={getLocalizedText(item, 'name', currentLanguage)}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-48 w-full bg-muted"></div>
+              )}
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold mb-2">
+                  {getLocalizedText(item, 'name', currentLanguage)}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {getLocalizedText(item, 'description', currentLanguage)}
+                </p>
+                <p className="text-xl font-bold">{item.price} ALL</p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="container mx-auto py-12">
+      {selectedCategory ? (
+        <>
+          <button onClick={() => setSelectedCategory(null)} className="mb-4 text-sm text-blue-500">
+            Kthehu te Kategoritë
+          </button>
+          {renderMenuItems()}
+        </>
+      ) : (
+        renderCategories()
+      )}
+    </div>
+  );
+}

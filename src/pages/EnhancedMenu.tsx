@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
@@ -102,6 +103,7 @@ interface MenuTheme {
   headingColor?: string;
   categoryNameColor?: string;
   itemNameColor?: string;
+  itemCategoryNameColor?: string;
   descriptionColor?: string;
   priceColor?: string;
 }
@@ -432,6 +434,9 @@ const EnhancedMenu = () => {
   const categoryNameStyles = useMemo(() => customTheme ? {
     color: customTheme.categoryNameColor || customTheme.textColor
   } : {}, [customTheme]);
+  const itemCategoryNameStyles = useMemo(() => customTheme ? {
+    color: customTheme.itemCategoryNameColor || customTheme.mutedTextColor
+  } : {}, [customTheme]);
   const mutedTextStyles = useMemo(() => customTheme ? {
     color: customTheme.mutedTextColor
   } : {}, [customTheme]);
@@ -452,7 +457,8 @@ const EnhancedMenu = () => {
             : `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10)`,
           backgroundSize: logoImageUrl ? 'cover, 60px 60px' : 'cover',
           backgroundPosition: logoImageUrl ? 'center, top 10px right 10px' : 'center',
-          backgroundRepeat: logoImageUrl ? 'no-repeat, no-repeat' : 'no-repeat'
+          backgroundRepeat: logoImageUrl ? 'no-repeat, no-repeat' : 'no-repeat',
+          backgroundColor: customTheme?.cardBackground
         }}
         onClick={() => setSelectedCategory(category.id)}
       >
@@ -466,14 +472,14 @@ const EnhancedMenu = () => {
         <CardContent className="relative p-4 h-full flex flex-col justify-between">
           <div>
             <h3 className="font-bold text-lg mb-2 line-clamp-2" style={{
-              color: customTheme?.headingColor
+              color: customTheme?.categoryNameColor || customTheme?.textColor
             }}>
               {getLocalizedText(category, 'name')}
             </h3>
             
             {category.description && (
               <p className="text-sm opacity-90 line-clamp-2 mb-3" style={{
-                color: customTheme?.mutedTextColor
+                color: customTheme?.descriptionColor || customTheme?.mutedTextColor
               }}>
                 {getLocalizedText(category, 'description')}
               </p>
@@ -499,7 +505,10 @@ const EnhancedMenu = () => {
             </div>
             
             <div className="flex items-center text-sm opacity-75">
-              <ArrowLeft className="h-4 w-4 rotate-180 group-hover:translate-x-1 transition-transform duration-300" />
+              <ArrowLeft 
+                className="h-4 w-4 rotate-180 group-hover:translate-x-1 transition-transform duration-300" 
+                style={{ color: customTheme?.textColor }}
+              />
             </div>
           </div>
         </CardContent>

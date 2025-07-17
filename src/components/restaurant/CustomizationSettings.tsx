@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -21,6 +22,7 @@ interface Theme {
   headingColor?: string;
   categoryNameColor?: string;
   itemNameColor?: string;
+  itemCategoryNameColor?: string;
   descriptionColor?: string;
   priceColor?: string;
   languageSwitchBackground?: string;
@@ -44,6 +46,7 @@ const modernMinimalTheme: Theme = {
   headingColor: '#ffffff',
   categoryNameColor: '#0c0c0c',
   itemNameColor: '#0c0c0c',
+  itemCategoryNameColor: '#666666',
   descriptionColor: '#666666',
   priceColor: '#2563eb',
   languageSwitchBackground: '#0c0c0c',
@@ -66,6 +69,7 @@ const oceanBreezTheme: Theme = {
   headingColor: '#ffffff',
   categoryNameColor: '#0369a1',
   itemNameColor: '#0c4a6e',
+  itemCategoryNameColor: '#64748b',
   descriptionColor: '#64748b',
   priceColor: '#0ea5e9',
   languageSwitchBackground: '#0369a1',
@@ -88,6 +92,7 @@ const sunsetTheme: Theme = {
   headingColor: '#ffffff',
   categoryNameColor: '#ea580c',
   itemNameColor: '#c2410c',
+  itemCategoryNameColor: '#78716c',
   descriptionColor: '#78716c',
   priceColor: '#f97316',
   languageSwitchBackground: '#ea580c',
@@ -110,6 +115,7 @@ const forestGreenTheme: Theme = {
   headingColor: '#f2e7c7',
   categoryNameColor: '#f2e7c7',
   itemNameColor: '#f2e7c7',
+  itemCategoryNameColor: '#c7b899',
   descriptionColor: '#c7b899',
   priceColor: '#f2e7c7',
   languageSwitchBackground: '#2d4a3d',
@@ -132,6 +138,7 @@ const royalPurpleTheme: Theme = {
   headingColor: '#ffffff',
   categoryNameColor: '#6b21a8',
   itemNameColor: '#581c87',
+  itemCategoryNameColor: '#6b7280',
   descriptionColor: '#6b7280',
   priceColor: '#8b5cf6',
   languageSwitchBackground: '#6b21a8',
@@ -154,6 +161,7 @@ const elegantDarkTheme: Theme = {
   headingColor: '#f1f5f9',
   categoryNameColor: '#f1f5f9',
   itemNameColor: '#f1f5f9',
+  itemCategoryNameColor: '#94a3b8',
   descriptionColor: '#94a3b8',
   priceColor: '#3b82f6',
   languageSwitchBackground: '#1e293b',
@@ -176,6 +184,7 @@ const rosePinkTheme: Theme = {
   headingColor: '#ffffff',
   categoryNameColor: '#be185d',
   itemNameColor: '#9f1239',
+  itemCategoryNameColor: '#6b7280',
   descriptionColor: '#6b7280',
   priceColor: '#ec4899',
   languageSwitchBackground: '#be185d',
@@ -198,6 +207,7 @@ const vintageGoldTheme: Theme = {
   headingColor: '#ffffff',
   categoryNameColor: '#a16207',
   itemNameColor: '#92400e',
+  itemCategoryNameColor: '#78716c',
   descriptionColor: '#78716c',
   priceColor: '#ca8a04',
   languageSwitchBackground: '#a16207',
@@ -646,6 +656,17 @@ const CustomizationSettings = () => {
                   color={theme.itemNameColor || theme.textColor}
                   onColorChange={(color: string) => {
                     setTheme({ ...theme, itemNameColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="itemCategoryNameColor">Item Category Name Color</Label>
+                <ColorPicker
+                  id="itemCategoryNameColor"
+                  color={theme.itemCategoryNameColor || theme.mutedTextColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, itemCategoryNameColor: color });
                     setSelectedPreset('custom');
                   }}
                 />

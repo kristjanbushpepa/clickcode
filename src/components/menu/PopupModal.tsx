@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,15 +10,17 @@ interface PopupSettings {
   title: string;
   description: string;
   link: string;
-  button_text: string;
-  wheel_enabled: boolean;
-  wheel_unlock_text: string;
-  wheel_unlock_button_text: string;
-  wheel_rewards: Array<{
-    text: string;
-    chance: number;
-    color: string;
-  }>;
+  buttonText: string;
+  wheelSettings: {
+    enabled: boolean;
+    unlockText: string;
+    unlockButtonText: string;
+    rewards: Array<{
+      text: string;
+      chance: number;
+      color: string;
+    }>;
+  };
 }
 
 interface PopupModalProps {
@@ -31,7 +32,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
   const [isOpen, setIsOpen] = useState(false);
   const [showWheel, setShowWheel] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
-  const [wonReward, setWonReward] = useState<string>('');
 
   useEffect(() => {
     if (settings.enabled) {
@@ -44,27 +44,22 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
   }, [settings.enabled]);
 
   const handleCtaClick = () => {
-    if (settings.type === 'wheel' && settings.wheel_enabled) {
+    if (settings.type === 'wheel' && settings.wheelSettings.enabled) {
       setShowWheel(true);
     } else if (settings.link) {
       window.open(settings.link, '_blank');
-      setIsOpen(false);
-    } else {
-      // If no link, just close the popup
       setIsOpen(false);
     }
   };
 
   const handleWheelComplete = (result: string) => {
     setHasSpun(true);
-    setWonReward(result);
-    // Show result for 5 seconds then close
+    // Show result for 3 seconds then close
     setTimeout(() => {
       setIsOpen(false);
       setShowWheel(false);
       setHasSpun(false);
-      setWonReward('');
-    }, 5000);
+    }, 3000);
   };
 
   if (!settings.enabled) return null;
@@ -93,16 +88,16 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                 {settings.description}
               </p>
 
-              {settings.type === 'wheel' && settings.wheel_enabled ? (
+              {settings.type === 'wheel' && settings.wheelSettings.enabled ? (
                 <div className="space-y-3">
                   <p className="text-sm font-medium">
-                    {settings.wheel_unlock_text}
+                    {settings.wheelSettings.unlockText}
                   </p>
                   <Button 
                     onClick={handleCtaClick}
                     className="w-full"
                   >
-                    {settings.wheel_unlock_button_text}
+                    {settings.wheelSettings.unlockButtonText}
                   </Button>
                 </div>
               ) : (
@@ -110,7 +105,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                   onClick={handleCtaClick}
                   className="w-full flex items-center gap-2"
                 >
-                  {settings.button_text}
+                  {settings.buttonText}
                   {settings.link && <ExternalLink className="h-4 w-4" />}
                 </Button>
               )}
@@ -123,7 +118,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                     Thanks for your support! Spin to win your reward:
                   </p>
                   <SpinWheel 
-                    rewards={settings.wheel_rewards}
+                    rewards={settings.wheelSettings.rewards}
                     onComplete={handleWheelComplete}
                   />
                 </>
@@ -131,9 +126,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                 <div className="space-y-2">
                   <p className="text-lg font-semibold text-primary">
                     🎉 Congratulations!
-                  </p>
-                  <p className="text-xl font-bold text-primary">
-                    You won: {wonReward}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Show this screen to claim your reward!

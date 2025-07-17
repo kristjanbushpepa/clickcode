@@ -426,7 +426,8 @@ const EnhancedMenu = () => {
     categoryItems: MenuItem[]; 
     index: number;
   }) => {
-    const categoryImageUrl = category.image_path ? getImageUrl(category.image_path) : null;
+    // Use restaurant logo as fallback for categories without images
+    const categoryImageUrl = logoImageUrl; // Use restaurant logo as fallback
     
     return (
       <Card 

@@ -79,7 +79,7 @@ export function CurrencySwitch({
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-8 px-2 bg-gray-800 border-gray-600 hover:bg-gray-700 text-white rounded-md flex items-center gap-1"
+          className="h-8 px-2 bg-muted/50 border-border hover:bg-muted text-foreground rounded-md flex items-center gap-1"
         >
           <span className="text-sm">{currentCurrencyData?.flag}</span>
           <span className="text-xs font-medium">{currentCurrency}</span>

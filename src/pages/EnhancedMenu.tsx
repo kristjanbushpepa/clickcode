@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
@@ -50,6 +51,8 @@ interface Category {
   description_sq?: string;
   display_order: number;
   is_active: boolean;
+  image_path?: string;
+  image_url?: string;
 }
 
 interface MenuItem {
@@ -104,6 +107,8 @@ interface MenuTheme {
   itemNameColor?: string;
   descriptionColor?: string;
   priceColor?: string;
+  badgeBackgroundColor?: string;
+  badgeTextColor?: string;
 }
 
 interface Restaurant {
@@ -344,7 +349,9 @@ const EnhancedMenu = () => {
         categoryNameColor: '#1f2937',
         itemNameColor: '#111827',
         descriptionColor: '#6b7280',
-        priceColor: '#059669'
+        priceColor: '#059669',
+        badgeBackgroundColor: '#f3f4f6',
+        badgeTextColor: '#374151'
       });
     }
   }, [customization]);
@@ -435,7 +442,7 @@ const EnhancedMenu = () => {
           borderColor: customTheme?.accentColor + '40',
           background: categoryImageUrl 
             ? 'transparent' 
-            : `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10)`
+            : customTheme?.cardBackground
         }}
         onClick={() => setSelectedCategory(category.id)}
       >
@@ -449,14 +456,9 @@ const EnhancedMenu = () => {
           </div>
         )}
         
-        {/* Default Icon Background */}
-        {!categoryImageUrl && (
-          <div className="absolute top-4 right-4 opacity-20">
-            <ChefHat className="h-12 w-12" style={{ color: customTheme?.accentColor }} />
-          </div>
-        )}
-        
-        <CardContent className="relative p-4 h-full flex flex-col justify-between text-white">
+        <CardContent className="relative p-4 h-full flex flex-col justify-between" style={{
+          color: categoryImageUrl ? '#ffffff' : customTheme?.textColor
+        }}>
           <div>
             <h3 className="font-bold text-lg mb-2 line-clamp-2" style={{
               color: categoryImageUrl ? '#ffffff' : customTheme?.headingColor
@@ -479,8 +481,8 @@ const EnhancedMenu = () => {
                 variant="secondary" 
                 className="text-xs backdrop-blur-sm"
                 style={{
-                  backgroundColor: categoryImageUrl ? 'rgba(255,255,255,0.9)' : customTheme?.accentColor + '20',
-                  color: categoryImageUrl ? customTheme?.textColor : customTheme?.accentColor
+                  backgroundColor: customTheme?.badgeBackgroundColor || (categoryImageUrl ? 'rgba(255,255,255,0.9)' : customTheme?.accentColor + '20'),
+                  color: customTheme?.badgeTextColor || (categoryImageUrl ? customTheme?.textColor : customTheme?.accentColor)
                 }}
               >
                 {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}

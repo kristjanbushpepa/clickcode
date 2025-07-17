@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +23,8 @@ interface Theme {
   currencySwitchBackground?: string;
   currencySwitchBorder?: string;
   currencySwitchText?: string;
+  badgeBackgroundColor?: string;
+  badgeTextColor?: string;
 }
 
 interface ThemePreviewProps {
@@ -79,6 +80,11 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
     color: theme.currencySwitchText || '#ffffff'
   };
 
+  const badgeStyles = {
+    backgroundColor: theme.badgeBackgroundColor || theme.accentColor + '20',
+    color: theme.badgeTextColor || theme.accentColor
+  };
+
   const renderLayoutStyle = () => {
     switch (layoutStyle) {
       case 'compact':
@@ -89,7 +95,7 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start gap-2">
                   <h4 className="font-medium text-sm" style={itemNameStyles}>Grilled Salmon</h4>
-                  <Badge variant="secondary" className="text-xs flex-shrink-0" style={{ backgroundColor: theme.accentColor + '20', color: priceStyles.color }}>
+                  <Badge variant="secondary" className="text-xs flex-shrink-0" style={badgeStyles}>
                     €18.50
                   </Badge>
                 </div>
@@ -106,7 +112,7 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
               <div className="w-full h-16 bg-gray-200 rounded mb-2"></div>
               <h4 className="font-medium text-xs mb-1" style={itemNameStyles}>Grilled Salmon</h4>
               <p className="text-xs mb-1 line-clamp-1" style={descriptionStyles}>Fresh Atlantic salmon</p>
-              <Badge variant="secondary" className="text-xs" style={{ backgroundColor: theme.accentColor + '20', color: priceStyles.color }}>
+              <Badge variant="secondary" className="text-xs" style={badgeStyles}>
                 €18.50
               </Badge>
             </Card>
@@ -114,7 +120,7 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
               <div className="w-full h-16 bg-gray-200 rounded mb-2"></div>
               <h4 className="font-medium text-xs mb-1" style={itemNameStyles}>Margherita Pizza</h4>
               <p className="text-xs mb-1 line-clamp-1" style={descriptionStyles}>Classic pizza</p>
-              <Badge variant="secondary" className="text-xs" style={{ backgroundColor: theme.accentColor + '20', color: priceStyles.color }}>
+              <Badge variant="secondary" className="text-xs" style={badgeStyles}>
                 €12.00
               </Badge>
             </Card>
@@ -129,7 +135,7 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
               <div className="p-2">
                 <div className="flex justify-between items-start mb-1 gap-2">
                   <h4 className="font-medium text-sm" style={itemNameStyles}>Grilled Salmon</h4>
-                  <Badge variant="secondary" className="text-xs flex-shrink-0" style={{ backgroundColor: theme.accentColor + '20', color: priceStyles.color }}>
+                  <Badge variant="secondary" className="text-xs flex-shrink-0" style={badgeStyles}>
                     €18.50
                   </Badge>
                 </div>
@@ -168,7 +174,7 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
                     <Clock className="h-3 w-3" />
                     15min
                   </div>
-                  <Badge variant="secondary" className="text-xs" style={{ backgroundColor: theme.accentColor + '20', color: priceStyles.color }}>
+                  <Badge variant="secondary" className="text-xs" style={badgeStyles}>
                     €18.50
                   </Badge>
                 </div>

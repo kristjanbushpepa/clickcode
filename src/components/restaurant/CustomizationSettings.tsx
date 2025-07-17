@@ -29,6 +29,8 @@ interface Theme {
   currencySwitchBackground?: string;
   currencySwitchBorder?: string;
   currencySwitchText?: string;
+  badgeBackgroundColor?: string;
+  badgeTextColor?: string;
 }
 
 // Modern Theme Presets
@@ -51,7 +53,9 @@ const modernMinimalTheme: Theme = {
   languageSwitchText: '#ffffff',
   currencySwitchBackground: '#0c0c0c',
   currencySwitchBorder: '#e5e5e5',
-  currencySwitchText: '#ffffff'
+  currencySwitchText: '#ffffff',
+  badgeBackgroundColor: '#f3f4f6',
+  badgeTextColor: '#374151'
 };
 
 const oceanBreezTheme: Theme = {
@@ -73,7 +77,9 @@ const oceanBreezTheme: Theme = {
   languageSwitchText: '#ffffff',
   currencySwitchBackground: '#0369a1',
   currencySwitchBorder: '#0ea5e9',
-  currencySwitchText: '#ffffff'
+  currencySwitchText: '#ffffff',
+  badgeBackgroundColor: '#dbeafe',
+  badgeTextColor: '#1e3a8a'
 };
 
 const sunsetTheme: Theme = {
@@ -95,7 +101,9 @@ const sunsetTheme: Theme = {
   languageSwitchText: '#ffffff',
   currencySwitchBackground: '#ea580c',
   currencySwitchBorder: '#f97316',
-  currencySwitchText: '#ffffff'
+  currencySwitchText: '#ffffff',
+  badgeBackgroundColor: '#fed7aa',
+  badgeTextColor: '#c2410c'
 };
 
 const forestGreenTheme: Theme = {
@@ -117,7 +125,9 @@ const forestGreenTheme: Theme = {
   languageSwitchText: '#f2e7c7',
   currencySwitchBackground: '#2d4a3d',
   currencySwitchBorder: '#3d5a4d',
-  currencySwitchText: '#f2e7c7'
+  currencySwitchText: '#f2e7c7',
+  badgeBackgroundColor: '#3d5a4d',
+  badgeTextColor: '#f2e7c7'
 };
 
 const royalPurpleTheme: Theme = {
@@ -139,7 +149,9 @@ const royalPurpleTheme: Theme = {
   languageSwitchText: '#ffffff',
   currencySwitchBackground: '#6b21a8',
   currencySwitchBorder: '#8b5cf6',
-  currencySwitchText: '#ffffff'
+  currencySwitchText: '#ffffff',
+  badgeBackgroundColor: '#e9d5ff',
+  badgeTextColor: '#581c87'
 };
 
 const elegantDarkTheme: Theme = {
@@ -161,7 +173,9 @@ const elegantDarkTheme: Theme = {
   languageSwitchText: '#f1f5f9',
   currencySwitchBackground: '#1e293b',
   currencySwitchBorder: '#334155',
-  currencySwitchText: '#f1f5f9'
+  currencySwitchText: '#f1f5f9',
+  badgeBackgroundColor: '#334155',
+  badgeTextColor: '#f1f5f9'
 };
 
 const rosePinkTheme: Theme = {
@@ -183,7 +197,9 @@ const rosePinkTheme: Theme = {
   languageSwitchText: '#ffffff',
   currencySwitchBackground: '#be185d',
   currencySwitchBorder: '#ec4899',
-  currencySwitchText: '#ffffff'
+  currencySwitchText: '#ffffff',
+  badgeBackgroundColor: '#fce7f3',
+  badgeTextColor: '#9f1239'
 };
 
 const vintageGoldTheme: Theme = {
@@ -205,7 +221,9 @@ const vintageGoldTheme: Theme = {
   languageSwitchText: '#ffffff',
   currencySwitchBackground: '#a16207',
   currencySwitchBorder: '#ca8a04',
-  currencySwitchText: '#ffffff'
+  currencySwitchText: '#ffffff',
+  badgeBackgroundColor: '#fef3c7',
+  badgeTextColor: '#92400e'
 };
 
 const CustomizationSettings = () => {
@@ -734,6 +752,28 @@ const CustomizationSettings = () => {
                   color={theme.currencySwitchText || '#ffffff'}
                   onColorChange={(color: string) => {
                     setTheme({ ...theme, currencySwitchText: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="badgeBackgroundColor">Badge Background Color</Label>
+                <ColorPicker
+                  id="badgeBackgroundColor"
+                  color={theme.badgeBackgroundColor || theme.accentColor + '20'}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, badgeBackgroundColor: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="badgeTextColor">Badge Text Color</Label>
+                <ColorPicker
+                  id="badgeTextColor"
+                  color={theme.badgeTextColor || theme.accentColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, badgeTextColor: color });
                     setSelectedPreset('custom');
                   }}
                 />

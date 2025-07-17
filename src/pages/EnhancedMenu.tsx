@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Facebook, ArrowLeft, Star, MapPin } from 'lucide-react';
+import { Clock, Tag, Utensils, AlertCircle, Search, Phone, Globe, Instagram, Facebook, ArrowLeft, Star, MapPin, ChefHat } from 'lucide-react';
 import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameConversion';
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
 import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
@@ -420,6 +420,89 @@ const EnhancedMenu = () => {
     color: customTheme.mutedTextColor
   } : {}, [customTheme]);
 
+  // Enhanced category card component
+  const CategoryCard = ({ category, categoryItems, index }: { 
+    category: Category; 
+    categoryItems: MenuItem[]; 
+    index: number;
+  }) => {
+    const categoryImageUrl = category.image_path ? getImageUrl(category.image_path) : null;
+    
+    return (
+      <Card 
+        className="group relative h-40 border overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+        style={{
+          borderColor: customTheme?.accentColor + '40',
+          background: categoryImageUrl 
+            ? 'transparent' 
+            : `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10)`
+        }}
+        onClick={() => setSelectedCategory(category.id)}
+      >
+        {/* Category Image Background */}
+        {categoryImageUrl && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${categoryImageUrl})` }}
+          >
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
+          </div>
+        )}
+        
+        {/* Default Icon Background */}
+        {!categoryImageUrl && (
+          <div className="absolute top-4 right-4 opacity-20">
+            <ChefHat className="h-12 w-12" style={{ color: customTheme?.accentColor }} />
+          </div>
+        )}
+        
+        <CardContent className="relative p-4 h-full flex flex-col justify-between text-white">
+          <div>
+            <h3 className="font-bold text-lg mb-2 line-clamp-2" style={{
+              color: categoryImageUrl ? '#ffffff' : customTheme?.headingColor
+            }}>
+              {getLocalizedText(category, 'name')}
+            </h3>
+            
+            {category.description && (
+              <p className="text-sm opacity-90 line-clamp-2 mb-3" style={{
+                color: categoryImageUrl ? '#ffffff' : customTheme?.mutedTextColor
+              }}>
+                {getLocalizedText(category, 'description')}
+              </p>
+            )}
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Badge 
+                variant="secondary" 
+                className="text-xs backdrop-blur-sm"
+                style={{
+                  backgroundColor: categoryImageUrl ? 'rgba(255,255,255,0.9)' : customTheme?.accentColor + '20',
+                  color: categoryImageUrl ? customTheme?.textColor : customTheme?.accentColor
+                }}
+              >
+                {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
+              </Badge>
+              
+              {categoryItems.some(item => item.is_featured) && (
+                <Star className="h-4 w-4 text-yellow-400 fill-current" />
+              )}
+            </div>
+            
+            <div className="flex items-center text-sm opacity-75">
+              <ArrowLeft className="h-4 w-4 rotate-180 group-hover:translate-x-1 transition-transform duration-300" />
+            </div>
+          </div>
+          
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Loading states
   if (!restaurantName) {
     return <div className="min-h-screen flex items-center justify-center p-4">
@@ -451,7 +534,7 @@ const EnhancedMenu = () => {
     return <MenuLoadingSkeleton layoutStyle={layoutStyle} />;
   }
 
-  // Enhanced header component
+  // Enhanced MenuHeader component
   const MenuHeader = () => <div className="relative">
       {bannerImageUrl && <div className="absolute inset-0 bg-cover bg-center" style={{
       backgroundImage: `url(${bannerImageUrl})`
@@ -504,7 +587,7 @@ const EnhancedMenu = () => {
       </div>
     </div>;
 
-  // Enhanced search component
+  // Enhanced SearchBar component
   const SearchBar = () => <div className="px-3 py-3">
       <div className="max-w-sm mx-auto relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={mutedTextStyles} />
@@ -539,6 +622,7 @@ const EnhancedMenu = () => {
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
         </div>;
     }
+    
     return <div className="viewport-fill smooth-scroll" style={themeStyles}>
         {/* Viewport background fill */}
         <div 
@@ -548,38 +632,25 @@ const EnhancedMenu = () => {
         
         <MenuHeader />
         <SearchBar />
-        <div className="px-3 pb-6">
-          <div className="max-w-sm mx-auto">
-            {filteredCategories.length === 0 ? <div className="text-center py-8 fade-in">
-                <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
-                <h3 className="text-base font-semibold mb-2" style={headingStyles}>Menu Coming Soon</h3>
-                <p className="text-sm" style={mutedTextStyles}>The menu is being prepared and will be available shortly.</p>
-              </div> : <div className="grid grid-cols-2 gap-3">
+        <div className="px-4 pb-6">
+          <div className="max-w-2xl mx-auto">
+            {filteredCategories.length === 0 ? <div className="text-center py-12 fade-in">
+                <Utensils className="h-12 w-12 mx-auto mb-4" style={mutedTextStyles} />
+                <h3 className="text-xl font-semibold mb-3" style={headingStyles}>Menu Coming Soon</h3>
+                <p className="text-base" style={mutedTextStyles}>The menu is being prepared and will be available shortly.</p>
+              </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredCategories.map((category, index) => {
               const categoryItems = menuItems.filter(item => item.category_id === category.id);
-              return <div key={category.id}>
-                      <Card className="category-card h-28 border" style={{
-                  ...cardStyles,
-                  borderColor: customTheme?.accentColor + '40'
-                }} onClick={() => setSelectedCategory(category.id)}>
-                        <CardContent className="p-3 h-full flex flex-col">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-sm mb-1" style={categoryNameStyles}>
-                              {getLocalizedText(category, 'name')}
-                            </h3>
-                            <p className="text-xs line-clamp-2 leading-relaxed" style={categoryNameStyles}>
-                              {categoryItems.slice(0, 2).map(item => getLocalizedText(item, 'name')).join(', ')}
-                              {categoryItems.length > 2 && '...'}
-                            </p>
-                          </div>
-                          <div className="flex items-center justify-between mt-2">
-                            <div className="text-xs" style={mutedTextStyles}>
-                              {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
-                            </div>
-                            {categoryItems.some(item => item.is_featured) && <Star className="h-3 w-3 text-yellow-500 fill-current" />}
-                          </div>
-                        </CardContent>
-                      </Card>
+              return <div 
+                      key={category.id} 
+                      className="fade-in"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <CategoryCard 
+                        category={category} 
+                        categoryItems={categoryItems} 
+                        index={index} 
+                      />
                     </div>;
             })}
               </div>}

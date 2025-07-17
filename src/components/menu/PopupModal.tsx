@@ -16,7 +16,7 @@ interface PopupSettings {
   dailyLimit: number;
   wheelSettings: {
     enabled: boolean;
-    unlockType: 'free' | 'link' | 'review';
+    unlockType: 'free' | 'link';
     unlockText: string;
     unlockButtonText: string;
     unlockLink: string;
@@ -38,6 +38,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
   const [showWheel, setShowWheel] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
   const [wonReward, setWonReward] = useState<string>('');
+  const [timeLeft, setTimeLeft] = useState(5);
 
   useEffect(() => {
     if (!settings.enabled) return;
@@ -64,10 +65,20 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
       if (settings.wheelSettings.unlockType === 'free') {
         setShowWheel(true);
       } else if (settings.wheelSettings.unlockType === 'link' && settings.wheelSettings.unlockLink) {
+        // Open the actual link provided, not just any subdomain
         window.open(settings.wheelSettings.unlockLink, '_blank');
-        setShowWheel(true);
-      } else {
-        setShowWheel(true);
+        // Start 5-second countdown for wheel unlock
+        setTimeLeft(5);
+        const countdown = setInterval(() => {
+          setTimeLeft(prev => {
+            if (prev <= 1) {
+              clearInterval(countdown);
+              setShowWheel(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
       }
     } else if (settings.link) {
       window.open(settings.link, '_blank');
@@ -118,12 +129,27 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                   <p className="text-sm font-medium">
                     {settings.wheelSettings.unlockText}
                   </p>
-                  <Button 
-                    onClick={handleCtaClick}
-                    className="w-full"
-                  >
-                    {settings.wheelSettings.unlockButtonText}
-                  </Button>
+                  {settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5 ? (
+                    <div className="text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Wheel unlocks in {timeLeft} seconds...
+                      </p>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all duration-1000" 
+                          style={{ width: `${((5 - timeLeft) / 5) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <Button 
+                      onClick={handleCtaClick}
+                      className="w-full"
+                      disabled={settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5}
+                    >
+                      {settings.wheelSettings.unlockButtonText}
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <Button 
@@ -142,7 +168,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                   <p className="text-sm text-muted-foreground">
                     {settings.wheelSettings.unlockType === 'free' 
                       ? 'Spin the wheel for your reward!' 
-                      : 'Thanks for your support! Spin to win your reward:'
+                      : 'Thanks for visiting the link! Spin to win your reward:'
                     }
                   </p>
                   <SpinWheel 

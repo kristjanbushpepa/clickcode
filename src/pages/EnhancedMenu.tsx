@@ -30,7 +30,7 @@ interface PopupSettings {
   dailyLimit: number;
   wheelSettings: {
     enabled: boolean;
-    unlockType: 'free' | 'link' | 'review';
+    unlockType: 'free' | 'link';
     unlockText: string;
     unlockButtonText: string;
     unlockLink: string;
@@ -305,7 +305,7 @@ const EnhancedMenu = () => {
         dailyLimit: data.daily_limit || 1,
         wheelSettings: {
           enabled: data.wheel_enabled,
-          unlockType: data.wheel_unlock_type || 'review',
+          unlockType: data.wheel_unlock_type || 'free',
           unlockText: data.wheel_unlock_text,
           unlockButtonText: data.wheel_unlock_button_text,
           unlockLink: data.wheel_unlock_link || '',

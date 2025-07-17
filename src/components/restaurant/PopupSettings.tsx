@@ -399,7 +399,7 @@ export const PopupSettings: React.FC = () => {
                           <Label htmlFor="unlock-type">Unlock Type</Label>
                           <Select
                             value={settings.wheelSettings.unlockType}
-                            onValueChange={(type: 'free' | 'link' | 'review') => setSettings(prev => ({
+                            onValueChange={(type: 'free' | 'link') => setSettings(prev => ({
                               ...prev,
                               wheelSettings: { ...prev.wheelSettings, unlockType: type }
                             }))}
@@ -410,7 +410,6 @@ export const PopupSettings: React.FC = () => {
                             <SelectContent>
                               <SelectItem value="free">Free to use</SelectItem>
                               <SelectItem value="link">Require link visit</SelectItem>
-                              <SelectItem value="review">Require review</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

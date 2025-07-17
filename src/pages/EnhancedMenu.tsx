@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
@@ -386,10 +385,25 @@ const EnhancedMenu = () => {
       (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [menuItems, searchTerm, selectedCategory, layoutPreference]);
-  const filteredCategories = useMemo(() => 
-    categories.filter(category => 
-      (category.name_sq || category.name).toLowerCase().includes(searchTerm.toLowerCase())
-    ), [categories, searchTerm]);
+  const filteredCategories = useMemo(() => {
+    if (!searchTerm) {
+      return categories;
+    }
+    
+    // If searching in categories mode without a selected category, show categories that match search
+    // or categories that have items matching the search
+    const categoriesWithMatchingItems = categories.filter(category => {
+      const categoryMatches = (category.name_sq || category.name).toLowerCase().includes(searchTerm.toLowerCase());
+      const hasMatchingItems = menuItems.some(item => 
+        item.category_id === category.id && 
+        ((item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) || 
+         (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      return categoryMatches || hasMatchingItems;
+    });
+    
+    return categoriesWithMatchingItems;
+  }, [categories, searchTerm, menuItems]);
 
   // Utility functions
   const formatPrice = useCallback((price: number, originalCurrency: string) => {
@@ -447,38 +461,71 @@ const EnhancedMenu = () => {
     categoryItems: MenuItem[]; 
     index: number;
   }) => {
+    // Get the first item image from this category as fallback, or use restaurant logo
+    const categoryImageUrl = useMemo(() => {
+      const firstItemWithImage = categoryItems.find(item => 
+        getMenuItemImageUrl(item)
+      );
+      
+      if (firstItemWithImage) {
+        return getMenuItemImageUrl(firstItemWithImage);
+      }
+      
+      return logoImageUrl;
+    }, [categoryItems, logoImageUrl]);
+
     return (
       <Card 
         className="group relative h-40 border overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
         style={{
           borderColor: customTheme?.accentColor + '40',
-          background: logoImageUrl 
-            ? `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10), url(${logoImageUrl})`
-            : `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10)`,
-          backgroundSize: logoImageUrl ? 'cover, 60px 60px' : 'cover',
-          backgroundPosition: logoImageUrl ? 'center, top 10px right 10px' : 'center',
-          backgroundRepeat: logoImageUrl ? 'no-repeat, no-repeat' : 'no-repeat',
           backgroundColor: customTheme?.cardBackground
         }}
         onClick={() => setSelectedCategory(category.id)}
       >
-        {/* Default Icon Background */}
-        {!logoImageUrl && (
-          <div className="absolute top-4 right-4 opacity-20">
-            <ChefHat className="h-12 w-12" style={{ color: customTheme?.accentColor }} />
+        {/* Background Image */}
+        {categoryImageUrl && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${categoryImageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(135deg, ${customTheme?.accentColor}40, ${customTheme?.primaryColor}30)`
+              }}
+            />
           </div>
         )}
         
-        <CardContent className="relative p-4 h-full flex flex-col justify-between">
+        {/* Default Icon Background when no image */}
+        {!categoryImageUrl && (
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10)`
+            }}
+          >
+            <div className="absolute top-4 right-4 opacity-20">
+              <ChefHat className="h-12 w-12" style={{ color: customTheme?.accentColor }} />
+            </div>
+          </div>
+        )}
+        
+        <CardContent className="relative p-4 h-full flex flex-col justify-between z-10">
           <div>
-            <h3 className="font-bold text-lg mb-2 line-clamp-2" style={{
+            <h3 className="font-bold text-lg mb-2 line-clamp-2 drop-shadow-sm" style={{
               color: customTheme?.categoryNameColor || customTheme?.textColor
             }}>
               {getLocalizedText(category, 'name')}
             </h3>
             
             {category.description && (
-              <p className="text-sm opacity-90 line-clamp-2 mb-3" style={{
+              <p className="text-sm opacity-90 line-clamp-2 mb-3 drop-shadow-sm" style={{
                 color: customTheme?.descriptionColor || customTheme?.mutedTextColor
               }}>
                 {getLocalizedText(category, 'description')}
@@ -576,7 +623,9 @@ const EnhancedMenu = () => {
           </div>
           
           <div className="text-center slide-up">
-            <h1 className="text-lg font-bold mb-1 uppercase tracking-wide" style={headingStyles}>
+            <h1 className="text-lg font-bold mb-1 uppercase tracking-wide" style={{
+              color: customTheme?.headingColor || customTheme?.textColor
+            }}>
               {selectedCategory && layoutPreference === 'categories' ? getLocalizedText(categories.find(cat => cat.id === selectedCategory), 'name') : profile?.name || 'Restaurant Menu'}
             </h1>
             {profile?.address && !selectedCategory && <div className="flex items-center justify-center gap-1 text-xs opacity-80 uppercase tracking-wide mb-2">
@@ -603,25 +652,32 @@ const EnhancedMenu = () => {
       </div>
     </div>;
 
-  // Enhanced SearchBar component - only show in categories mode when viewing a specific category
+  // Enhanced SearchBar component - now available in all categories views
   const SearchBar = () => {
-    // Only show search bar when in categories mode and viewing a specific category
-    if (layoutPreference !== 'categories' || !selectedCategory) {
+    // Show search bar in categories mode (both main view and category-specific view)
+    if (layoutPreference !== 'categories') {
       return null;
     }
+    
+    const placeholder = selectedCategory 
+      ? "Search items in this category" 
+      : "Search categories and items";
     
     return (
       <div className="px-3 py-3">
         <div className="max-w-sm mx-auto relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={mutedTextStyles} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={{
+            color: customTheme?.mutedTextColor
+          }} />
           <Input 
-            placeholder="Search items in this category" 
+            placeholder={placeholder}
             value={searchTerm} 
             onChange={e => setSearchTerm(e.target.value)} 
             className="pl-10 h-10 border backdrop-blur-sm" 
             style={{
-              ...cardStyles,
-              borderColor: customTheme?.borderColor
+              backgroundColor: customTheme?.cardBackground,
+              borderColor: customTheme?.borderColor,
+              color: customTheme?.textColor
             }} 
           />
         </div>
@@ -632,7 +688,10 @@ const EnhancedMenu = () => {
   // Categories layout
   if (layoutPreference === 'categories') {
     if (selectedCategory) {
-      return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+      return <div className="viewport-fill smooth-scroll" style={{
+        backgroundColor: customTheme?.backgroundColor,
+        color: customTheme?.textColor
+      }}>
           {/* Viewport background fill */}
           <div 
             className="fixed inset-0 -z-10" 
@@ -644,8 +703,12 @@ const EnhancedMenu = () => {
           <div className="px-3 py-3">
             <div className="max-w-sm mx-auto">
               {filteredMenuItems.length === 0 ? <div className="text-center py-8 fade-in">
-                  <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
-                  <p className="text-sm" style={mutedTextStyles}>
+                  <Utensils className="h-10 w-10 mx-auto mb-3" style={{
+                    color: customTheme?.mutedTextColor
+                  }} />
+                  <p className="text-sm" style={{
+                    color: customTheme?.mutedTextColor
+                  }}>
                     {searchTerm ? 'No items found matching your search.' : 'No items found in this category.'}
                   </p>
                 </div> : <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
@@ -657,7 +720,10 @@ const EnhancedMenu = () => {
         </div>;
     }
     
-    return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+    return <div className="viewport-fill smooth-scroll" style={{
+      backgroundColor: customTheme?.backgroundColor,
+      color: customTheme?.textColor
+    }}>
         {/* Viewport background fill */}
         <div 
           className="fixed inset-0 -z-10" 
@@ -665,12 +731,23 @@ const EnhancedMenu = () => {
         />
         
         <MenuHeader />
+        <SearchBar />
         <div className="px-4 pb-6">
           <div className="max-w-2xl mx-auto">
             {filteredCategories.length === 0 ? <div className="text-center py-12 fade-in">
-                <Utensils className="h-12 w-12 mx-auto mb-4" style={mutedTextStyles} />
-                <h3 className="text-xl font-semibold mb-3" style={headingStyles}>Menu Coming Soon</h3>
-                <p className="text-base" style={mutedTextStyles}>The menu is being prepared and will be available shortly.</p>
+                <Utensils className="h-12 w-12 mx-auto mb-4" style={{
+                  color: customTheme?.mutedTextColor
+                }} />
+                <h3 className="text-xl font-semibold mb-3" style={{
+                  color: customTheme?.headingColor || customTheme?.textColor
+                }}>
+                  {searchTerm ? 'No results found' : 'Menu Coming Soon'}
+                </h3>
+                <p className="text-base" style={{
+                  color: customTheme?.mutedTextColor
+                }}>
+                  {searchTerm ? 'Try searching for something else.' : 'The menu is being prepared and will be available shortly.'}
+                </p>
               </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredCategories.map((category, index) => {
               const categoryItems = menuItems.filter(item => item.category_id === category.id);

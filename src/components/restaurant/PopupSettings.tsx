@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -71,17 +72,36 @@ export const PopupSettings: React.FC = () => {
     try {
       const restaurantSupabase = getRestaurantSupabase();
       const { data, error } = await restaurantSupabase
-        .from('restaurant_customization')
-        .select('popup_settings')
-        .single();
+        .from('popup_settings')
+        .select('*')
+        .maybeSingle();
 
       if (error) throw error;
       
-      if (data?.popup_settings) {
-        setSettings(data.popup_settings);
+      if (data) {
+        // Map database fields to component state structure
+        setSettings({
+          enabled: data.enabled,
+          type: data.type,
+          title: data.title,
+          description: data.description,
+          link: data.link || '',
+          buttonText: data.button_text,
+          wheelSettings: {
+            enabled: data.wheel_enabled,
+            unlockText: data.wheel_unlock_text,
+            unlockButtonText: data.wheel_unlock_button_text,
+            rewards: data.wheel_rewards || []
+          }
+        });
       }
     } catch (error) {
       console.error('Error loading popup settings:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load popup settings.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -89,11 +109,24 @@ export const PopupSettings: React.FC = () => {
     setLoading(true);
     try {
       const restaurantSupabase = getRestaurantSupabase();
+      
+      // Map component state to database fields
+      const dbData = {
+        enabled: settings.enabled,
+        type: settings.type,
+        title: settings.title,
+        description: settings.description,
+        link: settings.link || null,
+        button_text: settings.buttonText,
+        wheel_enabled: settings.wheelSettings.enabled,
+        wheel_unlock_text: settings.wheelSettings.unlockText,
+        wheel_unlock_button_text: settings.wheelSettings.unlockButtonText,
+        wheel_rewards: settings.wheelSettings.rewards
+      };
+
       const { error } = await restaurantSupabase
-        .from('restaurant_customization')
-        .upsert({
-          popup_settings: settings
-        });
+        .from('popup_settings')
+        .upsert(dbData);
 
       if (error) throw error;
 

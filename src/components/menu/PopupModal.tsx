@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,10 +12,14 @@ interface PopupSettings {
   description: string;
   link: string;
   buttonText: string;
+  showAfterSeconds: number;
+  dailyLimit: number;
   wheelSettings: {
     enabled: boolean;
+    unlockType: 'free' | 'link' | 'review';
     unlockText: string;
     unlockButtonText: string;
+    unlockLink: string;
     rewards: Array<{
       text: string;
       chance: number;
@@ -32,20 +37,38 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
   const [isOpen, setIsOpen] = useState(false);
   const [showWheel, setShowWheel] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
+  const [wonReward, setWonReward] = useState<string>('');
 
   useEffect(() => {
-    if (settings.enabled) {
-      // Show popup after 3 seconds
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [settings.enabled]);
+    if (!settings.enabled) return;
+
+    // Check daily limit
+    const today = new Date().toDateString();
+    const storageKey = `popup_shown_${restaurantName}_${today}`;
+    const shownCount = parseInt(localStorage.getItem(storageKey) || '0');
+
+    if (shownCount >= settings.dailyLimit) return;
+
+    // Show popup after specified seconds
+    const timer = setTimeout(() => {
+      setIsOpen(true);
+      // Increment shown count
+      localStorage.setItem(storageKey, (shownCount + 1).toString());
+    }, settings.showAfterSeconds * 1000);
+
+    return () => clearTimeout(timer);
+  }, [settings.enabled, settings.showAfterSeconds, settings.dailyLimit, restaurantName]);
 
   const handleCtaClick = () => {
     if (settings.type === 'wheel' && settings.wheelSettings.enabled) {
-      setShowWheel(true);
+      if (settings.wheelSettings.unlockType === 'free') {
+        setShowWheel(true);
+      } else if (settings.wheelSettings.unlockType === 'link' && settings.wheelSettings.unlockLink) {
+        window.open(settings.wheelSettings.unlockLink, '_blank');
+        setShowWheel(true);
+      } else {
+        setShowWheel(true);
+      }
     } else if (settings.link) {
       window.open(settings.link, '_blank');
       setIsOpen(false);
@@ -53,13 +76,15 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
   };
 
   const handleWheelComplete = (result: string) => {
+    setWonReward(result);
     setHasSpun(true);
-    // Show result for 3 seconds then close
+    // Show result for 5 seconds then close
     setTimeout(() => {
       setIsOpen(false);
       setShowWheel(false);
       setHasSpun(false);
-    }, 3000);
+      setWonReward('');
+    }, 5000);
   };
 
   if (!settings.enabled) return null;
@@ -115,7 +140,10 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
               {!hasSpun ? (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    Thanks for your support! Spin to win your reward:
+                    {settings.wheelSettings.unlockType === 'free' 
+                      ? 'Spin the wheel for your reward!' 
+                      : 'Thanks for your support! Spin to win your reward:'
+                    }
                   </p>
                   <SpinWheel 
                     rewards={settings.wheelSettings.rewards}
@@ -123,10 +151,16 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                   />
                 </>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  <div className="text-6xl">🎉</div>
                   <p className="text-lg font-semibold text-primary">
-                    🎉 Congratulations!
+                    Congratulations!
                   </p>
+                  <div className="bg-primary/10 p-4 rounded-lg">
+                    <p className="text-xl font-bold text-primary">
+                      {wonReward}
+                    </p>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     Show this screen to claim your reward!
                   </p>

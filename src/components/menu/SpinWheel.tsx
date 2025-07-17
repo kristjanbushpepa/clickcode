@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -18,20 +19,30 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
   const [result, setResult] = useState<string>('');
   const wheelRef = useRef<HTMLDivElement>(null);
 
-  const totalChance = rewards.reduce((sum, reward) => sum + reward.chance, 0);
+  // Normalize rewards to ensure they add up to 100%
+  const normalizeRewards = (rewards: Reward[]) => {
+    const totalChance = rewards.reduce((sum, reward) => sum + reward.chance, 0);
+    if (totalChance === 0) return rewards;
+    
+    return rewards.map(reward => ({
+      ...reward,
+      chance: (reward.chance / totalChance) * 100
+    }));
+  };
+
+  const normalizedRewards = normalizeRewards(rewards);
   
   // Calculate segments
-  const segments = rewards.map((reward, index) => {
-    const percentage = (reward.chance / totalChance) * 100;
-    const startAngle = index === 0 ? 0 : rewards.slice(0, index).reduce((sum, r) => sum + (r.chance / totalChance) * 360, 0);
-    const endAngle = startAngle + (percentage / 100) * 360;
+  const segments = normalizedRewards.map((reward, index) => {
+    const startAngle = index === 0 ? 0 : normalizedRewards.slice(0, index).reduce((sum, r) => sum + (r.chance / 100) * 360, 0);
+    const segmentAngle = (reward.chance / 100) * 360;
+    const endAngle = startAngle + segmentAngle;
     
     return {
       ...reward,
-      percentage,
       startAngle,
       endAngle,
-      rotation: startAngle + (endAngle - startAngle) / 2
+      midAngle: startAngle + segmentAngle / 2
     };
   });
 
@@ -40,12 +51,12 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
     
     setIsSpinning(true);
     
-    // Generate random number based on chances
-    const random = Math.random() * totalChance;
+    // Generate random number to select winner
+    const random = Math.random() * 100;
     let currentChance = 0;
-    let selectedReward = rewards[0];
+    let selectedReward = normalizedRewards[0];
     
-    for (const reward of rewards) {
+    for (const reward of normalizedRewards) {
       currentChance += reward.chance;
       if (random <= currentChance) {
         selectedReward = reward;
@@ -55,9 +66,12 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
     
     // Calculate rotation to land on selected reward
     const segment = segments.find(s => s.text === selectedReward.text);
-    const targetAngle = segment ? segment.rotation : 0;
+    if (!segment) return;
+    
+    // Calculate target angle (we want the pointer to point to the middle of the segment)
+    const targetAngle = 360 - segment.midAngle; // Reverse because wheel spins clockwise but we measure counterclockwise
     const spins = 5; // Number of full rotations
-    const finalRotation = rotation + spins * 360 + (360 - targetAngle);
+    const finalRotation = rotation + spins * 360 + targetAngle + Math.random() * 20 - 10; // Add small random offset
     
     setRotation(finalRotation);
     setResult(selectedReward.text);
@@ -104,7 +118,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
                 'Z'
               ].join(' ');
               
-              const textAngle = (segment.startAngle + segment.endAngle) / 2;
+              const textAngle = segment.midAngle;
               const textX = 100 + 60 * Math.cos((textAngle * Math.PI) / 180);
               const textY = 100 + 60 * Math.sin((textAngle * Math.PI) / 180);
               
@@ -120,13 +134,24 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
                     x={textX}
                     y={textY}
                     fill="white"
-                    fontSize="12"
+                    fontSize="10"
                     fontWeight="bold"
                     textAnchor="middle"
                     dominantBaseline="middle"
                     transform={`rotate(${textAngle}, ${textX}, ${textY})`}
                   >
                     {segment.text}
+                  </text>
+                  <text
+                    x={textX}
+                    y={textY + 12}
+                    fill="white"
+                    fontSize="8"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    transform={`rotate(${textAngle}, ${textX}, ${textY + 12})`}
+                  >
+                    {segment.chance.toFixed(1)}%
                   </text>
                 </g>
               );

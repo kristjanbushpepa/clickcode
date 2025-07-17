@@ -19,6 +19,29 @@ import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import MenuItemPopup from '@/components/menu/MenuItemPopup';
 
+interface PopupSettings {
+  enabled: boolean;
+  type: 'cta' | 'wheel';
+  title: string;
+  description: string;
+  link: string;
+  buttonText: string;
+  showAfterSeconds: number;
+  dailyLimit: number;
+  wheelSettings: {
+    enabled: boolean;
+    unlockType: 'free' | 'link' | 'review';
+    unlockText: string;
+    unlockButtonText: string;
+    unlockLink: string;
+    rewards: Array<{
+      text: string;
+      chance: number;
+      color: string;
+    }>;
+  };
+}
+
 interface Category {
   id: string;
   name: string;
@@ -261,9 +284,34 @@ const EnhancedMenu = () => {
       const {
         data,
         error
-      } = await restaurantSupabase.from('restaurant_customization').select('popup_settings').single();
-      if (error) return null;
-      return data?.popup_settings;
+      } = await restaurantSupabase.from('popup_settings').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle();
+      
+      if (error) {
+        console.error('Error loading popup settings:', error);
+        return null;
+      }
+      
+      if (!data) return null;
+      
+      // Map database fields to component interface
+      return {
+        enabled: data.enabled,
+        type: data.type,
+        title: data.title,
+        description: data.description,
+        link: data.link || '',
+        buttonText: data.button_text,
+        showAfterSeconds: data.show_after_seconds || 3,
+        dailyLimit: data.daily_limit || 1,
+        wheelSettings: {
+          enabled: data.wheel_enabled,
+          unlockType: data.wheel_unlock_type || 'review',
+          unlockText: data.wheel_unlock_text,
+          unlockButtonText: data.wheel_unlock_button_text,
+          unlockLink: data.wheel_unlock_link || '',
+          rewards: data.wheel_rewards || []
+        }
+      } as PopupSettings;
     },
     enabled: !!restaurantSupabase,
     staleTime: 5 * 60 * 1000

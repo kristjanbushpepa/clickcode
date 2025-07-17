@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -25,10 +26,14 @@ interface PopupSettingsData {
   description: string;
   link: string;
   buttonText: string;
+  showAfterSeconds: number;
+  dailyLimit: number;
   wheelSettings: {
     enabled: boolean;
+    unlockType: 'free' | 'link' | 'review';
     unlockText: string;
     unlockButtonText: string;
+    unlockLink: string;
     rewards: Reward[];
   };
 }
@@ -46,10 +51,14 @@ export const PopupSettings: React.FC = () => {
     description: 'Get the latest updates and special offers',
     link: '',
     buttonText: 'Follow Now',
+    showAfterSeconds: 3,
+    dailyLimit: 1,
     wheelSettings: {
       enabled: false,
+      unlockType: 'review',
       unlockText: 'Give us a 5-star review to spin the wheel!',
       unlockButtonText: 'Leave Review & Spin',
+      unlockLink: '',
       rewards: [
         { text: '10% Off', chance: 20, color: '#ef4444' },
         { text: 'Free Drink', chance: 15, color: '#3b82f6' },
@@ -72,7 +81,6 @@ export const PopupSettings: React.FC = () => {
     try {
       const restaurantSupabase = getRestaurantSupabase();
       
-      // First, try to get all records and handle multiple records
       const { data, error } = await restaurantSupabase
         .from('popup_settings')
         .select('*')
@@ -81,11 +89,9 @@ export const PopupSettings: React.FC = () => {
       if (error) throw error;
       
       if (data && data.length > 0) {
-        // If there are multiple records, use the first one and clean up duplicates
         const firstRecord = data[0];
         setSettingsId(firstRecord.id);
         
-        // If there are multiple records, delete the extras
         if (data.length > 1) {
           console.log(`Found ${data.length} popup settings records, cleaning up duplicates...`);
           const idsToDelete = data.slice(1).map(record => record.id);
@@ -98,7 +104,6 @@ export const PopupSettings: React.FC = () => {
           }
         }
         
-        // Map database fields to component state structure
         setSettings({
           enabled: firstRecord.enabled,
           type: firstRecord.type,
@@ -106,10 +111,14 @@ export const PopupSettings: React.FC = () => {
           description: firstRecord.description,
           link: firstRecord.link || '',
           buttonText: firstRecord.button_text,
+          showAfterSeconds: firstRecord.show_after_seconds || 3,
+          dailyLimit: firstRecord.daily_limit || 1,
           wheelSettings: {
             enabled: firstRecord.wheel_enabled,
+            unlockType: firstRecord.wheel_unlock_type || 'review',
             unlockText: firstRecord.wheel_unlock_text,
             unlockButtonText: firstRecord.wheel_unlock_button_text,
+            unlockLink: firstRecord.wheel_unlock_link || '',
             rewards: firstRecord.wheel_rewards || []
           }
         });
@@ -129,7 +138,6 @@ export const PopupSettings: React.FC = () => {
     try {
       const restaurantSupabase = getRestaurantSupabase();
       
-      // Map component state to database fields
       const dbData = {
         enabled: settings.enabled,
         type: settings.type,
@@ -137,21 +145,23 @@ export const PopupSettings: React.FC = () => {
         description: settings.description,
         link: settings.link || null,
         button_text: settings.buttonText,
+        show_after_seconds: settings.showAfterSeconds,
+        daily_limit: settings.dailyLimit,
         wheel_enabled: settings.wheelSettings.enabled,
+        wheel_unlock_type: settings.wheelSettings.unlockType,
         wheel_unlock_text: settings.wheelSettings.unlockText,
         wheel_unlock_button_text: settings.wheelSettings.unlockButtonText,
+        wheel_unlock_link: settings.wheelSettings.unlockLink || null,
         wheel_rewards: settings.wheelSettings.rewards
       };
 
       let result;
       if (settingsId) {
-        // Update existing record
         result = await restaurantSupabase
           .from('popup_settings')
           .update(dbData)
           .eq('id', settingsId);
       } else {
-        // Insert new record
         result = await restaurantSupabase
           .from('popup_settings')
           .insert([dbData])
@@ -219,6 +229,26 @@ export const PopupSettings: React.FC = () => {
     }));
   };
 
+  const normalizeRewards = () => {
+    const rewards = settings.wheelSettings.rewards;
+    const totalChance = rewards.reduce((sum, reward) => sum + reward.chance, 0);
+    
+    if (totalChance === 0) return;
+    
+    const normalizedRewards = rewards.map(reward => ({
+      ...reward,
+      chance: Math.round((reward.chance / totalChance) * 100)
+    }));
+    
+    setSettings(prev => ({
+      ...prev,
+      wheelSettings: {
+        ...prev.wheelSettings,
+        rewards: normalizedRewards
+      }
+    }));
+  };
+
   const totalChance = settings.wheelSettings.rewards.reduce((sum, reward) => sum + reward.chance, 0);
 
   return (
@@ -239,6 +269,37 @@ export const PopupSettings: React.FC = () => {
 
           {settings.enabled && (
             <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="show-after">Show after (seconds)</Label>
+                  <Input
+                    id="show-after"
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={settings.showAfterSeconds}
+                    onChange={(e) => setSettings(prev => ({ 
+                      ...prev, 
+                      showAfterSeconds: parseInt(e.target.value) || 3 
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="daily-limit">Daily limit per user</Label>
+                  <Input
+                    id="daily-limit"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={settings.dailyLimit}
+                    onChange={(e) => setSettings(prev => ({ 
+                      ...prev, 
+                      dailyLimit: parseInt(e.target.value) || 1 
+                    }))}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="popup-type">Popup Type</Label>
                 <Select
@@ -318,6 +379,42 @@ export const PopupSettings: React.FC = () => {
                     {settings.wheelSettings.enabled && (
                       <>
                         <div className="space-y-2">
+                          <Label htmlFor="unlock-type">Unlock Type</Label>
+                          <Select
+                            value={settings.wheelSettings.unlockType}
+                            onValueChange={(type: 'free' | 'link' | 'review') => setSettings(prev => ({
+                              ...prev,
+                              wheelSettings: { ...prev.wheelSettings, unlockType: type }
+                            }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="free">Free to use</SelectItem>
+                              <SelectItem value="link">Require link visit</SelectItem>
+                              <SelectItem value="review">Require review</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {settings.wheelSettings.unlockType === 'link' && (
+                          <div className="space-y-2">
+                            <Label htmlFor="unlock-link">Unlock Link</Label>
+                            <Input
+                              id="unlock-link"
+                              type="url"
+                              value={settings.wheelSettings.unlockLink}
+                              onChange={(e) => setSettings(prev => ({
+                                ...prev,
+                                wheelSettings: { ...prev.wheelSettings, unlockLink: e.target.value }
+                              }))}
+                              placeholder="https://example.com"
+                            />
+                          </div>
+                        )}
+
+                        <div className="space-y-2">
                           <Label htmlFor="unlock-text">Unlock Text</Label>
                           <Textarea
                             id="unlock-text"
@@ -348,6 +445,9 @@ export const PopupSettings: React.FC = () => {
                               <Badge variant={totalChance === 100 ? 'default' : 'destructive'}>
                                 Total: {totalChance}%
                               </Badge>
+                              <Button size="sm" onClick={normalizeRewards} variant="outline">
+                                Normalize to 100%
+                              </Button>
                               <Button size="sm" onClick={addReward}>
                                 <Plus className="h-4 w-4" />
                               </Button>

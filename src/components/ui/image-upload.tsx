@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, X, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { toast } from '@/hooks/use-toast';
 import { compressImage, getOptimizedFileName } from '@/utils/imageCompression';
@@ -17,7 +17,6 @@ interface ImageUploadProps {
 
 export function ImageUpload({ currentImagePath, onImageChange, label, className }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     currentImagePath ? getImageUrl(currentImagePath) : null
   );
@@ -108,39 +107,21 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
   };
 
   const handleRemoveImage = async () => {
-    setIsDeleting(true);
-    try {
-      if (currentImagePath) {
+    if (currentImagePath) {
+      try {
         const restaurantSupabase = getRestaurantSupabase();
-        const { error } = await restaurantSupabase.storage
+        await restaurantSupabase.storage
           .from('restaurant-images')
           .remove([currentImagePath]);
-        
-        if (error) {
-          console.error('Error deleting image from storage:', error);
-          // Don't throw here, still proceed with UI update
-        }
+      } catch (error) {
+        console.error('Error deleting image:', error);
       }
-      
-      setPreviewUrl(null);
-      onImageChange(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
-      toast({
-        title: 'Sukses',
-        description: 'Imazhi u fshi me sukses',
-      });
-    } catch (error: any) {
-      console.error('Error removing image:', error);
-      toast({
-        title: 'Gabim',
-        description: `Gabim në fshirjen e imazhit: ${error.message}`,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsDeleting(false);
+    }
+    
+    setPreviewUrl(null);
+    onImageChange(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -149,28 +130,21 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
       <Label>{label}</Label>
       <div className="space-y-2">
         {previewUrl ? (
-          <div className="relative group">
+          <div className="relative">
             <img
               src={previewUrl}
               alt="Preview"
               className="w-full h-32 object-cover rounded-md border"
             />
-            <div className="absolute top-2 right-2 flex gap-1">
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={handleRemoveImage}
-                disabled={isDeleting}
-                className="opacity-90 hover:opacity-100"
-              >
-                {isDeleting ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="absolute top-2 right-2"
+              onClick={handleRemoveImage}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         ) : (
           <div className="border-2 border-dashed border-muted-foreground/25 rounded-md p-4 text-center">
@@ -186,28 +160,12 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
             type="button"
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading || isDeleting}
+            disabled={isUploading}
             className="flex-1"
           >
             <Upload className="h-4 w-4 mr-2" />
             {isUploading ? 'Duke kompresuar dhe ngarkuar...' : 'Ngarko Imazh'}
           </Button>
-          
-          {previewUrl && (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleRemoveImage}
-              disabled={isDeleting || isUploading}
-              className="px-3"
-            >
-              {isDeleting ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
-            </Button>
-          )}
           
           <Input
             ref={fileInputRef}

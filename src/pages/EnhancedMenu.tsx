@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { MenuSkeleton } from '@/components/menu/MenuSkeleton';
+import { MenuLoadingSkeleton } from '@/components/menu/MenuSkeleton';
 import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuFooter } from '@/components/menu/MenuFooter';
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
@@ -17,6 +17,9 @@ const EnhancedMenu = () => {
   const [menuData, setMenuData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [restaurantSupabase, setRestaurantSupabase] = useState(null);
+  const [currentLanguage, setCurrentLanguage] = useState('sq');
+  const [currentCurrency, setCurrentCurrency] = useState('ALL');
 
   // Popup settings hook
   const { settings: popupSettings } = usePopupSettings(
@@ -40,16 +43,17 @@ const EnhancedMenu = () => {
         setRestaurantData(restaurant);
 
         // Connect to restaurant's database
-        const restaurantSupabase = createRestaurantSupabase(
+        const restaurantSupabaseClient = createRestaurantSupabase(
           restaurant.supabase_url,
           restaurant.supabase_anon_key
         );
+        setRestaurantSupabase(restaurantSupabaseClient);
 
         // Fetch restaurant profile and menu data
         const [profileResponse, categoriesResponse, menuItemsResponse] = await Promise.all([
-          restaurantSupabase.from('restaurant_profile').select('*').single(),
-          restaurantSupabase.from('categories').select('*').order('display_order'),
-          restaurantSupabase.from('menu_items').select('*').order('display_order')
+          restaurantSupabaseClient.from('restaurant_profile').select('*').single(),
+          restaurantSupabaseClient.from('categories').select('*').order('display_order'),
+          restaurantSupabaseClient.from('menu_items').select('*').order('display_order')
         ]);
 
         if (profileResponse.error) throw profileResponse.error;
@@ -75,7 +79,29 @@ const EnhancedMenu = () => {
     }
   }, [id]);
 
-  if (loading) return <MenuSkeleton />;
+  const formatPrice = (price, currency) => {
+    const symbols = {
+      'ALL': 'L',
+      'EUR': '€',
+      'USD': '$',
+      'GBP': '£',
+      'CHF': 'CHF'
+    };
+    return `${symbols[currency] || currency} ${price.toFixed(2)}`;
+  };
+
+  const getLocalizedText = (item, field) => {
+    if (currentLanguage === 'sq' && item[`${field}_sq`]) {
+      return item[`${field}_sq`];
+    }
+    return item[field] || '';
+  };
+
+  const getMenuItemImageUrl = (item) => {
+    return item.image_url || item.image_path || null;
+  };
+
+  if (loading) return <MenuLoadingSkeleton />;
 
   if (error) {
     return (
@@ -153,8 +179,16 @@ const EnhancedMenu = () => {
             <p className="text-muted-foreground text-sm">Discover our delicious offerings</p>
           </div>
           <div className="flex gap-4">
-            <LanguageSwitch />
-            <CurrencySwitch />
+            <LanguageSwitch 
+              restaurantSupabase={restaurantSupabase}
+              currentLanguage={currentLanguage}
+              onLanguageChange={setCurrentLanguage}
+            />
+            <CurrencySwitch 
+              restaurantSupabase={restaurantSupabase}
+              currentCurrency={currentCurrency}
+              onCurrencyChange={setCurrentCurrency}
+            />
           </div>
         </div>
       </div>
@@ -184,7 +218,15 @@ const EnhancedMenu = () => {
 
               <div className="grid gap-6 md:gap-8">
                 {categoryItems.map((item) => (
-                  <EnhancedMenuItem key={item.id} item={item} />
+                  <EnhancedMenuItem 
+                    key={item.id} 
+                    item={item}
+                    layoutStyle="elegant-list"
+                    formatPrice={formatPrice}
+                    getLocalizedText={getLocalizedText}
+                    getMenuItemImageUrl={getMenuItemImageUrl}
+                    categoryName={category.name}
+                  />
                 ))}
               </div>
             </div>

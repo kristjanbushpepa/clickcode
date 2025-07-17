@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -62,6 +61,7 @@ export const PopupSettings: React.FC = () => {
   });
   
   const [loading, setLoading] = useState(false);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -71,27 +71,46 @@ export const PopupSettings: React.FC = () => {
   const loadSettings = async () => {
     try {
       const restaurantSupabase = getRestaurantSupabase();
+      
+      // First, try to get all records and handle multiple records
       const { data, error } = await restaurantSupabase
         .from('popup_settings')
         .select('*')
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      if (data) {
+      if (data && data.length > 0) {
+        // If there are multiple records, use the first one and clean up duplicates
+        const firstRecord = data[0];
+        setSettingsId(firstRecord.id);
+        
+        // If there are multiple records, delete the extras
+        if (data.length > 1) {
+          console.log(`Found ${data.length} popup settings records, cleaning up duplicates...`);
+          const idsToDelete = data.slice(1).map(record => record.id);
+          
+          for (const id of idsToDelete) {
+            await restaurantSupabase
+              .from('popup_settings')
+              .delete()
+              .eq('id', id);
+          }
+        }
+        
         // Map database fields to component state structure
         setSettings({
-          enabled: data.enabled,
-          type: data.type,
-          title: data.title,
-          description: data.description,
-          link: data.link || '',
-          buttonText: data.button_text,
+          enabled: firstRecord.enabled,
+          type: firstRecord.type,
+          title: firstRecord.title,
+          description: firstRecord.description,
+          link: firstRecord.link || '',
+          buttonText: firstRecord.button_text,
           wheelSettings: {
-            enabled: data.wheel_enabled,
-            unlockText: data.wheel_unlock_text,
-            unlockButtonText: data.wheel_unlock_button_text,
-            rewards: data.wheel_rewards || []
+            enabled: firstRecord.wheel_enabled,
+            unlockText: firstRecord.wheel_unlock_text,
+            unlockButtonText: firstRecord.wheel_unlock_button_text,
+            rewards: firstRecord.wheel_rewards || []
           }
         });
       }
@@ -124,11 +143,27 @@ export const PopupSettings: React.FC = () => {
         wheel_rewards: settings.wheelSettings.rewards
       };
 
-      const { error } = await restaurantSupabase
-        .from('popup_settings')
-        .upsert(dbData);
+      let result;
+      if (settingsId) {
+        // Update existing record
+        result = await restaurantSupabase
+          .from('popup_settings')
+          .update(dbData)
+          .eq('id', settingsId);
+      } else {
+        // Insert new record
+        result = await restaurantSupabase
+          .from('popup_settings')
+          .insert([dbData])
+          .select()
+          .single();
+        
+        if (result.data) {
+          setSettingsId(result.data.id);
+        }
+      }
 
-      if (error) throw error;
+      if (result.error) throw result.error;
 
       toast({
         title: 'Settings saved',

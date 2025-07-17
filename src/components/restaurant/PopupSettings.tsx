@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -86,12 +85,16 @@ export const PopupSettings: React.FC = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading popup settings:', error);
+        return;
+      }
       
       if (data && data.length > 0) {
         const firstRecord = data[0];
         setSettingsId(firstRecord.id);
         
+        // Clean up duplicates if they exist
         if (data.length > 1) {
           console.log(`Found ${data.length} popup settings records, cleaning up duplicates...`);
           const idsToDelete = data.slice(1).map(record => record.id);
@@ -108,16 +111,16 @@ export const PopupSettings: React.FC = () => {
           enabled: firstRecord.enabled,
           type: firstRecord.type,
           title: firstRecord.title,
-          description: firstRecord.description,
+          description: firstRecord.description || '',
           link: firstRecord.link || '',
           buttonText: firstRecord.button_text,
-          showAfterSeconds: firstRecord.show_after_seconds || 3,
-          dailyLimit: firstRecord.daily_limit || 1,
+          showAfterSeconds: firstRecord.show_after_seconds,
+          dailyLimit: firstRecord.daily_limit,
           wheelSettings: {
             enabled: firstRecord.wheel_enabled,
-            unlockType: firstRecord.wheel_unlock_type || 'review',
-            unlockText: firstRecord.wheel_unlock_text,
-            unlockButtonText: firstRecord.wheel_unlock_button_text,
+            unlockType: firstRecord.wheel_unlock_type,
+            unlockText: firstRecord.wheel_unlock_text || '',
+            unlockButtonText: firstRecord.wheel_unlock_button_text || '',
             unlockLink: firstRecord.wheel_unlock_link || '',
             rewards: firstRecord.wheel_rewards || []
           }
@@ -155,6 +158,8 @@ export const PopupSettings: React.FC = () => {
         wheel_rewards: settings.wheelSettings.rewards
       };
 
+      console.log('Saving popup settings with data:', dbData);
+
       let result;
       if (settingsId) {
         result = await restaurantSupabase
@@ -173,7 +178,10 @@ export const PopupSettings: React.FC = () => {
         }
       }
 
-      if (result.error) throw result.error;
+      if (result.error) {
+        console.error('Database error:', result.error);
+        throw result.error;
+      }
 
       toast({
         title: 'Settings saved',
@@ -183,7 +191,7 @@ export const PopupSettings: React.FC = () => {
       console.error('Error saving popup settings:', error);
       toast({
         title: 'Error',
-        description: 'Failed to save popup settings.',
+        description: `Failed to save popup settings: ${error.message || 'Unknown error'}`,
         variant: 'destructive',
       });
     } finally {

@@ -370,8 +370,24 @@ const EnhancedMenu = () => {
   // Memoized computed values
   const bannerImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null, [profile, getDisplayImageUrl]);
   const logoImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null, [profile, getDisplayImageUrl]);
-  const filteredMenuItems = useMemo(() => menuItems.filter(item => (item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) || (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase())), [menuItems, searchTerm]);
-  const filteredCategories = useMemo(() => categories.filter(category => (category.name_sq || category.name).toLowerCase().includes(searchTerm.toLowerCase())), [categories, searchTerm]);
+  const filteredMenuItems = useMemo(() => {
+    let itemsToFilter = menuItems;
+    
+    // If we're in categories mode and have a selected category, filter by category
+    if (layoutPreference === 'categories' && selectedCategory) {
+      itemsToFilter = menuItems.filter(item => item.category_id === selectedCategory);
+    }
+    
+    // Then apply search filter
+    return itemsToFilter.filter(item => 
+      (item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [menuItems, searchTerm, selectedCategory, layoutPreference]);
+  const filteredCategories = useMemo(() => 
+    categories.filter(category => 
+      (category.name_sq || category.name).toLowerCase().includes(searchTerm.toLowerCase())
+    ), [categories, searchTerm]);
 
   // Utility functions
   const formatPrice = useCallback((price: number, originalCurrency: string) => {
@@ -426,47 +442,38 @@ const EnhancedMenu = () => {
     categoryItems: MenuItem[]; 
     index: number;
   }) => {
-    const categoryImageUrl = category.image_path ? getImageUrl(category.image_path) : null;
-    
     return (
       <Card 
         className="group relative h-40 border overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
         style={{
           borderColor: customTheme?.accentColor + '40',
-          background: categoryImageUrl 
-            ? 'transparent' 
-            : `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10)`
+          background: logoImageUrl 
+            ? `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10), url(${logoImageUrl})`
+            : `linear-gradient(135deg, ${customTheme?.accentColor}20, ${customTheme?.primaryColor}10)`,
+          backgroundSize: logoImageUrl ? 'cover, 60px 60px' : 'cover',
+          backgroundPosition: logoImageUrl ? 'center, top 10px right 10px' : 'center',
+          backgroundRepeat: logoImageUrl ? 'no-repeat, no-repeat' : 'no-repeat'
         }}
         onClick={() => setSelectedCategory(category.id)}
       >
-        {/* Category Image Background */}
-        {categoryImageUrl && (
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${categoryImageUrl})` }}
-          >
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
-          </div>
-        )}
-        
         {/* Default Icon Background */}
-        {!categoryImageUrl && (
+        {!logoImageUrl && (
           <div className="absolute top-4 right-4 opacity-20">
             <ChefHat className="h-12 w-12" style={{ color: customTheme?.accentColor }} />
           </div>
         )}
         
-        <CardContent className="relative p-4 h-full flex flex-col justify-between text-white">
+        <CardContent className="relative p-4 h-full flex flex-col justify-between">
           <div>
             <h3 className="font-bold text-lg mb-2 line-clamp-2" style={{
-              color: categoryImageUrl ? '#ffffff' : customTheme?.headingColor
+              color: customTheme?.headingColor
             }}>
               {getLocalizedText(category, 'name')}
             </h3>
             
             {category.description && (
               <p className="text-sm opacity-90 line-clamp-2 mb-3" style={{
-                color: categoryImageUrl ? '#ffffff' : customTheme?.mutedTextColor
+                color: customTheme?.mutedTextColor
               }}>
                 {getLocalizedText(category, 'description')}
               </p>
@@ -477,10 +484,10 @@ const EnhancedMenu = () => {
             <div className="flex items-center gap-2">
               <Badge 
                 variant="secondary" 
-                className="text-xs backdrop-blur-sm"
+                className="text-xs"
                 style={{
-                  backgroundColor: categoryImageUrl ? 'rgba(255,255,255,0.9)' : customTheme?.accentColor + '20',
-                  color: categoryImageUrl ? customTheme?.textColor : customTheme?.accentColor
+                  backgroundColor: customTheme?.accentColor + '20',
+                  color: customTheme?.accentColor
                 }}
               >
                 {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
@@ -495,9 +502,6 @@ const EnhancedMenu = () => {
               <ArrowLeft className="h-4 w-4 rotate-180 group-hover:translate-x-1 transition-transform duration-300" />
             </div>
           </div>
-          
-          {/* Hover overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </CardContent>
       </Card>
     );
@@ -548,7 +552,10 @@ const EnhancedMenu = () => {
         <div className="max-w-sm mx-auto">
           <div className="flex justify-between items-start mb-3">
             <div className="flex items-center gap-3">
-              {selectedCategory && layoutPreference === 'categories' && <Button variant="ghost" size="sm" onClick={() => setSelectedCategory(null)} className="text-white hover:bg-white/20 p-2 h-8 w-8">
+              {selectedCategory && layoutPreference === 'categories' && <Button variant="ghost" size="sm" onClick={() => {
+                  setSelectedCategory(null);
+                  setSearchTerm(''); // Clear search when going back to categories
+                }} className="text-white hover:bg-white/20 p-2 h-8 w-8">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>}
               {logoImageUrl && <img src={logoImageUrl} alt={profile?.name} className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1" />}
@@ -587,16 +594,31 @@ const EnhancedMenu = () => {
       </div>
     </div>;
 
-  // Enhanced SearchBar component
-  const SearchBar = () => <div className="px-3 py-3">
-      <div className="max-w-sm mx-auto relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={mutedTextStyles} />
-        <Input placeholder="Search ingredients & dishes" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 h-10 border backdrop-blur-sm" style={{
-        ...cardStyles,
-        borderColor: customTheme?.borderColor
-      }} />
+  // Enhanced SearchBar component - only show in categories mode when viewing a specific category
+  const SearchBar = () => {
+    // Only show search bar when in categories mode and viewing a specific category
+    if (layoutPreference !== 'categories' || !selectedCategory) {
+      return null;
+    }
+    
+    return (
+      <div className="px-3 py-3">
+        <div className="max-w-sm mx-auto relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={mutedTextStyles} />
+          <Input 
+            placeholder="Search items in this category" 
+            value={searchTerm} 
+            onChange={e => setSearchTerm(e.target.value)} 
+            className="pl-10 h-10 border backdrop-blur-sm" 
+            style={{
+              ...cardStyles,
+              borderColor: customTheme?.borderColor
+            }} 
+          />
+        </div>
       </div>
-    </div>;
+    );
+  };
 
   // Categories layout
   if (layoutPreference === 'categories') {
@@ -609,11 +631,14 @@ const EnhancedMenu = () => {
           />
           
           <MenuHeader />
+          <SearchBar />
           <div className="px-3 py-3">
             <div className="max-w-sm mx-auto">
               {filteredMenuItems.length === 0 ? <div className="text-center py-8 fade-in">
                   <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
-                  <p className="text-sm" style={mutedTextStyles}>No items found in this category.</p>
+                  <p className="text-sm" style={mutedTextStyles}>
+                    {searchTerm ? 'No items found matching your search.' : 'No items found in this category.'}
+                  </p>
                 </div> : <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
                   {filteredMenuItems.map((item, index) => <EnhancedMenuItem key={item.id} item={item} layoutStyle={layoutStyle} customTheme={customTheme} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} isCompact={true} index={index} onClick={handleMenuItemClick} />)}
                 </div>}
@@ -631,7 +656,6 @@ const EnhancedMenu = () => {
         />
         
         <MenuHeader />
-        <SearchBar />
         <div className="px-4 pb-6">
           <div className="max-w-2xl mx-auto">
             {filteredCategories.length === 0 ? <div className="text-center py-12 fade-in">

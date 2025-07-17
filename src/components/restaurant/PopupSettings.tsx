@@ -107,22 +107,29 @@ export const PopupSettings: React.FC = () => {
           }
         }
         
+        // Ensure all values have proper defaults to avoid undefined
         setSettings({
-          enabled: firstRecord.enabled,
-          type: firstRecord.type,
-          title: firstRecord.title,
+          enabled: Boolean(firstRecord.enabled),
+          type: firstRecord.type || 'cta',
+          title: firstRecord.title || 'Follow us on Instagram!',
           description: firstRecord.description || '',
           link: firstRecord.link || '',
-          buttonText: firstRecord.button_text,
-          showAfterSeconds: firstRecord.show_after_seconds,
-          dailyLimit: firstRecord.daily_limit,
+          buttonText: firstRecord.button_text || 'Follow Now',
+          showAfterSeconds: Number(firstRecord.show_after_seconds) || 3,
+          dailyLimit: Number(firstRecord.daily_limit) || 1,
           wheelSettings: {
-            enabled: firstRecord.wheel_enabled,
-            unlockType: firstRecord.wheel_unlock_type,
-            unlockText: firstRecord.wheel_unlock_text || '',
-            unlockButtonText: firstRecord.wheel_unlock_button_text || '',
+            enabled: Boolean(firstRecord.wheel_enabled),
+            unlockType: firstRecord.wheel_unlock_type || 'review',
+            unlockText: firstRecord.wheel_unlock_text || 'Give us a 5-star review to spin the wheel!',
+            unlockButtonText: firstRecord.wheel_unlock_button_text || 'Leave Review & Spin',
             unlockLink: firstRecord.wheel_unlock_link || '',
-            rewards: firstRecord.wheel_rewards || []
+            rewards: Array.isArray(firstRecord.wheel_rewards) ? firstRecord.wheel_rewards : [
+              { text: '10% Off', chance: 20, color: '#ef4444' },
+              { text: 'Free Drink', chance: 15, color: '#3b82f6' },
+              { text: '5% Off', chance: 30, color: '#10b981' },
+              { text: 'Free Appetizer', chance: 10, color: '#f59e0b' },
+              { text: 'Try Again', chance: 25, color: '#6b7280' }
+            ]
           }
         });
       }
@@ -141,19 +148,20 @@ export const PopupSettings: React.FC = () => {
     try {
       const restaurantSupabase = getRestaurantSupabase();
       
+      // Prepare data with simplified column names and proper null handling
       const dbData = {
         enabled: settings.enabled,
         type: settings.type,
         title: settings.title,
-        description: settings.description,
+        description: settings.description || null,
         link: settings.link || null,
         button_text: settings.buttonText,
         show_after_seconds: settings.showAfterSeconds,
         daily_limit: settings.dailyLimit,
         wheel_enabled: settings.wheelSettings.enabled,
         wheel_unlock_type: settings.wheelSettings.unlockType,
-        wheel_unlock_text: settings.wheelSettings.unlockText,
-        wheel_unlock_button_text: settings.wheelSettings.unlockButtonText,
+        wheel_unlock_text: settings.wheelSettings.unlockText || null,
+        wheel_unlock_button_text: settings.wheelSettings.unlockButtonText || null,
         wheel_unlock_link: settings.wheelSettings.unlockLink || null,
         wheel_rewards: settings.wheelSettings.rewards
       };
@@ -165,7 +173,8 @@ export const PopupSettings: React.FC = () => {
         result = await restaurantSupabase
           .from('popup_settings')
           .update(dbData)
-          .eq('id', settingsId);
+          .eq('id', settingsId)
+          .select();
       } else {
         result = await restaurantSupabase
           .from('popup_settings')
@@ -285,7 +294,7 @@ export const PopupSettings: React.FC = () => {
                     type="number"
                     min="1"
                     max="60"
-                    value={settings.showAfterSeconds}
+                    value={settings.showAfterSeconds.toString()}
                     onChange={(e) => setSettings(prev => ({ 
                       ...prev, 
                       showAfterSeconds: parseInt(e.target.value) || 3 
@@ -299,7 +308,7 @@ export const PopupSettings: React.FC = () => {
                     type="number"
                     min="1"
                     max="10"
-                    value={settings.dailyLimit}
+                    value={settings.dailyLimit.toString()}
                     onChange={(e) => setSettings(prev => ({ 
                       ...prev, 
                       dailyLimit: parseInt(e.target.value) || 1 
@@ -476,7 +485,7 @@ export const PopupSettings: React.FC = () => {
                                   <div className="col-span-3">
                                     <Input
                                       type="number"
-                                      value={reward.chance}
+                                      value={reward.chance.toString()}
                                       onChange={(e) => updateReward(index, 'chance', parseInt(e.target.value) || 0)}
                                       placeholder="Chance %"
                                       min="0"

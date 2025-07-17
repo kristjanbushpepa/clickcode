@@ -50,6 +50,8 @@ interface Category {
   description_sq?: string;
   display_order: number;
   is_active: boolean;
+  image_url?: string;
+  image_path?: string;
 }
 
 interface MenuItem {
@@ -190,7 +192,7 @@ const EnhancedMenu = () => {
     staleTime: 5 * 60 * 1000
   });
 
-  // Categories query
+  // Categories query - now includes image fields
   const {
     data: categories = [],
     isLoading: categoriesLoading
@@ -344,6 +346,7 @@ const EnhancedMenu = () => {
         headingColor: '#111827',
         categoryNameColor: '#1f2937',
         itemNameColor: '#111827',
+        itemCategoryNameColor: '#6b7280',
         descriptionColor: '#6b7280',
         priceColor: '#059669'
       });
@@ -366,6 +369,9 @@ const EnhancedMenu = () => {
   }, [getImageUrl]);
   const getMenuItemImageUrl = useCallback((item: MenuItem) => {
     return getDisplayImageUrl(item.image_path, item.image_url);
+  }, [getDisplayImageUrl]);
+  const getCategoryImageUrl = useCallback((category: Category) => {
+    return getDisplayImageUrl(category.image_path, category.image_url);
   }, [getDisplayImageUrl]);
 
   // Memoized computed values
@@ -461,8 +467,15 @@ const EnhancedMenu = () => {
     categoryItems: MenuItem[]; 
     index: number;
   }) => {
-    // Get the first item image from this category as fallback, or use restaurant logo
+    // Get category image first, then fallback to first item image, then restaurant logo
     const categoryImageUrl = useMemo(() => {
+      // First check if category has its own image
+      const categoryImage = getCategoryImageUrl(category);
+      if (categoryImage) {
+        return categoryImage;
+      }
+      
+      // If no category image, get the first item image from this category as fallback
       const firstItemWithImage = categoryItems.find(item => 
         getMenuItemImageUrl(item)
       );
@@ -471,20 +484,21 @@ const EnhancedMenu = () => {
         return getMenuItemImageUrl(firstItemWithImage);
       }
       
+      // Finally fallback to restaurant logo
       return logoImageUrl;
-    }, [categoryItems, logoImageUrl]);
+    }, [category, categoryItems, logoImageUrl]);
 
     return (
       <Card 
         className="group relative h-40 border overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
         style={{
-          borderColor: customTheme?.accentColor + '40',
+          borderColor: customTheme?.borderColor,
           backgroundColor: customTheme?.cardBackground
         }}
         onClick={() => setSelectedCategory(category.id)}
       >
         {/* Background Image */}
-        {categoryImageUrl && (
+        {categoryImageUrl ? (
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{
@@ -500,10 +514,8 @@ const EnhancedMenu = () => {
               }}
             />
           </div>
-        )}
-        
-        {/* Default Icon Background when no image */}
-        {!categoryImageUrl && (
+        ) : (
+          // Default styled background when no image
           <div 
             className="absolute inset-0"
             style={{
@@ -540,7 +552,8 @@ const EnhancedMenu = () => {
                 className="text-xs"
                 style={{
                   backgroundColor: customTheme?.accentColor + '20',
-                  color: customTheme?.accentColor
+                  color: customTheme?.accentColor,
+                  borderColor: customTheme?.accentColor + '40'
                 }}
               >
                 {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
@@ -17,7 +18,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { CurrencySettings } from './CurrencySettings';
 import { LanguageSettings } from './LanguageSettings';
 import { TranslationManager } from './TranslationManager';
-import { useDashboardForm } from '@/contexts/DashboardFormContext';
 
 interface Category {
   id: string;
@@ -66,7 +66,6 @@ interface MenuItem {
 export function MenuManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { setFormData, getFormData } = useDashboardForm();
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
@@ -286,16 +285,6 @@ export function MenuManagement() {
       toast({ title: 'Gabim në fshirjen e artikullit', description: error.message, variant: 'destructive' });
     }
   });
-
-  // Save form data when dialogs close
-  useEffect(() => {
-    if (!showCategoryDialog && editingCategory) {
-      setFormData('categoryForm', null);
-    }
-    if (!showItemDialog && editingItem) {
-      setFormData('itemForm', null);
-    }
-  }, [showCategoryDialog, showItemDialog, editingCategory, editingItem, setFormData]);
 
   const handleCategorySubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -589,7 +578,7 @@ export function MenuManagement() {
   );
 }
 
-// Category Dialog Component with Image Upload and Form Persistence
+// Category Dialog Component with Image Upload
 function CategoryDialog({ 
   category, 
   onSubmit, 
@@ -599,29 +588,12 @@ function CategoryDialog({
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; 
   onClose: () => void; 
 }) {
-  const { setFormData, getFormData } = useDashboardForm();
   const [imagePath, setImagePath] = useState<string | null>(category?.image_path || null);
 
-  // Load saved form data
+  // Update imagePath when category changes
   useEffect(() => {
-    const savedData = getFormData('categoryForm');
-    if (savedData && !category) {
-      setImagePath(savedData.image_path || null);
-    } else {
-      setImagePath(category?.image_path || null);
-    }
-  }, [category, getFormData]);
-
-  // Save form data on change
-  const handleFormChange = (field: string, value: any) => {
-    const currentData = getFormData('categoryForm') || {};
-    setFormData('categoryForm', { ...currentData, [field]: value });
-  };
-
-  const handleImageChange = (newImagePath: string | null) => {
-    setImagePath(newImagePath);
-    handleFormChange('image_path', newImagePath);
-  };
+    setImagePath(category?.image_path || null);
+  }, [category]);
 
   return (
     <DialogContent className="max-w-2xl">
@@ -643,10 +615,9 @@ function CategoryDialog({
             <Input
               id="name_sq"
               name="name_sq"
-              defaultValue={category?.name_sq || getFormData('categoryForm')?.name_sq || ''}
+              defaultValue={category?.name_sq || ''}
               required
               placeholder="Emri në shqip"
-              onChange={(e) => handleFormChange('name_sq', e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -654,10 +625,9 @@ function CategoryDialog({
             <Input
               id="name"
               name="name"
-              defaultValue={category?.name || getFormData('categoryForm')?.name || ''}
+              defaultValue={category?.name || ''}
               required
               placeholder="Emri në anglisht"
-              onChange={(e) => handleFormChange('name', e.target.value)}
             />
           </div>
         </div>
@@ -668,10 +638,9 @@ function CategoryDialog({
             <Textarea
               id="description_sq"
               name="description_sq"
-              defaultValue={category?.description_sq || getFormData('categoryForm')?.description_sq || ''}
+              defaultValue={category?.description_sq || ''}
               rows={3}
               placeholder="Përshkrimi në shqip"
-              onChange={(e) => handleFormChange('description_sq', e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -679,17 +648,16 @@ function CategoryDialog({
             <Textarea
               id="description"
               name="description"
-              defaultValue={category?.description || getFormData('categoryForm')?.description || ''}
+              defaultValue={category?.description || ''}
               rows={3}
               placeholder="Përshkrimi në anglisht"
-              onChange={(e) => handleFormChange('description', e.target.value)}
             />
           </div>
         </div>
 
         <ImageUpload
           currentImagePath={imagePath}
-          onImageChange={handleImageChange}
+          onImageChange={setImagePath}
           label="Imazhi i Kategorisë"
         />
 
@@ -700,16 +668,14 @@ function CategoryDialog({
               id="display_order"
               name="display_order"
               type="number"
-              defaultValue={category?.display_order || getFormData('categoryForm')?.display_order || 0}
-              onChange={(e) => handleFormChange('display_order', parseInt(e.target.value))}
+              defaultValue={category?.display_order || 0}
             />
           </div>
           <div className="flex items-center space-x-2 pt-6">
             <Switch
               id="is_active"
               name="is_active"
-              defaultChecked={category?.is_active ?? getFormData('categoryForm')?.is_active ?? true}
-              onCheckedChange={(checked) => handleFormChange('is_active', checked)}
+              defaultChecked={category?.is_active ?? true}
             />
             <Label htmlFor="is_active">Aktive</Label>
           </div>
@@ -728,7 +694,7 @@ function CategoryDialog({
   );
 }
 
-// Menu Item Dialog Component with Image Upload and Form Persistence
+// Menu Item Dialog Component with Image Upload
 function MenuItemDialog({ 
   item, 
   categories, 
@@ -740,29 +706,12 @@ function MenuItemDialog({
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void; 
   onClose: () => void; 
 }) {
-  const { setFormData, getFormData } = useDashboardForm();
   const [imagePath, setImagePath] = useState<string | null>(item?.image_path || null);
 
-  // Load saved form data
+  // Update imagePath when item changes
   useEffect(() => {
-    const savedData = getFormData('itemForm');
-    if (savedData && !item) {
-      setImagePath(savedData.image_path || null);
-    } else {
-      setImagePath(item?.image_path || null);
-    }
-  }, [item, getFormData]);
-
-  // Save form data on change
-  const handleFormChange = (field: string, value: any) => {
-    const currentData = getFormData('itemForm') || {};
-    setFormData('itemForm', { ...currentData, [field]: value });
-  };
-
-  const handleImageChange = (newImagePath: string | null) => {
-    setImagePath(newImagePath);
-    handleFormChange('image_path', newImagePath);
-  };
+    setImagePath(item?.image_path || null);
+  }, [item]);
 
   return (
     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -781,12 +730,7 @@ function MenuItemDialog({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="category_id">Kategoria</Label>
-            <Select 
-              name="category_id" 
-              defaultValue={item?.category_id || getFormData('itemForm')?.category_id || ''} 
-              required
-              onValueChange={(value) => handleFormChange('category_id', value)}
-            >
+            <Select name="category_id" defaultValue={item?.category_id || ''} required>
               <SelectTrigger>
                 <SelectValue placeholder="Zgjidh kategorinë" />
               </SelectTrigger>
@@ -806,10 +750,9 @@ function MenuItemDialog({
               name="price"
               type="number"
               step="0.01"
-              defaultValue={item?.price || getFormData('itemForm')?.price || ''}
+              defaultValue={item?.price || ''}
               required
               placeholder="0.00"
-              onChange={(e) => handleFormChange('price', parseFloat(e.target.value))}
             />
           </div>
         </div>
@@ -820,10 +763,9 @@ function MenuItemDialog({
             <Input
               id="name_sq"
               name="name_sq"
-              defaultValue={item?.name_sq || getFormData('itemForm')?.name_sq || ''}
+              defaultValue={item?.name_sq || ''}
               required
               placeholder="Emri në shqip"
-              onChange={(e) => handleFormChange('name_sq', e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -831,10 +773,9 @@ function MenuItemDialog({
             <Input
               id="name"
               name="name"
-              defaultValue={item?.name || getFormData('itemForm')?.name || ''}
+              defaultValue={item?.name || ''}
               required
               placeholder="Emri në anglisht"
-              onChange={(e) => handleFormChange('name', e.target.value)}
             />
           </div>
         </div>
@@ -845,10 +786,9 @@ function MenuItemDialog({
             <Textarea
               id="description_sq"
               name="description_sq"
-              defaultValue={item?.description_sq || getFormData('itemForm')?.description_sq || ''}
+              defaultValue={item?.description_sq || ''}
               rows={3}
               placeholder="Përshkrimi në shqip"
-              onChange={(e) => handleFormChange('description_sq', e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -856,17 +796,16 @@ function MenuItemDialog({
             <Textarea
               id="description"
               name="description"
-              defaultValue={item?.description || getFormData('itemForm')?.description || ''}
+              defaultValue={item?.description || ''}
               rows={3}
               placeholder="Përshkrimi në anglisht"
-              onChange={(e) => handleFormChange('description', e.target.value)}
             />
           </div>
         </div>
 
         <ImageUpload
           currentImagePath={imagePath}
-          onImageChange={handleImageChange}
+          onImageChange={setImagePath}
           label="Imazhi i Artikullit"
         />
 
@@ -876,9 +815,8 @@ function MenuItemDialog({
             <Input
               id="allergens"
               name="allergens"
-              defaultValue={item?.allergens?.join(', ') || getFormData('itemForm')?.allergens || ''}
+              defaultValue={item?.allergens?.join(', ') || ''}
               placeholder="gluten, qumësht, arra, etj."
-              onChange={(e) => handleFormChange('allergens', e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -887,9 +825,8 @@ function MenuItemDialog({
               id="preparation_time"
               name="preparation_time"
               type="number"
-              defaultValue={item?.preparation_time || getFormData('itemForm')?.preparation_time || ''}
+              defaultValue={item?.preparation_time || ''}
               placeholder="15"
-              onChange={(e) => handleFormChange('preparation_time', parseInt(e.target.value))}
             />
           </div>
         </div>
@@ -899,8 +836,7 @@ function MenuItemDialog({
             <Switch
               id="is_available"
               name="is_available"
-              defaultChecked={item?.is_available ?? getFormData('itemForm')?.is_available ?? true}
-              onCheckedChange={(checked) => handleFormChange('is_available', checked)}
+              defaultChecked={item?.is_available ?? true}
             />
             <Label htmlFor="is_available">E disponueshme</Label>
           </div>
@@ -908,8 +844,7 @@ function MenuItemDialog({
             <Switch
               id="is_featured"
               name="is_featured"
-              defaultChecked={item?.is_featured ?? getFormData('itemForm')?.is_featured ?? false}
-              onCheckedChange={(checked) => handleFormChange('is_featured', checked)}
+              defaultChecked={item?.is_featured ?? false}
             />
             <Label htmlFor="is_featured">E veçantë</Label>
           </div>
@@ -919,8 +854,7 @@ function MenuItemDialog({
               id="display_order"
               name="display_order"
               type="number"
-              defaultValue={item?.display_order || getFormData('itemForm')?.display_order || 0}
-              onChange={(e) => handleFormChange('display_order', parseInt(e.target.value))}
+              defaultValue={item?.display_order || 0}
             />
           </div>
         </div>

@@ -79,7 +79,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
     setTimeout(() => {
       setIsSpinning(false);
       onComplete(selectedReward.text);
-    }, 3000);
+    }, 4000);
   };
 
   return (
@@ -87,76 +87,99 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
       <div className="relative">
         {/* Pointer */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-10">
-          <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-transparent border-b-foreground"></div>
+          <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-transparent border-b-gray-800 drop-shadow-sm"></div>
         </div>
         
-        {/* Wheel */}
-        <div 
-          ref={wheelRef}
-          className="w-64 h-64 rounded-full border-4 border-border relative overflow-hidden"
-          style={{
-            transform: `rotate(${rotation}deg)`,
-            transition: isSpinning ? 'transform 3s cubic-bezier(0.23, 1, 0.32, 1)' : 'none'
-          }}
-        >
-          <svg className="w-full h-full" viewBox="0 0 200 200">
-            {segments.map((segment, index) => {
-              const startAngleRad = (segment.startAngle * Math.PI) / 180;
-              const endAngleRad = (segment.endAngle * Math.PI) / 180;
+        {/* Golden outer ring */}
+        <div className="w-[280px] h-[280px] rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 p-2 shadow-xl">
+          {/* Wheel */}
+          <div 
+            ref={wheelRef}
+            className="w-full h-full rounded-full relative overflow-hidden shadow-inner"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              transition: isSpinning ? 'transform 4s cubic-bezier(0.23, 1, 0.32, 1)' : 'none'
+            }}
+          >
+            <svg className="w-full h-full" viewBox="0 0 200 200">
+              {segments.map((segment, index) => {
+                const startAngleRad = (segment.startAngle * Math.PI) / 180;
+                const endAngleRad = (segment.endAngle * Math.PI) / 180;
+                
+                const x1 = 100 + 95 * Math.cos(startAngleRad);
+                const y1 = 100 + 95 * Math.sin(startAngleRad);
+                const x2 = 100 + 95 * Math.cos(endAngleRad);
+                const y2 = 100 + 95 * Math.sin(endAngleRad);
+                
+                const largeArcFlag = segment.endAngle - segment.startAngle > 180 ? 1 : 0;
+                
+                const pathData = [
+                  `M 100 100`,
+                  `L ${x1} ${y1}`,
+                  `A 95 95 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                  'Z'
+                ].join(' ');
+                
+                const textAngle = segment.midAngle;
+                const textRadius = 65;
+                const textX = 100 + textRadius * Math.cos((textAngle * Math.PI) / 180);
+                const textY = 100 + textRadius * Math.sin((textAngle * Math.PI) / 180);
+                
+                // Calculate text rotation to always be readable
+                let textRotation = textAngle;
+                if (textAngle > 90 && textAngle < 270) {
+                  textRotation = textAngle + 180;
+                }
+                
+                return (
+                  <g key={index}>
+                    <path
+                      d={pathData}
+                      fill={segment.color}
+                      stroke="#fbbf24"
+                      strokeWidth="1.5"
+                      className="drop-shadow-sm"
+                    />
+                    {/* Text */}
+                    <text
+                      x={textX}
+                      y={textY}
+                      fill="white"
+                      fontSize="9"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      transform={`rotate(${textRotation}, ${textX}, ${textY})`}
+                      style={{
+                        textShadow: '1px 1px 2px rgba(0,0,0,0.7)',
+                        filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.5))'
+                      }}
+                    >
+                      {segment.text}
+                    </text>
+                  </g>
+                );
+              })}
               
-              const x1 = 100 + 90 * Math.cos(startAngleRad);
-              const y1 = 100 + 90 * Math.sin(startAngleRad);
-              const x2 = 100 + 90 * Math.cos(endAngleRad);
-              const y2 = 100 + 90 * Math.sin(endAngleRad);
+              {/* Center circle */}
+              <circle
+                cx="100"
+                cy="100"
+                r="8"
+                fill="url(#centerGradient)"
+                stroke="#fbbf24"
+                strokeWidth="2"
+              />
               
-              const largeArcFlag = segment.endAngle - segment.startAngle > 180 ? 1 : 0;
-              
-              const pathData = [
-                `M 100 100`,
-                `L ${x1} ${y1}`,
-                `A 90 90 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-                'Z'
-              ].join(' ');
-              
-              const textAngle = segment.midAngle;
-              const textX = 100 + 60 * Math.cos((textAngle * Math.PI) / 180);
-              const textY = 100 + 60 * Math.sin((textAngle * Math.PI) / 180);
-              
-              return (
-                <g key={index}>
-                  <path
-                    d={pathData}
-                    fill={segment.color}
-                    stroke="white"
-                    strokeWidth="2"
-                  />
-                  <text
-                    x={textX}
-                    y={textY}
-                    fill="white"
-                    fontSize="10"
-                    fontWeight="bold"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    transform={`rotate(${textAngle}, ${textX}, ${textY})`}
-                  >
-                    {segment.text}
-                  </text>
-                  <text
-                    x={textX}
-                    y={textY + 12}
-                    fill="white"
-                    fontSize="8"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    transform={`rotate(${textAngle}, ${textX}, ${textY + 12})`}
-                  >
-                    {segment.chance.toFixed(1)}%
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+              {/* Gradient definitions */}
+              <defs>
+                <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fbbf24" />
+                  <stop offset="100%" stopColor="#f59e0b" />
+                </radialGradient>
+              </defs>
+            </svg>
+          </div>
         </div>
       </div>
       
@@ -164,15 +187,15 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
         onClick={spin} 
         disabled={isSpinning}
         size="lg"
-        className="px-8"
+        className="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none"
       >
         {isSpinning ? 'Spinning...' : 'Spin the Wheel!'}
       </Button>
       
       {result && !isSpinning && (
-        <div className="text-center">
+        <div className="text-center animate-fade-in">
           <p className="text-lg font-bold text-primary">You won:</p>
-          <p className="text-xl font-bold">{result}</p>
+          <p className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">{result}</p>
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -65,15 +65,10 @@ export const MenuItemDetailPopup = ({
   categoryName,
   customTheme
 }: MenuItemDetailPopupProps) => {
-  const [selectedSize, setSelectedSize] = useState<MenuItemSize | undefined>(
-    item?.sizes && item.sizes.length > 0 ? item.sizes[0] : undefined
-  );
-
   if (!item) return null;
 
   const itemImageUrl = getMenuItemImageUrl(item);
   const hasSizes = item.sizes && item.sizes.length > 0;
-  const displayPrice = selectedSize ? selectedSize.price : item.price;
 
   const contentStyles = customTheme ? {
     backgroundColor: customTheme.cardBackground,
@@ -137,7 +132,7 @@ export const MenuItemDetailPopup = ({
               <Badge 
                 className="text-sm font-semibold backdrop-blur-sm bg-white/90 text-gray-900"
               >
-                {formatPrice(displayPrice, item.currency)}
+                {formatPrice(item.price, item.currency)}
               </Badge>
             </div>
           </div>
@@ -167,7 +162,7 @@ export const MenuItemDetailPopup = ({
                       color: priceStyles.color 
                     }}
                   >
-                    {formatPrice(displayPrice, item.currency)}
+                    {formatPrice(item.price, item.currency)}
                   </Badge>
                 </div>
               )}
@@ -210,43 +205,30 @@ export const MenuItemDetailPopup = ({
             </div>
           )}
 
-          {/* Size Selection */}
+          {/* Available Sizes Display */}
           {hasSizes && (
             <div className="mb-4">
               <h4 className="text-sm font-medium mb-3" style={headingStyles}>
-                Choose Size:
+                Available Sizes:
               </h4>
               <div className="grid grid-cols-1 gap-2">
-                {item.sizes!.map((size, index) => {
-                  const isSelected = selectedSize?.name === size.name;
-                  return (
-                    <Button
-                      key={index}
-                      variant={isSelected ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedSize(size)}
-                      className={`h-auto py-3 px-4 flex justify-between items-center transition-all duration-200 ${
-                        isSelected 
-                          ? 'ring-2 ring-blue-500/50 ring-offset-2 shadow-md' 
-                          : 'hover:shadow-sm'
-                      }`}
-                      style={isSelected ? {
-                        backgroundColor: customTheme?.accentColor || '#3b82f6',
-                        borderColor: customTheme?.accentColor || '#3b82f6',
-                        color: '#ffffff'
-                      } : {
-                        borderColor: customTheme?.borderColor || '#e5e7eb',
-                        backgroundColor: customTheme?.cardBackground || 'transparent',
-                        color: customTheme?.textColor || '#374151'
-                      }}
-                    >
-                      <span className="font-medium">{size.name}</span>
-                      <span className={`font-bold text-base ${isSelected ? 'text-white' : ''}`} style={isSelected ? {} : priceStyles}>
-                        {formatPrice(size.price, item.currency)}
-                      </span>
-                    </Button>
-                  );
-                })}
+                {item.sizes!.map((size, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center py-2 px-3 border rounded-lg"
+                    style={{
+                      borderColor: customTheme?.borderColor || '#e5e7eb',
+                      backgroundColor: customTheme?.cardBackground || 'transparent'
+                    }}
+                  >
+                    <span className="font-medium" style={{ color: customTheme?.textColor }}>
+                      {size.name}
+                    </span>
+                    <span className="font-bold text-base" style={priceStyles}>
+                      {formatPrice(size.price, item.currency)}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -275,14 +257,14 @@ export const MenuItemDetailPopup = ({
             </div>
           )}
 
-          {/* Final Price Display */}
+          {/* Base Price Display */}
           <div className="pt-3 border-t" style={{ borderColor: customTheme?.borderColor }}>
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium" style={mutedTextStyles}>
-                {hasSizes && selectedSize ? `${selectedSize.name} - ` : ''}Total:
+                Base Price:
               </span>
               <span className="text-2xl font-bold" style={priceStyles}>
-                {formatPrice(displayPrice, item.currency)}
+                {formatPrice(item.price, item.currency)}
               </span>
             </div>
           </div>

@@ -31,10 +31,12 @@ export interface TranslatableItem {
   translation_metadata?: Record<string, any>;
 }
 
-// Language options for translation (excluding English since items are input in English/Albanian)
+// Language options for translation (English and Albanian are read-only for viewing)
 export const LANGUAGE_OPTIONS = [
-  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' }
+  { code: 'sq', name: 'Shqip', flag: '🇦🇱', readonly: true },
+  { code: 'en', name: 'English', flag: '🇬🇧', readonly: true },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹', readonly: false },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪', readonly: false },
+  { code: 'fr', name: 'Français', flag: '🇫🇷', readonly: false },
+  { code: 'zh', name: '中文', flag: '🇨🇳', readonly: false }
 ];

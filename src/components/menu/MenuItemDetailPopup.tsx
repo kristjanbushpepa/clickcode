@@ -143,11 +143,11 @@ export const MenuItemDetailPopup = ({
 
         {/* Image */}
         {itemImageUrl && (
-          <div className="relative w-full h-48 overflow-hidden">
+          <div className="relative w-full h-48 overflow-hidden bg-muted flex items-center justify-center">
             <img
               src={itemImageUrl}
               alt={getLocalizedText(item, 'name')}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             

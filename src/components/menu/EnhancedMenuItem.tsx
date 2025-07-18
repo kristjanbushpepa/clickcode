@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -91,12 +92,12 @@ const LazyImage = ({ src, alt, className, onLoad }: {
   };
 
   return (
-    <div ref={imgRef} className={`${className} bg-muted overflow-hidden`}>
+    <div ref={imgRef} className={`${className} bg-muted overflow-hidden flex items-center justify-center`}>
       {inView && (
         <img
           src={src}
           alt={alt}
-          className={`menu-image ${loaded ? 'loaded' : 'blur-load'}`}
+          className={`w-full h-full object-cover object-center ${loaded ? 'loaded' : 'blur-load'}`}
           onLoad={handleLoad}
           loading="lazy"
         />
@@ -206,11 +207,13 @@ export const EnhancedMenuItem = ({
                   </div>
                 </div>
                 {itemImageUrl && (
-                  <LazyImage
-                    src={itemImageUrl}
-                    alt={getLocalizedText(item, 'name')}
-                    className="w-14 h-14 rounded-lg flex-shrink-0"
-                  />
+                  <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-muted flex items-center justify-center">
+                    <LazyImage
+                      src={itemImageUrl}
+                      alt={getLocalizedText(item, 'name')}
+                      className="w-full h-full"
+                    />
+                  </div>
                 )}
               </div>
             </CardContent>
@@ -225,11 +228,11 @@ export const EnhancedMenuItem = ({
             onClick={handleClick}
           >
             {itemImageUrl && (
-              <div className="relative">
+              <div className="relative w-full h-32 overflow-hidden bg-muted flex items-center justify-center">
                 <LazyImage
                   src={itemImageUrl}
                   alt={getLocalizedText(item, 'name')}
-                  className="w-full h-32"
+                  className="w-full h-full"
                 />
                 {item.is_featured && (
                   <div className="absolute top-2 right-2">
@@ -292,11 +295,11 @@ export const EnhancedMenuItem = ({
             onClick={handleClick}
           >
             {itemImageUrl && (
-              <div className="relative">
+              <div className="relative w-full h-40 overflow-hidden bg-muted flex items-center justify-center">
                 <LazyImage
                   src={itemImageUrl}
                   alt={getLocalizedText(item, 'name')}
-                  className="w-full h-40"
+                  className="w-full h-full"
                 />
                 {item.is_featured && (
                   <div className="absolute top-2 right-2">
@@ -450,11 +453,11 @@ export const EnhancedMenuItem = ({
                   </div>
                 </div>
                 {itemImageUrl && (
-                  <div className="relative">
+                  <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-muted flex items-center justify-center">
                     <LazyImage
                       src={itemImageUrl}
                       alt={getLocalizedText(item, 'name')}
-                      className="w-20 h-20 rounded-lg flex-shrink-0"
+                      className="w-full h-full"
                     />
                     {item.is_featured && (
                       <div className="absolute -top-1 -right-1">
@@ -484,19 +487,20 @@ export const EnhancedMenuItem = ({
             onClick={handleClick}
           >
             <div className="relative">
-              {itemImageUrl && (
-                <LazyImage 
-                  src={itemImageUrl} 
-                  alt={getLocalizedText(item, 'name')}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                  onLoad={() => {}}
-                />
-              )}
-              {!itemImageUrl && (
-                <div className="w-full h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                  <span className="text-slate-400 text-sm">No Image</span>
-                </div>
-              )}
+              <div className="w-full h-48 overflow-hidden bg-muted flex items-center justify-center">
+                {itemImageUrl ? (
+                  <LazyImage 
+                    src={itemImageUrl} 
+                    alt={getLocalizedText(item, 'name')}
+                    className="w-full h-full"
+                    onLoad={() => {}}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                    <span className="text-slate-400 text-sm">No Image</span>
+                  </div>
+                )}
+              </div>
               <div className="absolute top-3 right-3">
                 <div 
                   className="px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm"
@@ -561,12 +565,12 @@ export const EnhancedMenuItem = ({
             }}
             onClick={handleClick}
           >
-            <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+            <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
               {itemImageUrl ? (
                 <LazyImage 
                   src={itemImageUrl} 
                   alt={getLocalizedText(item, 'name')}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full"
                   onLoad={() => {}}
                 />
               ) : (
@@ -627,18 +631,20 @@ export const EnhancedMenuItem = ({
             onClick={handleClick}
           >
             <div className="relative">
-              {itemImageUrl ? (
-                <LazyImage 
-                  src={itemImageUrl} 
-                  alt={getLocalizedText(item, 'name')}
-                  className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-                  onLoad={() => {}}
-                />
-              ) : (
-                <div className="w-full h-40 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                  <span className="text-slate-400 text-sm">No Image</span>
-                </div>
-              )}
+              <div className="w-full h-40 overflow-hidden bg-muted flex items-center justify-center">
+                {itemImageUrl ? (
+                  <LazyImage 
+                    src={itemImageUrl} 
+                    alt={getLocalizedText(item, 'name')}
+                    className="w-full h-full"
+                    onLoad={() => {}}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                    <span className="text-slate-400 text-sm">No Image</span>
+                  </div>
+                )}
+              </div>
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300"></div>
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
                 <h3 className="font-semibold text-base mb-1 line-clamp-1">

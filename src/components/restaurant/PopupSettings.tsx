@@ -210,9 +210,10 @@ export const PopupSettings: React.FC = () => {
     try {
       const restaurantSupabase = getRestaurantSupabase();
       
+      // Ensure the type matches the selected popup type
       const dbData = {
         enabled: settings.enabled,
-        type: settings.type,
+        type: settings.type, // This will now be the correct type from the select dropdown
         title: settings.title,
         description: settings.description || null,
         link: settings.link || null,

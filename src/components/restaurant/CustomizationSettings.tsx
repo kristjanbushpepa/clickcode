@@ -226,11 +226,35 @@ const vintageGoldTheme: Theme = {
   badgeTextColor: '#92400e'
 };
 
+const redBlackTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#dc2626',
+  accentColor: '#0a0a0a',
+  backgroundColor: '#ffffff',
+  cardBackground: '#fefefe',
+  textColor: '#0a0a0a',
+  mutedTextColor: '#525252',
+  borderColor: '#e5e5e5',
+  headingColor: '#ffffff',
+  categoryNameColor: '#dc2626',
+  itemNameColor: '#0a0a0a',
+  descriptionColor: '#525252',
+  priceColor: '#dc2626',
+  languageSwitchBackground: '#dc2626',
+  languageSwitchBorder: '#dc2626',
+  languageSwitchText: '#ffffff',
+  currencySwitchBackground: '#dc2626',
+  currencySwitchBorder: '#dc2626',
+  currencySwitchText: '#ffffff',
+  badgeBackgroundColor: '#fee2e2',
+  badgeTextColor: '#dc2626'
+};
+
 const CustomizationSettings = () => {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('items');
   const [selectedLayoutStyle, setSelectedLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus'>('compact');
   const [theme, setTheme] = useState<Theme>(modernMinimalTheme);
-  const [selectedPreset, setSelectedPreset] = useState<'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'custom'>('minimal');
+  const [selectedPreset, setSelectedPreset] = useState<'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack' | 'custom'>('minimal');
 
   const presetThemes: { [key: string]: Theme } = {
     minimal: modernMinimalTheme,
@@ -241,6 +265,7 @@ const CustomizationSettings = () => {
     dark: elegantDarkTheme,
     rose: rosePinkTheme,
     vintage: vintageGoldTheme,
+    redblack: redBlackTheme,
   };
 
   const handleLayoutChange = async (layout: 'categories' | 'items') => {
@@ -345,7 +370,7 @@ const CustomizationSettings = () => {
     loadData();
   }, []);
 
-  const handlePresetChange = (preset: 'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage') => {
+  const handlePresetChange = (preset: 'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack') => {
     setSelectedPreset(preset);
     setTheme(presetThemes[preset]);
   };
@@ -548,6 +573,14 @@ const CustomizationSettings = () => {
               >
                 <div className="w-full h-4 bg-gradient-to-r from-amber-400 to-amber-600 border rounded mb-1"></div>
                 <span className="text-xs font-medium">Vintage</span>
+              </Button>
+              <Button 
+                variant={selectedPreset === 'redblack' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('redblack')}
+                className="flex flex-col h-20 p-2"
+              >
+                <div className="w-full h-4 bg-gradient-to-r from-red-600 to-black border rounded mb-1"></div>
+                <span className="text-xs font-medium">Red & Black</span>
               </Button>
               {selectedPreset === 'custom' && (
                 <div className="flex items-center justify-center border border-dashed rounded h-16">

@@ -14,7 +14,8 @@ import { EmptyState } from './translation/components/EmptyState';
 export function TranslationManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedLanguage, setSelectedLanguage] = useState('sq');
+  // Default to Italian since English is no longer available for translation
+  const [selectedLanguage, setSelectedLanguage] = useState('it');
   const [editingTranslations, setEditingTranslations] = useState<Record<string, Record<string, string>>>({});
   const [translatingItems, setTranslatingItems] = useState<Set<string>>(new Set());
   const [bulkTranslating, setBulkTranslating] = useState(false);

@@ -31,9 +31,8 @@ export interface TranslatableItem {
   translation_metadata?: Record<string, any>;
 }
 
+// Language options for translation (excluding English since items are input in English/Albanian)
 export const LANGUAGE_OPTIONS = [
-  { code: 'sq', name: 'Shqip', flag: '🇦🇱' },
-  { code: 'en', name: 'English', flag: '🇬🇧' },
   { code: 'it', name: 'Italiano', flag: '🇮🇹' },
   { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
   { code: 'fr', name: 'Français', flag: '🇫🇷' },

@@ -162,18 +162,18 @@ export const EnhancedMenuItem = ({
             <CardContent className="p-3">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between mb-1 gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between mb-1 gap-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
                       <h3 className="font-semibold text-sm leading-tight line-clamp-1" style={itemNameStyles}>
                         {getLocalizedText(item, 'name')}
                       </h3>
                       {item.is_featured && (
-                        <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                        <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
                       )}
                     </div>
                     <Badge 
                       variant="secondary" 
-                      className="text-xs flex-shrink-0 font-medium"
+                      className="text-xs flex-shrink-0 font-medium ml-2"
                       style={{ 
                         backgroundColor: customTheme?.accentColor + '20',
                         color: priceStyles.color 
@@ -235,24 +235,18 @@ export const EnhancedMenuItem = ({
               </div>
             )}
             <CardContent className="p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-sm leading-tight line-clamp-1" style={itemNameStyles}>
-                  {getLocalizedText(item, 'name')}
-                </h3>
-                {item.is_featured && !itemImageUrl && (
-                  <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                )}
-              </div>
-              {getLocalizedText(item, 'description') && (
-                <p className="text-xs mb-2 line-clamp-2 leading-relaxed" style={descriptionStyles}>
-                  {getLocalizedText(item, 'description')}
-                </p>
-              )}
-              
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-1 gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm leading-tight line-clamp-1" style={itemNameStyles}>
+                    {getLocalizedText(item, 'name')}
+                  </h3>
+                  {item.is_featured && !itemImageUrl && (
+                    <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
+                  )}
+                </div>
                 <Badge 
                   variant="secondary" 
-                  className="text-xs font-medium"
+                  className="text-xs font-medium flex-shrink-0"
                   style={{ 
                     backgroundColor: customTheme?.accentColor + '20',
                     color: priceStyles.color 
@@ -260,14 +254,20 @@ export const EnhancedMenuItem = ({
                 >
                   {formatPrice(displayPrice, item.currency)}
                 </Badge>
-                <div className="flex items-center gap-2">
-                  {item.preparation_time && (
-                    <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
-                      <Clock className="h-3 w-3" />
-                      {item.preparation_time}min
-                    </div>
-                  )}
-                </div>
+              </div>
+              {getLocalizedText(item, 'description') && (
+                <p className="text-xs mb-2 line-clamp-2 leading-relaxed" style={descriptionStyles}>
+                  {getLocalizedText(item, 'description')}
+                </p>
+              )}
+              
+              <div className="flex items-center gap-2">
+                {item.preparation_time && (
+                  <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                    <Clock className="h-3 w-3" />
+                    {item.preparation_time}min
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -297,13 +297,13 @@ export const EnhancedMenuItem = ({
               </div>
             )}
             <CardContent className="p-4">
-              <div className="flex items-start justify-between mb-2 gap-2">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between mb-2 gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <h3 className="font-semibold text-base leading-tight line-clamp-1" style={itemNameStyles}>
                     {getLocalizedText(item, 'name')}
                   </h3>
                   {item.is_featured && !itemImageUrl && (
-                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                    <Star className="h-4 w-4 text-yellow-500 fill-current flex-shrink-0" />
                   )}
                 </div>
                 <Badge 
@@ -340,13 +340,13 @@ export const EnhancedMenuItem = ({
             className="border-b pb-3 mb-3 hover:bg-muted/20 transition-colors px-2 -mx-2 rounded cursor-pointer"
             onClick={handleClick}
           >
-            <div className="flex items-start justify-between mb-1 gap-2">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-sm leading-tight" style={itemNameStyles}>
+            <div className="flex items-center justify-between mb-1 gap-2">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <h3 className="font-semibold text-sm leading-tight line-clamp-1" style={itemNameStyles}>
                   {getLocalizedText(item, 'name')}
                 </h3>
                 {item.is_featured && (
-                  <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                  <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
                 )}
               </div>
               <span className="text-sm font-medium flex-shrink-0" style={priceStyles}>
@@ -379,31 +379,18 @@ export const EnhancedMenuItem = ({
             <CardContent className="p-4">
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold text-base leading-tight" style={itemNameStyles}>
-                      {getLocalizedText(item, 'name')}
-                    </h3>
-                    {item.is_featured && (
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    )}
-                  </div>
-                  {getLocalizedText(item, 'description') && (
-                    <p className="text-sm mb-3 leading-relaxed" style={descriptionStyles}>
-                      {getLocalizedText(item, 'description')}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {item.preparation_time && (
-                        <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
-                          <Clock className="h-3 w-3" />
-                          {item.preparation_time}min
-                        </div>
+                  <div className="flex items-center justify-between mb-2 gap-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <h3 className="font-semibold text-base leading-tight line-clamp-1" style={itemNameStyles}>
+                        {getLocalizedText(item, 'name')}
+                      </h3>
+                      {item.is_featured && (
+                        <Star className="h-4 w-4 text-yellow-500 fill-current flex-shrink-0" />
                       )}
                     </div>
                     <Badge 
                       variant="secondary" 
-                      className="text-sm font-medium"
+                      className="text-sm font-medium flex-shrink-0"
                       style={{ 
                         backgroundColor: customTheme?.accentColor + '20',
                         color: priceStyles.color 
@@ -411,6 +398,19 @@ export const EnhancedMenuItem = ({
                     >
                       {formatPrice(displayPrice, item.currency)}
                     </Badge>
+                  </div>
+                  {getLocalizedText(item, 'description') && (
+                    <p className="text-sm mb-3 leading-relaxed" style={descriptionStyles}>
+                      {getLocalizedText(item, 'description')}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3">
+                    {item.preparation_time && (
+                      <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                        <Clock className="h-3 w-3" />
+                        {item.preparation_time}min
+                      </div>
+                    )}
                   </div>
                 </div>
                 {itemImageUrl && (

@@ -106,6 +106,16 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
 
   return (
     <div className="flex flex-col items-center space-y-4">
+      {/* Reference Image */}
+      <div className="mb-4">
+        <img 
+          src="/lovable-uploads/b3f03c08-8343-4600-8bb8-c11b5543f234.png" 
+          alt="Colorful spinning wheel reference" 
+          className="w-32 h-32 rounded-full shadow-lg"
+        />
+        <p className="text-xs text-muted-foreground text-center mt-2">Reference Design</p>
+      </div>
+
       <div className="relative">
         {/* Pointer */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-10">

@@ -13,8 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { Palette, Layout, Monitor, Smartphone, Tablet, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ThemePreview } from './customization/ThemePreview';
-import { LayoutPreview } from './customization/LayoutPreview';
+import ThemePreview from './customization/ThemePreview';
+import LayoutPreview from './customization/LayoutPreview';
 import { useDashboardForm } from '@/contexts/DashboardFormContext';
 
 interface CustomizationSettingsData {
@@ -448,7 +448,7 @@ const CustomizationSettings = () => {
                     </Label>
                     <ColorPicker
                       color={color}
-                      onChange={(newColor) => handleColorChange(key, newColor)}
+                      onColorChange={(newColor) => handleColorChange(key, newColor)}
                     />
                   </div>
                 ))}

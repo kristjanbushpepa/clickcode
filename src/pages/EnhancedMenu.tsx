@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -144,6 +144,9 @@ const EnhancedMenu = () => {
   const [layoutPreference, setLayoutPreference] = useState<'categories' | 'items'>('items');
   const [layoutStyle, setLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
+  
+  // Add ref for search input to maintain focus
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Restaurant lookup query
   const {
@@ -428,15 +431,48 @@ const EnhancedMenu = () => {
   const bannerImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null, [profile, getDisplayImageUrl]);
   const logoImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null, [profile, getDisplayImageUrl]);
   
-  // Updated filtered items - only filter menu items, not categories
+  // Optimized filtered items with better search logic
   const filteredMenuItems = useMemo(() => {
-    if (!searchTerm) return menuItems;
+    if (!searchTerm.trim()) return menuItems;
     
-    return menuItems.filter(item => 
-      (item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [menuItems, searchTerm]);
+    const searchLower = searchTerm.toLowerCase().trim();
+    
+    return menuItems.filter(item => {
+      // Get localized text for current language
+      const itemName = (currentLanguage === 'sq' && item.name_sq) ? item.name_sq : item.name;
+      const itemDescription = (currentLanguage === 'sq' && item.description_sq) ? item.description_sq : item.description;
+      
+      // Search in name
+      if (itemName && itemName.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+      
+      // Search in description
+      if (itemDescription && itemDescription.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+      
+      // Search in category name
+      const category = categories.find(cat => cat.id === item.category_id);
+      if (category) {
+        const categoryName = (currentLanguage === 'sq' && category.name_sq) ? category.name_sq : category.name;
+        if (categoryName && categoryName.toLowerCase().includes(searchLower)) {
+          return true;
+        }
+      }
+      
+      return false;
+    });
+  }, [menuItems, searchTerm, currentLanguage, categories]);
+
+  // Filter items by category for tabs
+  const getFilteredItemsByCategory = useCallback((categoryId: string | null) => {
+    const baseItems = searchTerm ? filteredMenuItems : menuItems;
+    
+    if (!categoryId) return baseItems;
+    
+    return baseItems.filter(item => item.category_id === categoryId);
+  }, [menuItems, filteredMenuItems, searchTerm]);
 
   // Utility functions
   const formatPrice = useCallback((price: number, originalCurrency: string) => {
@@ -563,6 +599,48 @@ const EnhancedMenu = () => {
     );
   };
 
+  // Memoized search handler to prevent re-renders
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  // Clear search function
+  const clearSearch = useCallback(() => {
+    setSearchTerm('');
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
+
+  // Memoized SearchBar component to prevent re-renders
+  const SearchBar = useMemo(() => (
+    <div className="px-3 py-3">
+      <div className="max-w-sm mx-auto relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={mutedTextStyles} />
+        <Input 
+          ref={searchInputRef}
+          placeholder="Search menu items..." 
+          value={searchTerm} 
+          onChange={handleSearchChange}
+          className="pl-10 h-10 border backdrop-blur-sm" 
+          style={{
+            ...cardStyles,
+            borderColor: customTheme?.borderColor
+          }} 
+        />
+        {searchTerm && (
+          <button
+            onClick={clearSearch}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Clear search"
+          >
+            ×
+          </button>
+        )}
+      </div>
+    </div>
+  ), [searchTerm, handleSearchChange, clearSearch, mutedTextStyles, cardStyles, customTheme]);
+
   // Loading states
   if (!restaurantName) {
     return <div className="min-h-screen flex items-center justify-center p-4">
@@ -647,20 +725,11 @@ const EnhancedMenu = () => {
       </div>
     </div>;
 
-  // Enhanced SearchBar component
-  const SearchBar = () => <div className="px-3 py-3">
-      <div className="max-w-sm mx-auto relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={mutedTextStyles} />
-        <Input placeholder="Search menu items..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 h-10 border backdrop-blur-sm" style={{
-        ...cardStyles,
-        borderColor: customTheme?.borderColor
-      }} />
-      </div>
-    </div>;
-
   // Categories layout
   if (layoutPreference === 'categories') {
     if (selectedCategory) {
+      const categoryItems = getFilteredItemsByCategory(selectedCategory);
+      
       return <div className="viewport-fill smooth-scroll" style={themeStyles}>
           {/* Viewport background fill */}
           <div 
@@ -669,14 +738,40 @@ const EnhancedMenu = () => {
           />
           
           <MenuHeader />
+          {SearchBar}
           <div className="px-3 py-3">
             <div className="max-w-sm mx-auto">
-              {filteredMenuItems.length === 0 ? <div className="text-center py-8 fade-in">
+              {categoryItems.length === 0 ? (
+                <div className="text-center py-8 fade-in">
                   <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
-                  <p className="text-sm" style={mutedTextStyles}>No items found in this category.</p>
-                </div> : <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
-                  {filteredMenuItems.map((item, index) => <EnhancedMenuItem key={item.id} item={item} layoutStyle={layoutStyle} customTheme={customTheme} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} isCompact={true} index={index} onClick={handleMenuItemClick} />)}
-                </div>}
+                  <p className="text-sm" style={mutedTextStyles}>
+                    {searchTerm ? 'No items found matching your search in this category.' : 'No items found in this category.'}
+                  </p>
+                  {searchTerm && (
+                    <Button variant="outline" onClick={clearSearch} className="mt-3">
+                      Clear search
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                  {categoryItems.map((item, index) => (
+                    <EnhancedMenuItem 
+                      key={item.id} 
+                      item={item} 
+                      layoutStyle={layoutStyle} 
+                      customTheme={customTheme} 
+                      formatPrice={formatPrice} 
+                      getLocalizedText={getLocalizedText} 
+                      getMenuItemImageUrl={getMenuItemImageUrl} 
+                      categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} 
+                      isCompact={true} 
+                      index={index} 
+                      onClick={handleMenuItemClick} 
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
@@ -691,17 +786,27 @@ const EnhancedMenu = () => {
         />
         
         <MenuHeader />
-        <SearchBar />
+        {SearchBar}
         <div className="px-4 pb-6">
           <div className="max-w-2xl mx-auto">
-            {categories.length === 0 ? <div className="text-center py-12 fade-in">
+            {categories.length === 0 ? (
+              <div className="text-center py-12 fade-in">
                 <Utensils className="h-12 w-12 mx-auto mb-4" style={mutedTextStyles} />
                 <h3 className="text-xl font-semibold mb-3" style={headingStyles}>Menu Coming Soon</h3>
                 <p className="text-base" style={mutedTextStyles}>The menu is being prepared and will be available shortly.</p>
-              </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categories.map((category, index) => {
-              const categoryItems = menuItems.filter(item => item.category_id === category.id);
-              return <div 
+                  const categoryItems = getFilteredItemsByCategory(category.id);
+                  
+                  // Hide categories with no matching items when searching
+                  if (searchTerm && categoryItems.length === 0) {
+                    return null;
+                  }
+                  
+                  return (
+                    <div 
                       key={category.id} 
                       className="fade-in"
                       style={{ animationDelay: `${index * 100}ms` }}
@@ -711,9 +816,11 @@ const EnhancedMenu = () => {
                         categoryItems={categoryItems} 
                         index={index} 
                       />
-                    </div>;
-            })}
-              </div>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
         <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
@@ -729,55 +836,119 @@ const EnhancedMenu = () => {
       />
       
       <MenuHeader />
-      <SearchBar />
+      {SearchBar}
       <div className="px-3 py-3">
         <div className="max-w-sm mx-auto">
           <Tabs defaultValue="all" className="w-full">
             <ScrollArea className="w-full whitespace-nowrap">
               <TabsList className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm" style={{
-              backgroundColor: customTheme?.accentColor + '20',
-              borderColor: customTheme?.accentColor
-            }}>
+                backgroundColor: customTheme?.accentColor + '20',
+                borderColor: customTheme?.accentColor
+              }}>
                 <TabsTrigger value="all" className="text-xs h-7 px-3 flex-shrink-0">
                   All
                 </TabsTrigger>
-                {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="text-xs h-7 px-3 flex-shrink-0">
-                    {getLocalizedText(category, 'name')}
-                  </TabsTrigger>)}
+                {categories.map(category => {
+                  const categoryItems = getFilteredItemsByCategory(category.id);
+                  
+                  // Hide empty categories when searching
+                  if (searchTerm && categoryItems.length === 0) {
+                    return null;
+                  }
+                  
+                  return (
+                    <TabsTrigger key={category.id} value={category.id} className="text-xs h-7 px-3 flex-shrink-0">
+                      {getLocalizedText(category, 'name')} ({categoryItems.length})
+                    </TabsTrigger>
+                  );
+                })}
               </TabsList>
               <ScrollBar orientation="horizontal" className="mt-2" />
             </ScrollArea>
 
             <TabsContent value="all" className="space-y-3 mt-4">
               <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
-                All Items
+                All Items {searchTerm && `(${filteredMenuItems.length} found)`}
               </h3>
-              {filteredMenuItems.length === 0 ? <div className="text-center py-8 fade-in">
+              {filteredMenuItems.length === 0 ? (
+                <div className="text-center py-8 fade-in">
                   <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
                   <p className="text-sm" style={mutedTextStyles}>
                     {searchTerm ? 'No items found matching your search.' : 'No items available.'}
                   </p>
-                </div> : <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
-                  {filteredMenuItems.map((item, index) => <EnhancedMenuItem key={item.id} item={item} layoutStyle={layoutStyle} customTheme={customTheme} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} index={index} onClick={handleMenuItemClick} />)}
-                </div>}
+                  {searchTerm && (
+                    <Button variant="outline" onClick={clearSearch} className="mt-3">
+                      Clear search
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                  {filteredMenuItems.map((item, index) => (
+                    <EnhancedMenuItem 
+                      key={item.id} 
+                      item={item} 
+                      layoutStyle={layoutStyle} 
+                      customTheme={customTheme} 
+                      formatPrice={formatPrice} 
+                      getLocalizedText={getLocalizedText} 
+                      getMenuItemImageUrl={getMenuItemImageUrl} 
+                      categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} 
+                      index={index} 
+                      onClick={handleMenuItemClick} 
+                    />
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             {categories.map(category => {
-            const categoryItems = filteredMenuItems.filter(item => item.category_id === category.id);
-            return <TabsContent key={category.id} value={category.id} className="space-y-3 mt-4">
+              const categoryItems = getFilteredItemsByCategory(category.id);
+              
+              // Hide empty categories when searching
+              if (searchTerm && categoryItems.length === 0) {
+                return null;
+              }
+              
+              return (
+                <TabsContent key={category.id} value={category.id} className="space-y-3 mt-4">
                   <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
-                    {getLocalizedText(category, 'name')}
+                    {getLocalizedText(category, 'name')} {searchTerm && `(${categoryItems.length} found)`}
                   </h3>
-                  {categoryItems.length === 0 ? <div className="text-center py-8 fade-in">
+                  {categoryItems.length === 0 ? (
+                    <div className="text-center py-8 fade-in">
                       <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
                       <p className="text-sm" style={mutedTextStyles}>
                         {searchTerm ? 'No items found matching your search in this category.' : 'No items in this category.'}
                       </p>
-                    </div> : <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
-                      {categoryItems.map((item, index) => <EnhancedMenuItem key={item.id} item={item} layoutStyle={layoutStyle} customTheme={customTheme} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={getLocalizedText(category, 'name')} isCompact={true} index={index} onClick={handleMenuItemClick} />)}
-                    </div>}
-                </TabsContent>;
-          })}
+                      {searchTerm && (
+                        <Button variant="outline" onClick={clearSearch} className="mt-3">
+                          Clear search
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                      {categoryItems.map((item, index) => (
+                        <EnhancedMenuItem 
+                          key={item.id} 
+                          item={item} 
+                          layoutStyle={layoutStyle} 
+                          customTheme={customTheme} 
+                          formatPrice={formatPrice} 
+                          getLocalizedText={getLocalizedText} 
+                          getMenuItemImageUrl={getMenuItemImageUrl} 
+                          categoryName={getLocalizedText(category, 'name')} 
+                          isCompact={true} 
+                          index={index} 
+                          onClick={handleMenuItemClick} 
+                        />
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              );
+            })}
           </Tabs>
         </div>
       </div>
@@ -794,7 +965,18 @@ const EnhancedMenu = () => {
       )}
 
       {/* Menu Item Detail Popup */}
-      {selectedMenuItem && <MenuItemPopup item={selectedMenuItem} isOpen={!!selectedMenuItem} onClose={() => setSelectedMenuItem(null)} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} customTheme={customTheme} />}
+      {selectedMenuItem && (
+        <MenuItemPopup 
+          item={selectedMenuItem} 
+          isOpen={!!selectedMenuItem} 
+          onClose={() => setSelectedMenuItem(null)} 
+          formatPrice={formatPrice} 
+          getLocalizedText={getLocalizedText} 
+          getMenuItemImageUrl={getMenuItemImageUrl} 
+          categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} 
+          customTheme={customTheme} 
+        />
+      )}
     </div>;
 };
 

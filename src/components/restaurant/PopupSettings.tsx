@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
+import { useDashboardForm } from '@/contexts/DashboardFormContext';
 
 interface Reward {
   text: string;
@@ -43,34 +44,45 @@ const defaultColors = [
 ];
 
 export const PopupSettings: React.FC = () => {
-  const [settings, setSettings] = useState<PopupSettingsData>({
-    enabled: false,
-    type: 'cta',
-    title: 'Follow us on Instagram!',
-    description: 'Get the latest updates and special offers',
-    link: '',
-    buttonText: 'Follow Now',
-    showAfterSeconds: 3,
-    dailyLimit: 1,
-    wheelSettings: {
+  const { formData, setFormData, getFormData } = useDashboardForm();
+  const formKey = 'popupSettings';
+  
+  const [settings, setSettings] = useState<PopupSettingsData>(() => {
+    // Initialize with saved form data or defaults
+    return getFormData(formKey) || {
       enabled: false,
-      unlockType: 'review',
-      unlockText: 'Give us a 5-star review to spin the wheel!',
-      unlockButtonText: 'Leave Review & Spin',
-      unlockLink: '',
-      rewards: [
-        { text: '10% Off', chance: 20, color: '#ef4444' },
-        { text: 'Free Drink', chance: 15, color: '#3b82f6' },
-        { text: '5% Off', chance: 30, color: '#10b981' },
-        { text: 'Free Appetizer', chance: 10, color: '#f59e0b' },
-        { text: 'Try Again', chance: 25, color: '#6b7280' }
-      ]
-    }
+      type: 'cta',
+      title: 'Follow us on Instagram!',
+      description: 'Get the latest updates and special offers',
+      link: '',
+      buttonText: 'Follow Now',
+      showAfterSeconds: 3,
+      dailyLimit: 1,
+      wheelSettings: {
+        enabled: false,
+        unlockType: 'review',
+        unlockText: 'Give us a 5-star review to spin the wheel!',
+        unlockButtonText: 'Leave Review & Spin',
+        unlockLink: '',
+        rewards: [
+          { text: '10% Off', chance: 20, color: '#ef4444' },
+          { text: 'Free Drink', chance: 15, color: '#3b82f6' },
+          { text: '5% Off', chance: 30, color: '#10b981' },
+          { text: 'Free Appetizer', chance: 10, color: '#f59e0b' },
+          { text: 'Try Again', chance: 25, color: '#6b7280' }
+        ]
+      }
+    };
   });
   
   const [loading, setLoading] = useState(false);
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Save form data whenever settings change
+  useEffect(() => {
+    setFormData(formKey, settings);
+  }, [settings, setFormData, formKey]);
 
   useEffect(() => {
     loadSettings();
@@ -107,8 +119,8 @@ export const PopupSettings: React.FC = () => {
           }
         }
         
-        // Ensure all values have proper defaults to avoid undefined
-        setSettings({
+        // Update settings with loaded data
+        const loadedSettings = {
           enabled: Boolean(firstRecord.enabled),
           type: firstRecord.type || 'cta',
           title: firstRecord.title || 'Follow us on Instagram!',
@@ -131,7 +143,9 @@ export const PopupSettings: React.FC = () => {
               { text: 'Try Again', chance: 25, color: '#6b7280' }
             ]
           }
-        });
+        };
+        
+        setSettings(loadedSettings);
       }
     } catch (error) {
       console.error('Error loading popup settings:', error);

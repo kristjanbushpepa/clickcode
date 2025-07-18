@@ -148,32 +148,6 @@ const EnhancedMenu = () => {
   // Add ref for search input to maintain focus
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Add swipe gesture handling
-  const handleSwipeRight = useCallback(() => {
-    // Only handle swipe right if we're in items layout and categories layout is available
-    if (layoutPreference === 'items' && categories.length > 0) {
-      // Switch to categories layout
-      setLayoutPreference('categories');
-      setSelectedCategory(null);
-    }
-  }, [layoutPreference, categories]);
-
-  const handleSwipeLeft = useCallback(() => {
-    // Only handle swipe left if we're in categories layout
-    if (layoutPreference === 'categories') {
-      // Switch to items layout
-      setLayoutPreference('items');
-      setSelectedCategory(null);
-    }
-  }, [layoutPreference]);
-
-  const swipeRef = useSwipeGestures({
-    onSwipeLeft: handleSwipeLeft,
-    onSwipeRight: handleSwipeRight,
-    threshold: 80,
-    preventScroll: true
-  });
-
   // Restaurant lookup query
   const {
     data: restaurant,
@@ -254,6 +228,32 @@ const EnhancedMenu = () => {
     enabled: !!restaurantSupabase,
     retry: 1,
     staleTime: 2 * 60 * 1000
+  });
+
+  // Add swipe gesture handling after categories are defined
+  const handleSwipeRight = useCallback(() => {
+    // Only handle swipe right if we're in items layout and categories layout is available
+    if (layoutPreference === 'items' && categories.length > 0) {
+      // Switch to categories layout
+      setLayoutPreference('categories');
+      setSelectedCategory(null);
+    }
+  }, [layoutPreference, categories]);
+
+  const handleSwipeLeft = useCallback(() => {
+    // Only handle swipe left if we're in categories layout
+    if (layoutPreference === 'categories') {
+      // Switch to items layout
+      setLayoutPreference('items');
+      setSelectedCategory(null);
+    }
+  }, [layoutPreference]);
+
+  const swipeRef = useSwipeGestures({
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+    threshold: 80,
+    preventScroll: true
   });
 
   // Menu items query

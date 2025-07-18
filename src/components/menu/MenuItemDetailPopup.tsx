@@ -218,29 +218,37 @@ export const MenuItemDetailPopup = ({
                 Choose Size:
               </h4>
               <div className="grid grid-cols-1 gap-2">
-                {item.sizes!.map((size, index) => (
-                  <Button
-                    key={index}
-                    variant={selectedSize?.name === size.name ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedSize(size)}
-                    className="h-auto py-3 px-4 flex justify-between items-center"
-                    style={selectedSize?.name === size.name ? {
-                      backgroundColor: customTheme?.accentColor || '#3b82f6',
-                      borderColor: customTheme?.accentColor || '#3b82f6',
-                      color: '#ffffff'
-                    } : {
-                      borderColor: customTheme?.borderColor,
-                      backgroundColor: 'transparent',
-                      color: customTheme?.textColor
-                    }}
-                  >
-                    <span className="font-medium">{size.name}</span>
-                    <span className="font-bold text-base">
-                      {formatPrice(size.price, item.currency)}
-                    </span>
-                  </Button>
-                ))}
+                {item.sizes!.map((size, index) => {
+                  const isSelected = selectedSize?.name === size.name;
+                  return (
+                    <Button
+                      key={index}
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedSize(size)}
+                      className={`h-auto py-3 px-4 flex justify-between items-center transition-all duration-200 ${
+                        isSelected 
+                          ? 'ring-2 ring-offset-2 shadow-md' 
+                          : 'hover:shadow-sm'
+                      }`}
+                      style={isSelected ? {
+                        backgroundColor: customTheme?.accentColor || '#3b82f6',
+                        borderColor: customTheme?.accentColor || '#3b82f6',
+                        color: '#ffffff',
+                        ringColor: customTheme?.accentColor + '50' || '#3b82f650'
+                      } : {
+                        borderColor: customTheme?.borderColor || '#e5e7eb',
+                        backgroundColor: customTheme?.cardBackground || 'transparent',
+                        color: customTheme?.textColor || '#374151'
+                      }}
+                    >
+                      <span className="font-medium">{size.name}</span>
+                      <span className={`font-bold text-base ${isSelected ? 'text-white' : ''}`} style={isSelected ? {} : priceStyles}>
+                        {formatPrice(size.price, item.currency)}
+                      </span>
+                    </Button>
+                  );
+                })}
               </div>
             </div>
           )}

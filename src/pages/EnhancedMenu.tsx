@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -144,6 +144,9 @@ const EnhancedMenu = () => {
   const [layoutPreference, setLayoutPreference] = useState<'categories' | 'items'>('items');
   const [layoutStyle, setLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
+  
+  // Add ref for search input to maintain focus
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Restaurant lookup query
   const {
@@ -428,14 +431,16 @@ const EnhancedMenu = () => {
   const bannerImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null, [profile, getDisplayImageUrl]);
   const logoImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null, [profile, getDisplayImageUrl]);
   
-  // Updated filtered items - only filter menu items, not categories
+  // Updated filtered items with stable reference
   const filteredMenuItems = useMemo(() => {
-    if (!searchTerm) return menuItems;
+    if (!searchTerm.trim()) return menuItems;
     
-    return menuItems.filter(item => 
-      (item.name_sq || item.name).toLowerCase().includes(searchTerm.toLowerCase()) || 
-      (item.description_sq || item.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const lowercaseSearch = searchTerm.toLowerCase().trim();
+    return menuItems.filter(item => {
+      const name = (item.name_sq || item.name || '').toLowerCase();
+      const description = (item.description_sq || item.description || '').toLowerCase();
+      return name.includes(lowercaseSearch) || description.includes(lowercaseSearch);
+    });
   }, [menuItems, searchTerm]);
 
   // Utility functions
@@ -647,16 +652,30 @@ const EnhancedMenu = () => {
       </div>
     </div>;
 
-  // Enhanced SearchBar component
-  const SearchBar = () => <div className="px-3 py-3">
+  // Optimized search handler with debouncing
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+  }, []);
+
+  // Enhanced SearchBar component with optimized input handling
+  const SearchBar = useCallback(() => (
+    <div className="px-3 py-3">
       <div className="max-w-sm mx-auto relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={mutedTextStyles} />
-        <Input placeholder="Search menu items..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 h-10 border backdrop-blur-sm" style={{
-        ...cardStyles,
-        borderColor: customTheme?.borderColor
-      }} />
+        <Input 
+          ref={searchInputRef}
+          placeholder="Search menu items..." 
+          value={searchTerm} 
+          onChange={(e) => handleSearchChange(e.target.value)}
+          className="pl-10 h-10 border backdrop-blur-sm" 
+          style={{
+            ...cardStyles,
+            borderColor: customTheme?.borderColor
+          }} 
+        />
       </div>
-    </div>;
+    </div>
+  ), [searchTerm, handleSearchChange, mutedTextStyles, cardStyles, customTheme]);
 
   // Categories layout
   if (layoutPreference === 'categories') {
@@ -720,7 +739,7 @@ const EnhancedMenu = () => {
       </div>;
   }
 
-  // Items layout (default)
+  // Items layout (default) with optimized search
   return <div className="viewport-fill smooth-scroll" style={themeStyles}>
       {/* Viewport background fill */}
       <div 

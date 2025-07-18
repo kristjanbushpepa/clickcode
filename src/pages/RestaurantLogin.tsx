@@ -12,7 +12,6 @@ import { createClient } from '@supabase/supabase-js';
 const RestaurantLogin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    restaurantId: '',
     email: '',
     password: ''
   });
@@ -28,65 +27,76 @@ const RestaurantLogin = () => {
     setIsLoading(true);
 
     try {
-      // First, get restaurant details from the main database
+      // First, get all restaurants to find which one this user belongs to
       const mainSupabase = createClient(
         'https://zijfbnubzfonpxngmqqz.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppamZibnViemZvbnB4bmdtcXF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjQwMjcsImV4cCI6MjA2NzQwMDAyN30.8Xa-6lpOYD15W4JLU0BqGBdr1zZF3wL2vjR07yJJZKQ'
       );
 
-      const { data: restaurant, error: restaurantError } = await mainSupabase
+      const { data: restaurants, error: restaurantError } = await mainSupabase
         .from('restaurants')
-        .select('supabase_url, supabase_anon_key, name')
-        .eq('id', formData.restaurantId)
-        .single();
+        .select('*');
 
-      if (restaurantError || !restaurant) {
+      if (restaurantError || !restaurants) {
         toast({
           title: "Error",
-          description: "Restaurant not found. Please check your Restaurant ID.",
+          description: "Failed to fetch restaurant information. Please try again.",
           variant: "destructive",
         });
         return;
       }
 
-      // Create client for restaurant's database
-      const restaurantSupabase = createClient(
-        restaurant.supabase_url,
-        restaurant.supabase_anon_key
-      );
+      // Try to authenticate with each restaurant until we find a match
+      let authenticatedRestaurant = null;
+      let authData = null;
 
-      // Attempt to sign in
-      const { data: authData, error: authError } = await restaurantSupabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+      for (const restaurant of restaurants) {
+        try {
+          const restaurantSupabase = createClient(
+            restaurant.supabase_url,
+            restaurant.supabase_anon_key
+          );
 
-      if (authError) {
+          const { data: authResponse, error: authError } = await restaurantSupabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+          });
+
+          if (!authError && authResponse.user) {
+            authenticatedRestaurant = restaurant;
+            authData = authResponse;
+            break;
+          }
+        } catch (error) {
+          // Continue to next restaurant if authentication fails
+          continue;
+        }
+      }
+
+      if (!authenticatedRestaurant || !authData) {
         toast({
           title: "Login Failed",
-          description: authError.message,
+          description: "Invalid email or password. Please check your credentials and try again.",
           variant: "destructive",
         });
         return;
       }
 
-      if (authData.user) {
-        // Store restaurant info in sessionStorage for the dashboard
-        sessionStorage.setItem('restaurant_info', JSON.stringify({
-          id: formData.restaurantId,
-          name: restaurant.name,
-          supabase_url: restaurant.supabase_url,
-          supabase_anon_key: restaurant.supabase_anon_key,
-          user: authData.user
-        }));
+      // Store restaurant info in sessionStorage for the dashboard
+      sessionStorage.setItem('restaurant_info', JSON.stringify({
+        id: authenticatedRestaurant.id,
+        name: authenticatedRestaurant.name,
+        supabase_url: authenticatedRestaurant.supabase_url,
+        supabase_anon_key: authenticatedRestaurant.supabase_anon_key,
+        user: authData.user
+      }));
 
-        toast({
-          title: "Success",
-          description: `Welcome to ${restaurant.name}!`,
-        });
+      toast({
+        title: "Success",
+        description: `Welcome to ${authenticatedRestaurant.name}!`,
+      });
 
-        navigate('/restaurant/dashboard');
-      }
+      navigate('/restaurant/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
@@ -114,21 +124,6 @@ const RestaurantLogin = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="restaurantId">Restaurant ID</Label>
-              <Input
-                id="restaurantId"
-                type="text"
-                value={formData.restaurantId}
-                onChange={(e) => handleInputChange('restaurantId', e.target.value)}
-                placeholder="Enter your restaurant ID"
-                required
-              />
-              <p className="text-xs text-gray-500">
-                Your Restaurant ID was provided by your administrator
-              </p>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

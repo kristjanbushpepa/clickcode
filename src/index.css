@@ -1,233 +1,141 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
+:root {
+  /* Light theme colors */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+  --radius: 0.5rem;
+}
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+.dark {
+  /* Dark theme colors */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+}
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+* {
+  border-color: hsl(var(--border));
+}
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: "Inter", sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --muted: 212.5 26.8% 14.1%;
-    --muted-foreground: 215 20.2% 65.9%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 212.5 26.8% 14.1%;
-    --secondary-foreground: 210 40% 98%;
-
-    --accent: 212.5 26.8% 14.1%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --ring: 217.2 32.6% 17.5%;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
+/* Custom popup styles for better mobile experience */
+.themed-popup-content {
+  backdrop-filter: blur(8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Enhanced button hover effects for popup */
+.themed-popup-content button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.themed-popup-content button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.themed-popup-content button:active {
+  transform: translateY(0);
+}
+
+/* Progress bar animation */
+@keyframes progress-fill {
+  from {
+    width: 0%;
   }
-  body {
-    @apply bg-background text-foreground;
+  to {
+    width: 100%;
   }
 }
 
-/* Modern Menu Animations and Effects */
-@layer components {
-  /* Safe area handling for iOS devices */
-  .safe-area-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  .viewport-fill {
-    min-height: 100vh;
-    min-height: 100dvh; /* Dynamic viewport height for mobile */
-  }
-  
-  .menu-card {
-    @apply relative overflow-hidden rounded-xl border border-border/60 bg-card 
-           backdrop-blur-sm transition-all duration-300 ease-out 
-           hover:shadow-lg hover:border-accent/50;
-  }
-
-  .category-card {
-    @apply cursor-pointer transition-all duration-300 ease-out hover:scale-[1.02] 
-           hover:shadow-xl backdrop-blur-sm border border-border/50;
-  }
-
-  .category-card:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
-                0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-
-  .menu-item-card {
-    @apply rounded-lg border border-border/40 bg-card/80 backdrop-blur-sm 
-           transition-all duration-300 ease-out hover:border-accent/60 
-           hover:shadow-md hover:bg-card/90;
-  }
-
-  .hover-lift {
-    @apply transition-transform duration-200 ease-out hover:scale-110 hover:-translate-y-0.5;
-  }
-
-  .fade-in {
-    animation: fadeInUp 0.6s ease-out forwards;
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  .slide-up {
-    animation: slideUp 0.5s ease-out;
-  }
-
-  .smooth-scroll {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .glass-effect {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
-  }
-
-  .gradient-overlay {
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.1) 0%, 
-      rgba(255, 255, 255, 0.05) 50%, 
-      rgba(0, 0, 0, 0.05) 100%);
-  }
-}
-
-@keyframes fadeInUp {
+/* Smooth fade in animation for popup content */
+@keyframes popup-fade-in {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: scale(0.95) translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(10px);
-    opacity: 0.8;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.themed-popup-content > * {
+  animation: popup-fade-in 0.3s ease-out;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
-}
-
-/* Staggered animation delays for category cards */
-.fade-in:nth-child(1) { animation-delay: 0ms; }
-.fade-in:nth-child(2) { animation-delay: 100ms; }
-.fade-in:nth-child(3) { animation-delay: 200ms; }
-.fade-in:nth-child(4) { animation-delay: 300ms; }
-.fade-in:nth-child(5) { animation-delay: 400ms; }
-.fade-in:nth-child(6) { animation-delay: 500ms; }
-
-/* Enhanced mobile responsiveness */
+/* Mobile-specific enhancements */
 @media (max-width: 640px) {
-  .category-card {
-    @apply h-36;
+  .themed-popup-content {
+    margin: 1rem;
+    max-height: 80vh;
+    overflow-y: auto;
   }
 }
 
-@media (min-width: 641px) {
-  .category-card {
-    @apply h-40;
+/* Safe area handling for iOS devices */
+@supports (padding: max(0px)) {
+  .themed-popup-content {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
-}
-
-/* Custom scrollbar for better mobile experience */
-.smooth-scroll::-webkit-scrollbar {
-  width: 0px;
-  background: transparent;
-}
-
-/* Text line clamping utilities */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Shimmer effect for loading states */
-.shimmer-bg {
-  background: linear-gradient(to right, #f6f7f8 8%, #edeef1 38%, #f6f7f8 54%);
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite linear;
-}
-
-/* Utility class for even more muted foreground color */
-.text-muted {
-    @apply text-muted-foreground;
 }

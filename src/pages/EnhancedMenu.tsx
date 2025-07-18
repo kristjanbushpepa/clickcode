@@ -19,6 +19,7 @@ import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import MenuItemPopup from '@/components/menu/MenuItemPopup';
 import { MenuItemDetailPopup } from '@/components/menu/MenuItemDetailPopup';
+import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 
 interface SocialMediaOption {
   platform: string;
@@ -133,9 +134,7 @@ interface Restaurant {
 }
 
 const EnhancedMenu = () => {
-  const {
-    restaurantName
-  } = useParams();
+  const { restaurantName } = useParams();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [customTheme, setCustomTheme] = useState<MenuTheme | null>(null);
@@ -148,6 +147,32 @@ const EnhancedMenu = () => {
   
   // Add ref for search input to maintain focus
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Add swipe gesture handling
+  const handleSwipeRight = useCallback(() => {
+    // Only handle swipe right if we're in items layout and categories layout is available
+    if (layoutPreference === 'items' && categories.length > 0) {
+      // Switch to categories layout
+      setLayoutPreference('categories');
+      setSelectedCategory(null);
+    }
+  }, [layoutPreference, categories]);
+
+  const handleSwipeLeft = useCallback(() => {
+    // Only handle swipe left if we're in categories layout
+    if (layoutPreference === 'categories') {
+      // Switch to items layout
+      setLayoutPreference('items');
+      setSelectedCategory(null);
+    }
+  }, [layoutPreference]);
+
+  const swipeRef = useSwipeGestures({
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+    threshold: 80,
+    preventScroll: true
+  });
 
   // Restaurant lookup query
   const {
@@ -912,7 +937,8 @@ const EnhancedMenu = () => {
   }
 
   // Items layout (default)
-  return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+  return (
+    <div ref={swipeRef} className="viewport-fill smooth-scroll" style={themeStyles}>
       {/* Viewport background fill */}
       <div 
         className="fixed inset-0 -z-10" 
@@ -1061,7 +1087,8 @@ const EnhancedMenu = () => {
           customTheme={customTheme} 
         />
       )}
-    </div>;
+    </div>
+  );
 };
 
 export default EnhancedMenu;

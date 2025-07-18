@@ -19,7 +19,6 @@ import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import MenuItemPopup from '@/components/menu/MenuItemPopup';
 import { MenuItemDetailPopup } from '@/components/menu/MenuItemDetailPopup';
-import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 
 interface SocialMediaOption {
   platform: string;
@@ -230,72 +229,6 @@ const EnhancedMenu = () => {
     enabled: !!restaurantSupabase,
     retry: 1,
     staleTime: 2 * 60 * 1000
-  });
-
-  // Swipe gesture handlers
-  const handleSwipeLeft = useCallback(() => {
-    if (layoutPreference === 'categories') {
-      if (selectedCategory) {
-        // If in a category, go back to categories view
-        setSelectedCategory(null);
-      } else if (categories.length > 0) {
-        // If in categories view, go to last category
-        setSelectedCategory(categories[categories.length - 1].id);
-      }
-    } else {
-      // In items layout, navigate to previous category
-      if (categories.length > 0) {
-        const currentIndex = selectedCategory 
-          ? categories.findIndex(cat => cat.id === selectedCategory)
-          : -1;
-        
-        if (currentIndex > 0) {
-          setSelectedCategory(categories[currentIndex - 1].id);
-        } else if (currentIndex === 0) {
-          setSelectedCategory(null); // Go to "All" tab
-        } else {
-          setSelectedCategory(categories[categories.length - 1].id);
-        }
-      }
-    }
-  }, [layoutPreference, selectedCategory, categories]);
-
-  const handleSwipeRight = useCallback(() => {
-    if (layoutPreference === 'categories') {
-      if (selectedCategory) {
-        // If in a category, navigate to next category or back to categories
-        const currentIndex = categories.findIndex(cat => cat.id === selectedCategory);
-        if (currentIndex < categories.length - 1) {
-          setSelectedCategory(categories[currentIndex + 1].id);
-        } else {
-          setSelectedCategory(null);
-        }
-      } else if (categories.length > 0) {
-        // If in categories view, go to first category
-        setSelectedCategory(categories[0].id);
-      }
-    } else {
-      // In items layout, navigate to next category
-      if (categories.length > 0) {
-        const currentIndex = selectedCategory 
-          ? categories.findIndex(cat => cat.id === selectedCategory)
-          : -1;
-        
-        if (currentIndex < categories.length - 1) {
-          setSelectedCategory(categories[currentIndex + 1].id);
-        } else {
-          setSelectedCategory(null); // Go to "All" tab
-        }
-      }
-    }
-  }, [layoutPreference, selectedCategory, categories]);
-
-  // Enable swipe gestures
-  useSwipeGestures({
-    onSwipeLeft: handleSwipeLeft,
-    onSwipeRight: handleSwipeRight,
-    threshold: 50,
-    preventScroll: true
   });
 
   // Menu items query

@@ -1,8 +1,7 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { useToast } from '@/components/ui/use-toast';
-import { TranslatableItem } from '../types';
+import { TranslatableItem, MenuItemSize } from '../types';
 
 export const useAutoTranslate = () => {
   const { toast } = useToast();
@@ -116,11 +115,31 @@ export const useAutoTranslate = () => {
     }
   };
 
+  const translateSizes = async (sizes: MenuItemSize[], targetLang: string): Promise<MenuItemSize[]> => {
+    if (!sizes || sizes.length === 0) return [];
+    
+    const translatedSizes = [];
+    for (const size of sizes) {
+      try {
+        const translatedName = await autoTranslate(size.name, targetLang);
+        translatedSizes.push({
+          name: translatedName,
+          price: size.price
+        });
+      } catch (error) {
+        console.error(`Error translating size "${size.name}":`, error);
+        // Keep original if translation fails
+        translatedSizes.push(size);
+      }
+    }
+    return translatedSizes;
+  };
+
   const updateTranslationMutation = useMutation({
     mutationFn: async ({ id, type, translations, metadata }: { 
       id: string; 
       type: 'category' | 'menu_item'; 
-      translations: Record<string, string>;
+      translations: Record<string, any>;
       metadata?: any;
     }) => {
       console.log(`Updating translations for ${type} ${id}:`, translations);
@@ -173,7 +192,7 @@ export const useAutoTranslate = () => {
     setTranslatingItems(prev => new Set(prev).add(item.id));
     
     try {
-      const translations: Record<string, string> = {};
+      const translations: Record<string, any> = {};
       const metadata = item.translation_metadata || {};
       
       const nameField = `name_${targetLang}` as keyof TranslatableItem;
@@ -198,6 +217,21 @@ export const useAutoTranslate = () => {
           timestamp: new Date().toISOString(),
           source: 'client-side'
         };
+      }
+
+      // Translate sizes if they exist
+      if (item.type === 'menu_item' && item.sizes && item.sizes.length > 0) {
+        const sizesField = `sizes_${targetLang}` as keyof TranslatableItem;
+        if (!item[sizesField]) {
+          console.log(`Translating sizes for item ${item.id}`);
+          const translatedSizes = await translateSizes(item.sizes, targetLang);
+          translations[`sizes_${targetLang}`] = translatedSizes;
+          metadata[`sizes_${targetLang}`] = {
+            status: 'auto_translated',
+            timestamp: new Date().toISOString(),
+            source: 'client-side'
+          };
+        }
       }
       
       if (Object.keys(translations).length > 0) {

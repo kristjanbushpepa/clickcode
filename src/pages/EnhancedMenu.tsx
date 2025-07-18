@@ -784,8 +784,14 @@ const EnhancedMenu = () => {
 
       <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
       
-      {/* Popup Modal */}
-      {popupSettings && restaurant && <PopupModal settings={popupSettings} restaurantName={restaurant.name} />}
+      {/* Popup Modal with theme */}
+      {popupSettings && restaurant && (
+        <PopupModal 
+          settings={popupSettings} 
+          restaurantName={restaurant.name} 
+          customTheme={customTheme}
+        />
+      )}
 
       {/* Menu Item Detail Popup */}
       {selectedMenuItem && <MenuItemPopup item={selectedMenuItem} isOpen={!!selectedMenuItem} onClose={() => setSelectedMenuItem(null)} formatPrice={formatPrice} getLocalizedText={getLocalizedText} getMenuItemImageUrl={getMenuItemImageUrl} categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} customTheme={customTheme} />}

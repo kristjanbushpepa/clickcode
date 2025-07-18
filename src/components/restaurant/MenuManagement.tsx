@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
@@ -13,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { Plus, Edit, Trash2, EyeOff, Tag, Utensils, DollarSign, Languages } from 'lucide-react';
+import { Plus, Edit, Trash2, EyeOff, Tag, Utensils, DollarSign, Languages, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { CurrencySettings } from './CurrencySettings';
 import { LanguageSettings } from './LanguageSettings';
@@ -61,6 +60,12 @@ interface MenuItem {
   allergens: string[];
   preparation_time?: number;
   display_order: number;
+  sizes?: MenuItemSize[];
+}
+
+interface MenuItemSize {
+  name: string;
+  price: number;
 }
 
 export function MenuManagement() {
@@ -311,6 +316,20 @@ export function MenuManagement() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    // Parse sizes from form data
+    const sizes: MenuItemSize[] = [];
+    const sizeInputs = e.currentTarget.querySelectorAll('[data-size-name]');
+    sizeInputs.forEach((input) => {
+      const nameInput = input as HTMLInputElement;
+      const priceInput = e.currentTarget.querySelector(`[data-size-price="${nameInput.dataset.sizeName}"]`) as HTMLInputElement;
+      if (nameInput.value.trim() && priceInput && priceInput.value) {
+        sizes.push({
+          name: nameInput.value.trim(),
+          price: parseFloat(priceInput.value)
+        });
+      }
+    });
+    
     const itemData: Partial<MenuItem> = {
       category_id: formData.get('category_id') as string,
       name: formData.get('name') as string,
@@ -324,7 +343,8 @@ export function MenuManagement() {
       allergens: (formData.get('allergens') as string)?.split(',').map(a => a.trim()).filter(Boolean) || [],
       preparation_time: parseInt(formData.get('preparation_time') as string) || undefined,
       display_order: parseInt(formData.get('display_order') as string) || 0,
-      image_path: formData.get('image_path') as string || null
+      image_path: formData.get('image_path') as string || null,
+      sizes: sizes.length > 0 ? sizes : undefined
     };
 
     if (editingItem) {
@@ -694,7 +714,7 @@ function CategoryDialog({
   );
 }
 
-// Menu Item Dialog Component with Image Upload
+// Menu Item Dialog Component with Size Options
 function MenuItemDialog({ 
   item, 
   categories, 
@@ -707,11 +727,27 @@ function MenuItemDialog({
   onClose: () => void; 
 }) {
   const [imagePath, setImagePath] = useState<string | null>(item?.image_path || null);
+  const [sizes, setSizes] = useState<MenuItemSize[]>(item?.sizes || []);
 
-  // Update imagePath when item changes
+  // Update imagePath and sizes when item changes
   useEffect(() => {
     setImagePath(item?.image_path || null);
+    setSizes(item?.sizes || []);
   }, [item]);
+
+  const addSize = () => {
+    setSizes([...sizes, { name: '', price: 0 }]);
+  };
+
+  const removeSize = (index: number) => {
+    setSizes(sizes.filter((_, i) => i !== index));
+  };
+
+  const updateSize = (index: number, field: keyof MenuItemSize, value: string | number) => {
+    const updatedSizes = [...sizes];
+    updatedSizes[index] = { ...updatedSizes[index], [field]: value };
+    setSizes(updatedSizes);
+  };
 
   return (
     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -744,7 +780,7 @@ function MenuItemDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="price">Çmimi (ALL)</Label>
+            <Label htmlFor="price">Çmimi Bazë (ALL)</Label>
             <Input
               id="price"
               name="price"
@@ -801,6 +837,54 @@ function MenuItemDialog({
               placeholder="Përshkrimi në anglisht"
             />
           </div>
+        </div>
+
+        {/* Size Options Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-medium">Madhësitë e Disponueshme</Label>
+            <Button type="button" onClick={addSize} size="sm" variant="outline">
+              <Plus className="h-4 w-4 mr-1" />
+              Shto Madhësi
+            </Button>
+          </div>
+          
+          {sizes.map((size, index) => (
+            <div key={index} className="flex items-center gap-2 p-3 border rounded-lg">
+              <div className="flex-1">
+                <Input
+                  data-size-name={index}
+                  placeholder="p.sh. Gjysmë, E plotë, 1kg, etc."
+                  value={size.name}
+                  onChange={(e) => updateSize(index, 'name', e.target.value)}
+                />
+              </div>
+              <div className="w-32">
+                <Input
+                  data-size-price={index}
+                  type="number"
+                  step="0.01"
+                  placeholder="Çmimi"
+                  value={size.price || ''}
+                  onChange={(e) => updateSize(index, 'price', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+              <Button 
+                type="button" 
+                onClick={() => removeSize(index)} 
+                size="sm" 
+                variant="ghost"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          
+          {sizes.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Nëse nuk shtoni madhësi, do të përdoret vetëm çmimi bazë.
+            </p>
+          )}
         </div>
 
         <ImageUpload
@@ -872,7 +956,7 @@ function MenuItemDialog({
   );
 }
 
-// Menu Item Card Component with Image Display
+// Menu Item Card Component with Size Display
 function MenuItemCard({ 
   item, 
   categories, 
@@ -922,6 +1006,21 @@ function MenuItemCard({
                 <span className="text-muted-foreground">{item.preparation_time} min</span>
               )}
             </div>
+            
+            {/* Display sizes if available */}
+            {item.sizes && item.sizes.length > 0 && (
+              <div className="mt-2">
+                <p className="text-xs text-muted-foreground mb-1">Madhësitë:</p>
+                <div className="flex flex-wrap gap-1">
+                  {item.sizes.map((size, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {size.name}: {size.price} ALL
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {item.allergens && item.allergens.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {item.allergens.map((allergen) => (

@@ -227,27 +227,27 @@ const vintageGoldTheme: Theme = {
 };
 
 const redBlackTheme: Theme = {
-  mode: 'light',
+  mode: 'dark',
   primaryColor: '#dc2626',
-  accentColor: '#0a0a0a',
-  backgroundColor: '#ffffff',
-  cardBackground: '#fefefe',
-  textColor: '#0a0a0a',
-  mutedTextColor: '#525252',
-  borderColor: '#e5e5e5',
+  accentColor: '#ef4444',
+  backgroundColor: '#0a0a0a',
+  cardBackground: '#1a1a1a',
+  textColor: '#f5f5f5',
+  mutedTextColor: '#a3a3a3',
+  borderColor: '#404040',
   headingColor: '#ffffff',
-  categoryNameColor: '#dc2626',
-  itemNameColor: '#0a0a0a',
-  descriptionColor: '#525252',
-  priceColor: '#dc2626',
+  categoryNameColor: '#ef4444',
+  itemNameColor: '#f5f5f5',
+  descriptionColor: '#a3a3a3',
+  priceColor: '#ef4444',
   languageSwitchBackground: '#dc2626',
-  languageSwitchBorder: '#dc2626',
+  languageSwitchBorder: '#404040',
   languageSwitchText: '#ffffff',
   currencySwitchBackground: '#dc2626',
-  currencySwitchBorder: '#dc2626',
+  currencySwitchBorder: '#404040',
   currencySwitchText: '#ffffff',
-  badgeBackgroundColor: '#fee2e2',
-  badgeTextColor: '#dc2626'
+  badgeBackgroundColor: '#262626',
+  badgeTextColor: '#ef4444'
 };
 
 const CustomizationSettings = () => {

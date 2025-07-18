@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,19 +14,17 @@ import { useToast } from '@/hooks/use-toast';
 interface Restaurant {
   id: string;
   name: string;
-  description: string;
-  website: string;
-  phone_number: string;
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  postal_code: string;
-  menu_items: MenuItem[];
+  owner_full_name: string;
+  owner_email: string;
+  owner_phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  postal_code?: string;
   supabase_url: string;
   supabase_anon_key: string;
-  stripe_account_id: string;
-  owner_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface MenuItem {
@@ -36,7 +35,7 @@ interface MenuItem {
   currency: string;
   image_url: string;
   category: string;
-  options: MenuOption[];
+  options?: MenuOption[];
 }
 
 interface MenuOption {
@@ -46,11 +45,11 @@ interface MenuOption {
 
 interface Profile {
   id: string;
-  username: string;
-  full_name: string;
-  avatar_url: string;
-  website: string;
-  email: string;
+  username?: string;
+  full_name?: string;
+  avatar_url?: string;
+  website?: string;
+  email?: string;
 }
 
 interface Customization {
@@ -141,7 +140,24 @@ export default function EnhancedMenu() {
         }
 
         if (restaurantData) {
-          setRestaurant(restaurantData);
+          // Map the database restaurant data to our Restaurant interface
+          const mappedRestaurant: Restaurant = {
+            id: restaurantData.id,
+            name: restaurantData.name,
+            owner_full_name: restaurantData.owner_full_name,
+            owner_email: restaurantData.owner_email,
+            owner_phone: restaurantData.owner_phone,
+            address: restaurantData.address,
+            city: restaurantData.city,
+            country: restaurantData.country,
+            postal_code: restaurantData.postal_code,
+            supabase_url: restaurantData.supabase_url,
+            supabase_anon_key: restaurantData.supabase_anon_key,
+            created_at: restaurantData.created_at,
+            updated_at: restaurantData.updated_at,
+          };
+          
+          setRestaurant(mappedRestaurant);
           
           const restaurantSupabase = getRestaurantSupabase(
             restaurantData.supabase_url,
@@ -152,7 +168,7 @@ export default function EnhancedMenu() {
             const { data: profileData, error: profileError } = await restaurantSupabase
               .from('profiles')
               .select('*')
-              .eq('id', restaurantData.owner_id)
+              .eq('id', restaurantData.owner_full_name) // Using owner_full_name as fallback
               .single();
 
             if (profileError) {
@@ -271,7 +287,7 @@ export default function EnhancedMenu() {
     };
 
     fetchRestaurantData();
-  }, [slug]);
+  }, [slug, toast]);
 
 	useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -293,7 +309,7 @@ export default function EnhancedMenu() {
 
   if (loading) return <MenuSkeleton />;
   if (error) return <div className="text-center text-red-500 p-4">{error}</div>;
-  if (!restaurant || !profile) return <div className="text-center p-4">Restaurant not found</div>;
+  if (!restaurant) return <div className="text-center p-4">Restaurant not found</div>;
 
   return (
     <div 
@@ -304,11 +320,11 @@ export default function EnhancedMenu() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold">{restaurant.name}</h1>
-            <p className="text-sm text-muted-foreground">{restaurant.description}</p>
+            <p className="text-sm text-muted-foreground">{restaurant.city}</p>
           </div>
           <div className="flex items-center space-x-4">
-            <CurrencySwitch currency={currency} setCurrency={setCurrency} />
-            <LanguageSwitch language={language} setLanguage={setLanguage} />
+            <CurrencySwitch />
+            <LanguageSwitch />
           </div>
         </div>
       </header>
@@ -336,7 +352,26 @@ export default function EnhancedMenu() {
         />
       )}
 
-      <MenuFooter restaurant={restaurant} profile={profile} />
+      {profile && (
+        <MenuFooter 
+          restaurant={{
+            name: restaurant.name,
+            address: restaurant.address || '',
+            city: restaurant.city || '',
+            country: restaurant.country || '',
+            owner_email: restaurant.owner_email,
+            owner_phone: restaurant.owner_phone || ''
+          }} 
+          profile={{
+            name: profile.full_name || restaurant.owner_full_name,
+            username: profile.username || '',
+            full_name: profile.full_name || restaurant.owner_full_name,
+            avatar_url: profile.avatar_url || '',
+            website: profile.website || '',
+            email: profile.email || restaurant.owner_email
+          }} 
+        />
+      )}
     </div>
   );
 }

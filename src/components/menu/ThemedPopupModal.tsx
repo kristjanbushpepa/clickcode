@@ -241,216 +241,210 @@ export const ThemedPopupModal: React.FC<ThemedPopupModalProps> = ({
   const enabledReviewOptions = settings.reviewOptions?.filter(review => review.enabled && review.url) || [];
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent 
-        className="themed-popup-content"
-        style={themeStyles}
-      >
-        <DialogHeader>
-          <DialogTitle 
-            className="text-sm sm:text-base font-semibold text-center"
-            style={{ color: theme?.headingColor || theme?.textColor }}
-          >
-            {settings.title}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent 
+          className="themed-popup-content"
+          style={themeStyles}
+        >
+          <DialogHeader>
+            <DialogTitle 
+              className="text-sm sm:text-base font-semibold text-center"
+              style={{ color: theme?.headingColor || theme?.textColor }}
+            >
+              {settings.title}
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-3">
-          {!showWheel ? (
-            <>
-              {settings.description && (
-                <p 
-                  className="text-xs sm:text-sm text-center leading-relaxed"
-                  style={{ color: theme?.mutedTextColor }}
-                >
-                  {settings.description}
-                </p>
-              )}
+          <div className="space-y-3">
+            {!showWheel ? (
+              <>
+                {settings.description && (
+                  <p 
+                    className="text-xs sm:text-sm text-center leading-relaxed"
+                    style={{ color: theme?.mutedTextColor }}
+                  >
+                    {settings.description}
+                  </p>
+                )}
 
-              {settings.type === 'social' && enabledSocialMedia.length > 0 ? (
-                <div className="space-y-3">
-                  <p 
-                    className="text-xs font-medium text-center"
-                    style={{ color: theme?.textColor }}
-                  >
-                    Follow us on social media!
-                  </p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {enabledSocialMedia.map((social, index) => {
-                      const platform = socialPlatforms.find(p => p.name === social.platform);
-                      const IconComponent = platform?.icon || Instagram;
-                      
-                      return (
-                        <Button
-                          key={index}
-                          onClick={() => handleSocialClick(social.url)}
-                          className="flex items-center justify-center gap-2 h-10 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                          style={{ 
-                            backgroundColor: platform?.color || theme?.primaryColor || '#6b7280'
-                          }}
+                {settings.type === 'social' && enabledSocialMedia.length > 0 ? (
+                  <div className="space-y-3">
+                    <p 
+                      className="text-xs font-medium text-center"
+                      style={{ color: theme?.textColor }}
+                    >
+                      Follow us on social media!
+                    </p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {enabledSocialMedia.map((social, index) => {
+                        const platform = socialPlatforms.find(p => p.name === social.platform);
+                        const IconComponent = platform?.icon || Instagram;
+                        
+                        return (
+                          <Button
+                            key={index}
+                            onClick={() => handleSocialClick(social.url)}
+                            className="flex items-center justify-center gap-2 h-10 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                            style={{ 
+                              backgroundColor: platform?.color || theme?.primaryColor || '#6b7280'
+                            }}
+                          >
+                            <IconComponent className="h-4 w-4" />
+                            {platform?.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : settings.type === 'review' && enabledReviewOptions.length > 0 ? (
+                  <div className="space-y-3">
+                    <p 
+                      className="text-xs font-medium text-center"
+                      style={{ color: theme?.textColor }}
+                    >
+                      Leave us a review!
+                    </p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {enabledReviewOptions.map((review, index) => {
+                        const platform = reviewPlatforms.find(p => p.name === review.platform);
+                        const IconComponent = platform?.icon || Star;
+                        
+                        return (
+                          <Button
+                            key={index}
+                            onClick={() => handleReviewClick(review.url)}
+                            className="flex items-center justify-center gap-2 h-10 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                            style={{ 
+                              backgroundColor: platform?.color || theme?.primaryColor || '#6b7280'
+                            }}
+                          >
+                            <IconComponent className="h-4 w-4" />
+                            {platform?.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : settings.type === 'wheel' && settings.wheelSettings.enabled ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-center">
+                      <PreviewWheel rewards={settings.wheelSettings.rewards.map(r => ({ color: r.color, chance: r.chance }))} />
+                    </div>
+                    
+                    <p 
+                      className="text-xs font-medium text-center"
+                      style={{ color: theme?.textColor }}
+                    >
+                      {settings.wheelSettings.unlockText}
+                    </p>
+                    
+                    {settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5 ? (
+                      <div className="text-center space-y-2">
+                        <p 
+                          className="text-xs"
+                          style={{ color: theme?.mutedTextColor }}
                         >
-                          <IconComponent className="h-4 w-4" />
-                          {platform?.label}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : settings.type === 'review' && enabledReviewOptions.length > 0 ? (
-                <div className="space-y-3">
-                  <p 
-                    className="text-xs font-medium text-center"
-                    style={{ color: theme?.textColor }}
-                  >
-                    Leave us a review!
-                  </p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {enabledReviewOptions.map((review, index) => {
-                      const platform = reviewPlatforms.find(p => p.name === review.platform);
-                      const IconComponent = platform?.icon || Star;
-                      
-                      return (
-                        <Button
-                          key={index}
-                          onClick={() => handleReviewClick(review.url)}
-                          className="flex items-center justify-center gap-2 h-10 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                          style={{ 
-                            backgroundColor: platform?.color || theme?.primaryColor || '#6b7280'
-                          }}
-                        >
-                          <IconComponent className="h-4 w-4" />
-                          {platform?.label}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : settings.type === 'wheel' && settings.wheelSettings.enabled ? (
-                <div className="space-y-3">
-                  <div className="flex justify-center">
-                    <PreviewWheel rewards={settings.wheelSettings.rewards.map(r => ({ color: r.color, chance: r.chance }))} />
-                  </div>
-                  
-                  <p 
-                    className="text-xs font-medium text-center"
-                    style={{ color: theme?.textColor }}
-                  >
-                    {settings.wheelSettings.unlockText}
-                  </p>
-                  
-                  {settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5 ? (
-                    <div className="text-center space-y-2">
-                      <p 
-                        className="text-xs"
-                        style={{ color: theme?.mutedTextColor }}
-                      >
-                        Wheel unlocks in {timeLeft} seconds...
-                      </p>
-                      <div 
-                        className="w-full rounded-full h-1.5"
-                        style={{ backgroundColor: theme?.borderColor || '#e5e7eb' }}
-                      >
+                          Wheel unlocks in {timeLeft} seconds...
+                        </p>
                         <div 
-                          className="h-1.5 rounded-full transition-all duration-1000" 
-                          style={{ 
-                            width: `${((5 - timeLeft) / 5) * 100}%`,
-                            backgroundColor: theme?.primaryColor || '#3b82f6'
-                          }}
+                          className="w-full rounded-full h-1.5"
+                          style={{ backgroundColor: theme?.borderColor || '#e5e7eb' }}
+                        >
+                          <div 
+                            className="h-1.5 rounded-full transition-all duration-1000" 
+                            style={{ 
+                              width: `${((5 - timeLeft) / 5) * 100}%`,
+                              backgroundColor: theme?.primaryColor || '#3b82f6'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <Button 
+                        onClick={handleCtaClick}
+                        className="w-full h-10 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                        style={{
+                          backgroundColor: theme?.primaryColor || '#3b82f6',
+                          color: 'white'
+                        }}
+                        disabled={settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5}
+                      >
+                        {settings.wheelSettings.unlockButtonText}
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={handleCtaClick}
+                    className="w-full flex items-center justify-center gap-2 h-10 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      backgroundColor: theme?.primaryColor || '#3b82f6',
+                      color: 'white'
+                    }}
+                  >
+                    {settings.buttonText}
+                    {settings.link && <ExternalLink className="h-3 w-3" />}
+                  </Button>
+                )}
+              </>
+            ) : (
+              <div className="text-center space-y-3">
+                {!hasSpun ? (
+                  <>
+                    <p 
+                      className="text-xs"
+                      style={{ color: theme?.mutedTextColor }}
+                    >
+                      {settings.wheelSettings.unlockType === 'free' 
+                        ? 'Spin the wheel for your reward!' 
+                        : 'Thanks! Spin to win your reward:'
+                      }
+                    </p>
+                    <div className="flex justify-center">
+                      <div className="scale-90 sm:scale-100">
+                        <SpinWheel 
+                          rewards={settings.wheelSettings.rewards}
+                          onComplete={handleWheelComplete}
                         />
                       </div>
                     </div>
-                  ) : (
-                    <Button 
-                      onClick={handleCtaClick}
-                      className="w-full h-10 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                      style={{
-                        backgroundColor: theme?.primaryColor || '#3b82f6',
-                        color: 'white'
-                      }}
-                      disabled={settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5}
-                    >
-                      {settings.wheelSettings.unlockButtonText}
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <Button 
-                  onClick={handleCtaClick}
-                  className="w-full flex items-center justify-center gap-2 h-10 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                  style={{
-                    backgroundColor: theme?.primaryColor || '#3b82f6',
-                    color: 'white'
-                  }}
-                >
-                  {settings.buttonText}
-                  {settings.link && <ExternalLink className="h-3 w-3" />}
-                </Button>
-              )}
-            </>
-          ) : (
-            <div className="text-center space-y-3">
-              {!hasSpun ? (
-                <>
-                  <p 
-                    className="text-xs"
-                    style={{ color: theme?.mutedTextColor }}
-                  >
-                    {settings.wheelSettings.unlockType === 'free' 
-                      ? 'Spin the wheel for your reward!' 
-                      : 'Thanks! Spin to win your reward:'
-                    }
-                  </p>
-                  <div className="flex justify-center">
-                    <div className="scale-90 sm:scale-100">
-                      <SpinWheel 
-                        rewards={settings.wheelSettings.rewards}
-                        onComplete={handleWheelComplete}
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="space-y-3">
-                  <div className="text-2xl">🎉</div>
-                  <p 
-                    className="text-sm font-semibold"
-                    style={{ color: theme?.primaryColor }}
-                  >
-                    Congratulations!
-                  </p>
-                  <div 
-                    className="p-3 rounded-lg"
-                    style={{ 
-                      backgroundColor: theme?.primaryColor ? `${theme.primaryColor}20` : '#3b82f620'
-                    }}
-                  >
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="text-2xl">🎉</div>
                     <p 
-                      className="text-sm font-bold"
+                      className="text-sm font-semibold"
                       style={{ color: theme?.primaryColor }}
                     >
-                      {wonReward}
+                      Congratulations!
+                    </p>
+                    <div 
+                      className="p-3 rounded-lg"
+                      style={{ 
+                        backgroundColor: theme?.primaryColor ? `${theme.primaryColor}20` : '#3b82f620'
+                      }}
+                    >
+                      <p 
+                        className="text-sm font-bold"
+                        style={{ color: theme?.primaryColor }}
+                      >
+                        {wonReward}
+                      </p>
+                    </div>
+                    <p 
+                      className="text-xs"
+                      style={{ color: theme?.mutedTextColor }}
+                    >
+                      Show this screen to claim your reward!
                     </p>
                   </div>
-                  <p 
-                    className="text-xs"
-                    style={{ color: theme?.mutedTextColor }}
-                  >
-                    Show this screen to claim your reward!
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </DialogContent>
-
-      <style jsx>{`
-        .themed-popup-content {
-          background-color: var(--theme-bg) !important;
-          color: var(--theme-text) !important;
-          border-color: var(--theme-border) !important;
-        }
-      `}</style>
-    </Dialog>
+                )}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

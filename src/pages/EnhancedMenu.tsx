@@ -230,24 +230,26 @@ const EnhancedMenu = () => {
     staleTime: 2 * 60 * 1000
   });
 
-  // Add swipe gesture handling after categories are defined
+  // Updated swipe gesture handling with improved logic for category navigation
   const handleSwipeRight = useCallback(() => {
-    // Only handle swipe right if we're in items layout and categories layout is available
-    if (layoutPreference === 'items' && categories.length > 0) {
-      // Switch to categories layout
+    // Handle swipe right based on current state
+    if (layoutPreference === 'categories' && selectedCategory) {
+      // If we're viewing items in a category, go back to categories view
+      setSelectedCategory(null);
+    } else if (layoutPreference === 'items' && categories.length > 0) {
+      // If we're in items layout, switch to categories layout
       setLayoutPreference('categories');
       setSelectedCategory(null);
     }
-  }, [layoutPreference, categories]);
+  }, [layoutPreference, selectedCategory, categories]);
 
   const handleSwipeLeft = useCallback(() => {
-    // Only handle swipe left if we're in categories layout
-    if (layoutPreference === 'categories') {
-      // Switch to items layout
+    // Handle swipe left - only switch from categories to items layout when not viewing a specific category
+    if (layoutPreference === 'categories' && !selectedCategory) {
+      // Only switch to items layout if we're in the main categories view (not viewing specific category items)
       setLayoutPreference('items');
-      setSelectedCategory(null);
     }
-  }, [layoutPreference]);
+  }, [layoutPreference, selectedCategory]);
 
   const swipeRef = useSwipeGestures({
     onSwipeLeft: handleSwipeLeft,
@@ -765,7 +767,7 @@ const EnhancedMenu = () => {
     if (selectedCategory) {
       const categoryItems = getFilteredItemsByCategory(selectedCategory);
       
-      return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+      return <div ref={swipeRef} className="viewport-fill smooth-scroll" style={themeStyles}>
           {/* Viewport background fill */}
           <div 
             className="fixed inset-0 -z-10" 
@@ -829,7 +831,7 @@ const EnhancedMenu = () => {
     
     // Categories layout - show search results when searching
     if (searchTerm) {
-      return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+      return <div ref={swipeRef} className="viewport-fill smooth-scroll" style={themeStyles}>
           {/* Viewport background fill */}
           <div 
             className="fixed inset-0 -z-10" 
@@ -892,7 +894,7 @@ const EnhancedMenu = () => {
         </div>;
     }
     
-    return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+    return <div ref={swipeRef} className="viewport-fill smooth-scroll" style={themeStyles}>
         {/* Viewport background fill */}
         <div 
           className="fixed inset-0 -z-10" 

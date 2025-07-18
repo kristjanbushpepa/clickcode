@@ -33,6 +33,7 @@ export function TranslationCard({
   const currentTranslations = editingTranslations[item.id] || {};
   const isTranslating = translatingItems.has(item.id);
   const languageData = LANGUAGE_OPTIONS.find(l => l.code === selectedLanguage);
+  const isReadonlyLanguage = languageData?.readonly;
 
   const nameField = `name_${selectedLanguage}` as keyof TranslatableItem;
   const descField = `description_${selectedLanguage}` as keyof TranslatableItem;
@@ -59,6 +60,8 @@ export function TranslationCard({
   const hasUnsavedChanges = Object.keys(currentTranslations).length > 0;
 
   const handleSizeChange = (index: number, name: string) => {
+    if (isReadonlyLanguage) return;
+    
     const updatedSizes = [...currentSizes];
     if (!updatedSizes[index]) {
       // If size doesn't exist, create it with price from original sizes
@@ -90,19 +93,21 @@ export function TranslationCard({
             <Badge variant="outline" className="flex items-center gap-1">
               {languageData?.flag} {languageData?.name}
             </Badge>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onAutoTranslateItem(item, selectedLanguage)}
-              disabled={isTranslating || isUpdating}
-            >
-              {isTranslating ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Languages className="h-4 w-4 mr-2" />
-              )}
-              Përkthe Automatikisht
-            </Button>
+            {!isReadonlyLanguage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onAutoTranslateItem(item, selectedLanguage)}
+                disabled={isTranslating || isUpdating}
+              >
+                {isTranslating ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Languages className="h-4 w-4 mr-2" />
+                )}
+                Përkthe Automatikisht
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -113,10 +118,12 @@ export function TranslationCard({
           <Input
             id={`name-${item.id}`}
             value={currentName}
-            onChange={(e) => onTranslationChange(item.id, `name_${selectedLanguage}`, e.target.value)}
-            placeholder={`Shkruani emrin në ${languageData?.name}...`}
+            onChange={(e) => !isReadonlyLanguage && onTranslationChange(item.id, `name_${selectedLanguage}`, e.target.value)}
+            placeholder={isReadonlyLanguage ? '' : `Shkruani emrin në ${languageData?.name}...`}
+            readOnly={isReadonlyLanguage}
+            className={isReadonlyLanguage ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}
           />
-          {item.name && (
+          {item.name && !isReadonlyLanguage && (
             <p className="text-xs text-muted-foreground">
               Origjinali: {item.name}
             </p>
@@ -130,13 +137,17 @@ export function TranslationCard({
             <Textarea
               id={`desc-${item.id}`}
               value={currentDesc}
-              onChange={(e) => onTranslationChange(item.id, `description_${selectedLanguage}`, e.target.value)}
-              placeholder={`Shkruani përshkrimin në ${languageData?.name}...`}
+              onChange={(e) => !isReadonlyLanguage && onTranslationChange(item.id, `description_${selectedLanguage}`, e.target.value)}
+              placeholder={isReadonlyLanguage ? '' : `Shkruani përshkrimin në ${languageData?.name}...`}
               rows={3}
+              readOnly={isReadonlyLanguage}
+              className={isReadonlyLanguage ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}
             />
-            <p className="text-xs text-muted-foreground">
-              Origjinali: {item.description}
-            </p>
+            {!isReadonlyLanguage && (
+              <p className="text-xs text-muted-foreground">
+                Origjinali: {item.description}
+              </p>
+            )}
           </div>
         )}
 
@@ -149,15 +160,18 @@ export function TranslationCard({
                 const translatedSize = currentSizes[index];
                 return (
                   <div key={index} className="border rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Origjinali: <strong>{originalSize.name}</strong></span>
-                      <span>{originalSize.price} ALL</span>
-                    </div>
+                    {!isReadonlyLanguage && (
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Origjinali: <strong>{originalSize.name}</strong></span>
+                        <span>{originalSize.price} ALL</span>
+                      </div>
+                    )}
                     <Input
                       value={translatedSize?.name || ''}
                       onChange={(e) => handleSizeChange(index, e.target.value)}
-                      placeholder={`Përktheni "${originalSize.name}" në ${languageData?.name}`}
-                      className="text-sm"
+                      placeholder={isReadonlyLanguage ? '' : `Përktheni "${originalSize.name}" në ${languageData?.name}`}
+                      className={`text-sm ${isReadonlyLanguage ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}`}
+                      readOnly={isReadonlyLanguage}
                     />
                     <div className="text-xs text-muted-foreground">
                       Çmimi: {originalSize.price} ALL
@@ -170,7 +184,7 @@ export function TranslationCard({
         )}
 
         {/* Save Button */}
-        {hasUnsavedChanges && (
+        {hasUnsavedChanges && !isReadonlyLanguage && (
           <Button
             onClick={() => onSaveTranslations(item)}
             disabled={isUpdating}

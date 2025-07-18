@@ -19,15 +19,29 @@ import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import MenuItemPopup from '@/components/menu/MenuItemPopup';
 
+interface SocialMediaOption {
+  platform: string;
+  url: string;
+  enabled: boolean;
+}
+
+interface ReviewOption {
+  platform: string;
+  url: string;
+  enabled: boolean;
+}
+
 interface PopupSettings {
   enabled: boolean;
-  type: 'cta' | 'wheel';
+  type: 'review' | 'wheel' | 'social';
   title: string;
   description: string;
   link: string;
   buttonText: string;
   showAfterSeconds: number;
   dailyLimit: number;
+  socialMedia?: SocialMediaOption[];
+  reviewOptions?: ReviewOption[];
   wheelSettings: {
     enabled: boolean;
     unlockType: 'free' | 'link';
@@ -327,6 +341,8 @@ const EnhancedMenu = () => {
         buttonText: data.button_text,
         showAfterSeconds: data.show_after_seconds || 3,
         dailyLimit: data.daily_limit || 1,
+        socialMedia: data.social_media || [],
+        reviewOptions: data.review_options || [],
         wheelSettings: {
           enabled: data.wheel_enabled,
           unlockType: data.wheel_unlock_type || 'free',

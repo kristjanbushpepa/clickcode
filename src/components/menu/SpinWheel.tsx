@@ -32,7 +32,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
 
   const normalizedRewards = normalizeRewards(rewards);
   
-  // Calculate segments with proper angles
+  // Calculate segments
   const segments = normalizedRewards.map((reward, index) => {
     const prevSegments = normalizedRewards.slice(0, index);
     const startAngle = prevSegments.reduce((sum, r) => sum + (r.chance / 100) * 360, 0);
@@ -52,6 +52,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
     if (isSpinning) return;
     
     setIsSpinning(true);
+    setResult('');
     
     // Generate random number to select winner
     const random = Math.random() * 100;
@@ -66,38 +67,43 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
       }
     }
     
-    // Calculate rotation to land on selected reward
+    // Calculate rotation - we want the pointer at top (12 o'clock) to point to selected segment
     const segment = segments.find(s => s.text === selectedReward.text);
     if (!segment) return;
     
-    // Calculate target angle (we want the pointer to point to the middle of the segment)
-    const targetAngle = 360 - segment.midAngle; // Reverse because wheel spins clockwise but we measure counterclockwise
-    const spins = 5; // Number of full rotations
-    const finalRotation = rotation + spins * 360 + targetAngle + Math.random() * 20 - 10; // Add small random offset
+    // Calculate target angle - pointer points to middle of segment
+    // We subtract from 360 because we want to rotate the wheel so the segment aligns with top pointer
+    const targetAngle = 360 - segment.midAngle + 90; // +90 to align with top pointer
+    const spins = 5 + Math.random() * 3; // 5-8 full rotations
+    const finalRotation = rotation + spins * 360 + targetAngle;
     
     setRotation(finalRotation);
-    setResult(selectedReward.text);
     
     setTimeout(() => {
+      setResult(selectedReward.text);
       setIsSpinning(false);
       onComplete(selectedReward.text);
-    }, 4000);
+    }, 3000);
   };
 
-  // Helper function to create SVG path for each segment
-  const createSegmentPath = (startAngle: number, endAngle: number, radius: number = 95) => {
+  // Create SVG path for segment
+  const createSegmentPath = (startAngle: number, endAngle: number) => {
+    const radius = 90;
+    const centerX = 100;
+    const centerY = 100;
+    
     const startAngleRad = (startAngle * Math.PI) / 180;
     const endAngleRad = (endAngle * Math.PI) / 180;
     
-    const x1 = 100 + radius * Math.cos(startAngleRad);
-    const y1 = 100 + radius * Math.sin(startAngleRad);
-    const x2 = 100 + radius * Math.cos(endAngleRad);
-    const y2 = 100 + radius * Math.sin(endAngleRad);
+    const x1 = centerX + radius * Math.cos(startAngleRad);
+    const y1 = centerY + radius * Math.sin(startAngleRad);
+    const x2 = centerX + radius * Math.cos(endAngleRad);
+    const y2 = centerY + radius * Math.sin(endAngleRad);
     
     const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
     
     return [
-      `M 100 100`,
+      `M ${centerX} ${centerY}`,
       `L ${x1} ${y1}`,
       `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
       'Z'
@@ -105,105 +111,73 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      {/* Reference Image */}
-      <div className="mb-4">
-        <img 
-          src="/lovable-uploads/b3f03c08-8343-4600-8bb8-c11b5543f234.png" 
-          alt="Colorful spinning wheel reference" 
-          className="w-32 h-32 rounded-full shadow-lg"
-        />
-        <p className="text-xs text-muted-foreground text-center mt-2">Reference Design</p>
-      </div>
-
+    <div className="flex flex-col items-center space-y-6">
       <div className="relative">
-        {/* Pointer */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-10">
-          <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[16px] border-transparent border-b-gray-800 drop-shadow-md"></div>
+        {/* Fixed pointer at top */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-20">
+          <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[24px] border-transparent border-b-red-500 drop-shadow-lg filter"></div>
         </div>
         
-        {/* Golden outer ring */}
-        <div className="w-[280px] h-[280px] rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 p-2 shadow-xl">
-          {/* Wheel */}
+        {/* Wheel container with golden border */}
+        <div className="relative w-[250px] h-[250px] rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 p-3 shadow-2xl">
+          {/* Inner wheel */}
           <div 
             ref={wheelRef}
-            className="w-full h-full rounded-full relative overflow-hidden shadow-inner bg-white"
+            className="w-full h-full rounded-full relative overflow-hidden bg-white shadow-inner"
             style={{
               transform: `rotate(${rotation}deg)`,
-              transition: isSpinning ? 'transform 4s cubic-bezier(0.23, 1, 0.32, 1)' : 'none'
+              transition: isSpinning ? 'transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none'
             }}
           >
             <svg className="w-full h-full" viewBox="0 0 200 200">
-              {/* Define gradients for better visual appeal */}
-              <defs>
-                <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#fbbf24" />
-                  <stop offset="100%" stopColor="#f59e0b" />
-                </radialGradient>
-                {segments.map((segment, index) => (
-                  <linearGradient key={`grad-${index}`} id={`gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor={segment.color} />
-                    <stop offset="100%" stopColor={segment.color} stopOpacity="0.8" />
-                  </linearGradient>
-                ))}
-              </defs>
-
-              {/* Render segments */}
+              {/* Segment backgrounds */}
               {segments.map((segment, index) => {
                 const pathData = createSegmentPath(segment.startAngle, segment.endAngle);
                 
-                // Calculate text position
-                const textRadius = 65;
-                const textAngle = segment.midAngle;
-                const textX = 100 + textRadius * Math.cos((textAngle * Math.PI) / 180);
-                const textY = 100 + textRadius * Math.sin((textAngle * Math.PI) / 180);
-                
-                // Calculate text rotation to always be readable
-                let textRotation = textAngle;
-                if (textAngle > 90 && textAngle < 270) {
-                  textRotation = textAngle + 180;
-                }
-                
                 return (
-                  <g key={index}>
-                    {/* Segment */}
+                  <g key={`segment-${index}`}>
                     <path
                       d={pathData}
-                      fill={`url(#gradient-${index})`}
+                      fill={segment.color}
                       stroke="#ffffff"
                       strokeWidth="2"
                       className="drop-shadow-sm"
                     />
-                    
-                    {/* Text */}
-                    <text
-                      x={textX}
-                      y={textY}
-                      fill="white"
-                      fontSize="10"
-                      fontWeight="bold"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      transform={`rotate(${textRotation}, ${textX}, ${textY})`}
-                      style={{
-                        textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
-                        filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.7))'
-                      }}
-                    >
-                      {segment.text}
-                    </text>
-                    
-                    {/* Segment border lines for better definition */}
-                    <line
-                      x1="100"
-                      y1="100"
-                      x2={100 + 95 * Math.cos((segment.startAngle * Math.PI) / 180)}
-                      y2={100 + 95 * Math.sin((segment.startAngle * Math.PI) / 180)}
-                      stroke="#fbbf24"
-                      strokeWidth="1"
-                      opacity="0.7"
-                    />
                   </g>
+                );
+              })}
+              
+              {/* Text labels */}
+              {segments.map((segment, index) => {
+                const textRadius = 60;
+                const textAngle = (segment.midAngle * Math.PI) / 180;
+                const textX = 100 + textRadius * Math.cos(textAngle);
+                const textY = 100 + textRadius * Math.sin(textAngle);
+                
+                // Calculate text rotation for readability
+                let textRotation = segment.midAngle;
+                if (segment.midAngle > 90 && segment.midAngle < 270) {
+                  textRotation = segment.midAngle + 180;
+                }
+                
+                return (
+                  <text
+                    key={`text-${index}`}
+                    x={textX}
+                    y={textY}
+                    fill="white"
+                    fontSize="11"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    transform={`rotate(${textRotation}, ${textX}, ${textY})`}
+                    style={{
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                      filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
+                    }}
+                  >
+                    {segment.text}
+                  </text>
                 );
               })}
               
@@ -211,12 +185,20 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
               <circle
                 cx="100"
                 cy="100"
-                r="12"
+                r="15"
                 fill="url(#centerGradient)"
                 stroke="#fbbf24"
                 strokeWidth="3"
                 className="drop-shadow-lg"
               />
+              
+              {/* Gradients */}
+              <defs>
+                <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fbbf24" />
+                  <stop offset="100%" stopColor="#f59e0b" />
+                </radialGradient>
+              </defs>
             </svg>
           </div>
         </div>
@@ -226,15 +208,26 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
         onClick={spin} 
         disabled={isSpinning}
         size="lg"
-        className="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none"
+        className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none disabled:hover:scale-100"
       >
-        {isSpinning ? 'Spinning...' : 'Spin the Wheel!'}
+        {isSpinning ? (
+          <span className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Spinning...
+          </span>
+        ) : (
+          'SPIN THE WHEEL!'
+        )}
       </Button>
       
       {result && !isSpinning && (
         <div className="text-center animate-fade-in">
-          <p className="text-lg font-bold text-primary">You won:</p>
-          <p className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">{result}</p>
+          <div className="text-6xl mb-2 animate-bounce">🎉</div>
+          <p className="text-lg font-bold text-gray-700 mb-2">Congratulations!</p>
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-6 py-3 rounded-full shadow-lg">
+            <p className="text-xl font-bold">{result}</p>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">Show this screen to claim your reward!</p>
         </div>
       )}
     </div>

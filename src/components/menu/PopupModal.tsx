@@ -3,19 +3,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { SpinWheel } from './SpinWheel';
 import { ExternalLink, Instagram, Facebook, MessageCircle, Youtube, Star, MapPin, Camera, X } from 'lucide-react';
-
 interface SocialMediaOption {
   platform: string;
   url: string;
   enabled: boolean;
 }
-
 interface ReviewOption {
   platform: string;
   url: string;
   enabled: boolean;
 }
-
 interface PopupSettings {
   enabled: boolean;
   type: 'review' | 'wheel' | 'social';
@@ -40,7 +37,6 @@ interface PopupSettings {
     }>;
   };
 }
-
 interface MenuTheme {
   mode: 'light' | 'dark';
   primaryColor: string;
@@ -52,46 +48,79 @@ interface MenuTheme {
   borderColor: string;
   headingColor?: string;
 }
-
 interface PopupModalProps {
   settings: PopupSettings;
   restaurantName: string;
   customTheme?: MenuTheme | null;
 }
-
-const socialPlatforms = [
-  { name: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F' },
-  { name: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2' },
-  { name: 'tiktok', label: 'TikTok', icon: MessageCircle, color: '#000000' },
-  { name: 'youtube', label: 'YouTube', icon: Youtube, color: '#FF0000' },
-];
-
-const reviewPlatforms = [
-  { name: 'google', label: 'Google Maps', icon: MapPin, color: '#4285F4' },
-  { name: 'tripadvisor', label: 'TripAdvisor', icon: Camera, color: '#00AF87' },
-  { name: 'yelp', label: 'Yelp', icon: Star, color: '#FF1A1A' },
-  { name: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2' },
-];
+const socialPlatforms = [{
+  name: 'instagram',
+  label: 'Instagram',
+  icon: Instagram,
+  color: '#E4405F'
+}, {
+  name: 'facebook',
+  label: 'Facebook',
+  icon: Facebook,
+  color: '#1877F2'
+}, {
+  name: 'tiktok',
+  label: 'TikTok',
+  icon: MessageCircle,
+  color: '#000000'
+}, {
+  name: 'youtube',
+  label: 'YouTube',
+  icon: Youtube,
+  color: '#FF0000'
+}];
+const reviewPlatforms = [{
+  name: 'google',
+  label: 'Google Maps',
+  icon: MapPin,
+  color: '#4285F4'
+}, {
+  name: 'tripadvisor',
+  label: 'TripAdvisor',
+  icon: Camera,
+  color: '#00AF87'
+}, {
+  name: 'yelp',
+  label: 'Yelp',
+  icon: Star,
+  color: '#FF1A1A'
+}, {
+  name: 'facebook',
+  label: 'Facebook',
+  icon: Facebook,
+  color: '#1877F2'
+}];
 
 // Preview wheel component that shows colors without text
-const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }> }> = ({ rewards }) => {
-  const normalizeRewards = (rewards: Array<{ color: string; chance: number }>) => {
+const PreviewWheel: React.FC<{
+  rewards: Array<{
+    color: string;
+    chance: number;
+  }>;
+}> = ({
+  rewards
+}) => {
+  const normalizeRewards = (rewards: Array<{
+    color: string;
+    chance: number;
+  }>) => {
     const totalChance = rewards.reduce((sum, reward) => sum + reward.chance, 0);
     if (totalChance === 0) return rewards;
-    
     return rewards.map(reward => ({
       ...reward,
-      chance: (reward.chance / totalChance) * 100
+      chance: reward.chance / totalChance * 100
     }));
   };
-
   const normalizedRewards = normalizeRewards(rewards);
-  
   const segments = normalizedRewards.map((reward, index) => {
-    const startAngle = index === 0 ? 0 : normalizedRewards.slice(0, index).reduce((sum, r) => sum + (r.chance / 100) * 360, 0);
-    const segmentAngle = (reward.chance / 100) * 360;
+    const startAngle = index === 0 ? 0 : normalizedRewards.slice(0, index).reduce((sum, r) => sum + r.chance / 100 * 360, 0);
+    const segmentAngle = reward.chance / 100 * 360;
     const endAngle = startAngle + segmentAngle;
-    
     return {
       ...reward,
       startAngle,
@@ -99,9 +128,7 @@ const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }>
       midAngle: startAngle + segmentAngle / 2
     };
   });
-
-  return (
-    <div className="flex flex-col items-center space-y-2">
+  return <div className="flex flex-col items-center space-y-2">
       <div className="relative">
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-10">
           <div className="w-0 h-0 border-l-2 border-r-2 border-b-4 border-transparent border-b-gray-800"></div>
@@ -110,48 +137,32 @@ const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }>
         <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-2 border-gray-300 relative overflow-hidden opacity-75 animate-pulse">
           <svg className="w-full h-full" viewBox="0 0 200 200">
             {segments.map((segment, index) => {
-              const startAngleRad = (segment.startAngle * Math.PI) / 180;
-              const endAngleRad = (segment.endAngle * Math.PI) / 180;
-              
-              const x1 = 100 + 90 * Math.cos(startAngleRad);
-              const y1 = 100 + 90 * Math.sin(startAngleRad);
-              const x2 = 100 + 90 * Math.cos(endAngleRad);
-              const y2 = 100 + 90 * Math.sin(endAngleRad);
-              
-              const largeArcFlag = segment.endAngle - segment.startAngle > 180 ? 1 : 0;
-              
-              const pathData = [
-                `M 100 100`,
-                `L ${x1} ${y1}`,
-                `A 90 90 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-                'Z'
-              ].join(' ');
-              
-              return (
-                <path
-                  key={index}
-                  d={pathData}
-                  fill={segment.color}
-                  stroke="white"
-                  strokeWidth="1"
-                />
-              );
-            })}
+            const startAngleRad = segment.startAngle * Math.PI / 180;
+            const endAngleRad = segment.endAngle * Math.PI / 180;
+            const x1 = 100 + 90 * Math.cos(startAngleRad);
+            const y1 = 100 + 90 * Math.sin(startAngleRad);
+            const x2 = 100 + 90 * Math.cos(endAngleRad);
+            const y2 = 100 + 90 * Math.sin(endAngleRad);
+            const largeArcFlag = segment.endAngle - segment.startAngle > 180 ? 1 : 0;
+            const pathData = [`M 100 100`, `L ${x1} ${y1}`, `A 90 90 0 ${largeArcFlag} 1 ${x2} ${y2}`, 'Z'].join(' ');
+            return <path key={index} d={pathData} fill={segment.color} stroke="white" strokeWidth="1" />;
+          })}
           </svg>
         </div>
       </div>
       <p className="text-xs text-gray-600 text-center">Spin to win prizes!</p>
-    </div>
-  );
+    </div>;
 };
-
-export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName, customTheme }) => {
+export const PopupModal: React.FC<PopupModalProps> = ({
+  settings,
+  restaurantName,
+  customTheme
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showWheel, setShowWheel] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
   const [wonReward, setWonReward] = useState<string>('');
   const [timeLeft, setTimeLeft] = useState(5);
-
   useEffect(() => {
     if (!settings.enabled) return;
 
@@ -159,7 +170,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
     const today = new Date().toDateString();
     const storageKey = `popup_shown_${restaurantName}_${today}`;
     const shownCount = parseInt(localStorage.getItem(storageKey) || '0');
-
     if (shownCount >= settings.dailyLimit) return;
 
     // Show popup after specified seconds
@@ -168,18 +178,14 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
       // Increment shown count
       localStorage.setItem(storageKey, (shownCount + 1).toString());
     }, settings.showAfterSeconds * 1000);
-
     return () => clearTimeout(timer);
   }, [settings.enabled, settings.showAfterSeconds, settings.dailyLimit, restaurantName]);
-
   const handleCtaClick = () => {
     if (settings.type === 'wheel' && settings.wheelSettings.enabled) {
       if (settings.wheelSettings.unlockType === 'free') {
         setShowWheel(true);
       } else if (settings.wheelSettings.unlockType === 'link' && settings.wheelSettings.unlockLink) {
-        const linkUrl = settings.wheelSettings.unlockLink.startsWith('http') 
-          ? settings.wheelSettings.unlockLink 
-          : `https://${settings.wheelSettings.unlockLink}`;
+        const linkUrl = settings.wheelSettings.unlockLink.startsWith('http') ? settings.wheelSettings.unlockLink : `https://${settings.wheelSettings.unlockLink}`;
         window.open(linkUrl, '_blank');
         setTimeLeft(5);
         const countdown = setInterval(() => {
@@ -194,24 +200,19 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
         }, 1000);
       }
     } else if (settings.link) {
-      const linkUrl = settings.link.startsWith('http') 
-        ? settings.link 
-        : `https://${settings.link}`;
+      const linkUrl = settings.link.startsWith('http') ? settings.link : `https://${settings.link}`;
       window.open(linkUrl, '_blank');
       setIsOpen(false);
     }
   };
-
   const handleSocialClick = (url: string) => {
     const linkUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(linkUrl, '_blank');
   };
-
   const handleReviewClick = (url: string) => {
     const linkUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(linkUrl, '_blank');
   };
-
   const handleWheelComplete = (result: string) => {
     setWonReward(result);
     setHasSpun(true);
@@ -222,9 +223,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
       setWonReward('');
     }, 5000);
   };
-
   if (!settings.enabled) return null;
-
   const enabledSocialMedia = settings.socialMedia?.filter(social => social.enabled && social.url) || [];
   const enabledReviewOptions = settings.reviewOptions?.filter(review => review.enabled && review.url) || [];
 
@@ -234,259 +233,148 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
     borderColor: '#e5e7eb',
     color: '#1f2937'
   };
-
   const headingStyles = {
     color: '#1f2937'
   };
-
   const mutedTextStyles = {
     color: '#6b7280'
   };
-
   const primaryButtonStyles = {
     backgroundColor: customTheme?.primaryColor || '#3b82f6',
     borderColor: customTheme?.primaryColor || '#3b82f6',
     color: '#ffffff'
   };
-
   const accentButtonStyles = {
     backgroundColor: customTheme?.accentColor || '#3b82f6',
     borderColor: customTheme?.accentColor || '#3b82f6',
     color: '#ffffff'
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent 
-        className="max-w-[95vw] w-full sm:max-w-md mx-auto p-0 gap-0 border-2 rounded-2xl shadow-2xl bg-white"
-        style={dialogStyles}
-      >
+  return <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent style={dialogStyles} className="max-w-[95vw] w-full sm:max-w-md mx-auto p-0 gap-0 border-2 shadow-2xl rounded-sm bg-slate-50">
         {/* Close button */}
-        <button
-          onClick={() => setIsOpen(false)}
-          className="absolute right-3 top-3 z-10 p-1.5 rounded-full transition-colors hover:bg-gray-100"
-          style={{ color: '#6b7280' }}
-        >
-          <X className="h-4 w-4" />
+        <button onClick={() => setIsOpen(false)} className="absolute right-3 top-3 z-10 p-1.5 rounded-full transition-colors hover:bg-gray-100" style={{
+        color: '#6b7280'
+      }}>
+          
         </button>
 
         {/* Header with gradient background */}
-        <div 
-          className="relative px-6 py-6 rounded-t-2xl"
-          style={{
-            background: customTheme?.primaryColor 
-              ? `linear-gradient(135deg, ${customTheme.primaryColor}, ${customTheme.accentColor})` 
-              : 'linear-gradient(135deg, #1f2937, #3b82f6)'
-          }}
-        >
-          <DialogHeader className="text-center">
-            <DialogTitle 
-              className="text-lg sm:text-xl font-bold text-white mb-2"
-            >
-              {settings.title}
-            </DialogTitle>
-          </DialogHeader>
-        </div>
+        
 
         {/* Content */}
         <div className="p-6 space-y-6 bg-white">
-          {!showWheel ? (
-            <>
-              <p 
-                className="text-sm text-center leading-relaxed"
-                style={mutedTextStyles}
-              >
+          {!showWheel ? <>
+              <p className="text-sm text-center leading-relaxed" style={mutedTextStyles}>
                 {settings.description}
               </p>
 
-              {settings.type === 'review' && enabledReviewOptions.length > 0 ? (
-                <div className="space-y-4">
+              {settings.type === 'review' && enabledReviewOptions.length > 0 ? <div className="space-y-4">
                   {/* 5 Yellow Stars */}
                   <div className="flex justify-center items-center space-x-1 mb-4">
-                    {[...Array(5)].map((_, index) => (
-                      <Star 
-                        key={index} 
-                        className="h-8 w-8 fill-yellow-400 text-yellow-400 animate-pulse" 
-                        style={{ animationDelay: `${index * 0.1}s` }}
-                      />
-                    ))}
+                    {[...Array(5)].map((_, index) => <Star key={index} className="h-8 w-8 fill-yellow-400 text-yellow-400 animate-pulse" style={{
+                animationDelay: `${index * 0.1}s`
+              }} />)}
                   </div>
                   
-                  <p 
-                    className="text-sm font-medium text-center"
-                    style={headingStyles}
-                  >
+                  <p className="text-sm font-medium text-center" style={headingStyles}>
                     Leave us a review!
                   </p>
                   
                   <div className="flex justify-center items-center space-x-6">
                     {enabledReviewOptions.map((review, index) => {
-                      const platform = reviewPlatforms.find(p => p.name === review.platform);
-                      const IconComponent = platform?.icon || Star;
-                      
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => handleReviewClick(review.url)}
-                          className="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 hover:scale-110 hover:shadow-lg animate-bounce"
-                          style={{ 
-                            backgroundColor: `${platform?.color}20`,
-                            borderColor: platform?.color,
-                            border: `2px solid ${platform?.color}`,
-                            animationDelay: `${index * 0.2}s`,
-                            animationDuration: '2s'
-                          }}
-                        >
-                          <IconComponent 
-                            className="h-8 w-8" 
-                            style={{ color: platform?.color }} 
-                          />
-                        </button>
-                      );
-                    })}
+                const platform = reviewPlatforms.find(p => p.name === review.platform);
+                const IconComponent = platform?.icon || Star;
+                return <button key={index} onClick={() => handleReviewClick(review.url)} className="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 hover:scale-110 hover:shadow-lg animate-bounce" style={{
+                  backgroundColor: `${platform?.color}20`,
+                  borderColor: platform?.color,
+                  border: `2px solid ${platform?.color}`,
+                  animationDelay: `${index * 0.2}s`,
+                  animationDuration: '2s'
+                }}>
+                          <IconComponent className="h-8 w-8" style={{
+                    color: platform?.color
+                  }} />
+                        </button>;
+              })}
                   </div>
-                </div>
-              ) : settings.type === 'social' && enabledSocialMedia.length > 0 ? (
-                <div className="space-y-4">
-                  <p 
-                    className="text-sm font-medium text-center"
-                    style={headingStyles}
-                  >
+                </div> : settings.type === 'social' && enabledSocialMedia.length > 0 ? <div className="space-y-4">
+                  <p className="text-sm font-medium text-center" style={headingStyles}>
                     Follow us on social media!
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {enabledSocialMedia.map((social, index) => {
-                      const platform = socialPlatforms.find(p => p.name === social.platform);
-                      const IconComponent = platform?.icon || Instagram;
-                      
-                      return (
-                        <Button
-                          key={index}
-                          onClick={() => handleSocialClick(social.url)}
-                          className="flex items-center justify-center gap-3 h-12 text-white font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg animate-pulse"
-                          style={{ 
-                            backgroundColor: platform?.color || '#6b7280',
-                            animationDelay: `${index * 0.2}s`,
-                            animationDuration: '2s'
-                          }}
-                        >
+                const platform = socialPlatforms.find(p => p.name === social.platform);
+                const IconComponent = platform?.icon || Instagram;
+                return <Button key={index} onClick={() => handleSocialClick(social.url)} className="flex items-center justify-center gap-3 h-12 text-white font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg animate-pulse" style={{
+                  backgroundColor: platform?.color || '#6b7280',
+                  animationDelay: `${index * 0.2}s`,
+                  animationDuration: '2s'
+                }}>
                           <IconComponent className="h-5 w-5 animate-bounce" />
                           <span className="text-sm">{platform?.label}</span>
-                        </Button>
-                      );
-                    })}
+                        </Button>;
+              })}
                   </div>
-                </div>
-              ) : settings.type === 'wheel' && settings.wheelSettings.enabled ? (
-                <div className="space-y-4">
+                </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-4">
                   <div className="flex justify-center">
-                    <PreviewWheel rewards={settings.wheelSettings.rewards.map(r => ({ color: r.color, chance: r.chance }))} />
+                    <PreviewWheel rewards={settings.wheelSettings.rewards.map(r => ({
+                color: r.color,
+                chance: r.chance
+              }))} />
                   </div>
                   
-                  <p 
-                    className="text-sm font-medium text-center"
-                    style={headingStyles}
-                  >
+                  <p className="text-sm font-medium text-center" style={headingStyles}>
                     {settings.wheelSettings.unlockText}
                   </p>
                   
-                  {settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5 ? (
-                    <div className="text-center space-y-3">
-                      <p 
-                        className="text-sm"
-                        style={mutedTextStyles}
-                      >
+                  {settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5 ? <div className="text-center space-y-3">
+                      <p className="text-sm" style={mutedTextStyles}>
                         Wheel unlocks in {timeLeft} seconds...
                       </p>
-                      <div 
-                        className="w-full rounded-full h-2 bg-gray-200"
-                      >
-                        <div 
-                          className="h-2 rounded-full transition-all duration-1000" 
-                          style={{ 
-                            width: `${((5 - timeLeft) / 5) * 100}%`,
-                            backgroundColor: customTheme?.accentColor || '#3b82f6'
-                          }}
-                        />
+                      <div className="w-full rounded-full h-2 bg-gray-200">
+                        <div className="h-2 rounded-full transition-all duration-1000" style={{
+                  width: `${(5 - timeLeft) / 5 * 100}%`,
+                  backgroundColor: customTheme?.accentColor || '#3b82f6'
+                }} />
                       </div>
-                    </div>
-                  ) : (
-                    <Button 
-                      onClick={handleCtaClick}
-                      className="w-full h-12 font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-pulse"
-                      disabled={settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5}
-                      style={accentButtonStyles}
-                    >
+                    </div> : <Button onClick={handleCtaClick} className="w-full h-12 font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-pulse" disabled={settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5} style={accentButtonStyles}>
                       {settings.wheelSettings.unlockButtonText}
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <Button 
-                  onClick={handleCtaClick}
-                  className="w-full h-12 flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white"
-                  style={primaryButtonStyles}
-                >
+                    </Button>}
+                </div> : <Button onClick={handleCtaClick} className="w-full h-12 flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white" style={primaryButtonStyles}>
                   <span>{settings.buttonText}</span>
                   {settings.link && <ExternalLink className="h-4 w-4" />}
-                </Button>
-              )}
-            </>
-          ) : (
-            <div className="text-center space-y-6 bg-white">
-              {!hasSpun ? (
-                <>
-                  <p 
-                    className="text-sm"
-                    style={mutedTextStyles}
-                  >
-                    {settings.wheelSettings.unlockType === 'free' 
-                      ? 'Spin the wheel for your reward!' 
-                      : 'Thanks for visiting the link! Spin to win your reward:'
-                    }
+                </Button>}
+            </> : <div className="text-center space-y-6 bg-white">
+              {!hasSpun ? <>
+                  <p className="text-sm" style={mutedTextStyles}>
+                    {settings.wheelSettings.unlockType === 'free' ? 'Spin the wheel for your reward!' : 'Thanks for visiting the link! Spin to win your reward:'}
                   </p>
                   <div className="flex justify-center">
-                    <SpinWheel 
-                      rewards={settings.wheelSettings.rewards}
-                      onComplete={handleWheelComplete}
-                    />
+                    <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} />
                   </div>
-                </>
-              ) : (
-                <div className="space-y-4">
+                </> : <div className="space-y-4">
                   <div className="text-5xl animate-bounce">🎉</div>
-                  <h3 
-                    className="text-xl font-bold"
-                    style={{ color: customTheme?.accentColor || '#3b82f6' }}
-                  >
+                  <h3 className="text-xl font-bold" style={{
+              color: customTheme?.accentColor || '#3b82f6'
+            }}>
                     Congratulations!
                   </h3>
-                  <div 
-                    className="p-4 rounded-xl border-2"
-                    style={{
-                      backgroundColor: customTheme?.accentColor ? `${customTheme.accentColor}20` : '#3b82f620',
-                      borderColor: customTheme?.accentColor || '#3b82f6'
-                    }}
-                  >
-                    <p 
-                      className="text-lg font-bold"
-                      style={{ color: customTheme?.accentColor || '#3b82f6' }}
-                    >
+                  <div className="p-4 rounded-xl border-2" style={{
+              backgroundColor: customTheme?.accentColor ? `${customTheme.accentColor}20` : '#3b82f620',
+              borderColor: customTheme?.accentColor || '#3b82f6'
+            }}>
+                    <p className="text-lg font-bold" style={{
+                color: customTheme?.accentColor || '#3b82f6'
+              }}>
                       {wonReward}
                     </p>
                   </div>
-                  <p 
-                    className="text-sm"
-                    style={mutedTextStyles}
-                  >
+                  <p className="text-sm" style={mutedTextStyles}>
                     Show this screen to claim your reward!
                   </p>
-                </div>
-              )}
-            </div>
-          )}
+                </div>}
+            </div>}
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };

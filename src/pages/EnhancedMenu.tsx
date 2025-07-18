@@ -494,13 +494,22 @@ const EnhancedMenu = () => {
     const symbol = symbols[currentCurrency] || currentCurrency;
     return `${convertedPrice.toFixed(2)} ${symbol}`;
   }, [currencySettings, currentCurrency]);
+  
   const getLocalizedText = useCallback((item: any, field: string) => {
     const languageField = `${field}_${currentLanguage}`;
     return item[languageField] || item[field] || '';
   }, [currentLanguage]);
+  
   const handleMenuItemClick = useCallback((item: MenuItem) => {
     setSelectedMenuItem(item);
   }, []);
+
+  // Get localized category name
+  const getLocalizedCategoryName = useCallback((categoryId: string) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    if (!category) return '';
+    return getLocalizedText(category, 'name');
+  }, [categories, getLocalizedText]);
 
   // Theme styles
   const themeStyles = useMemo(() => customTheme ? {
@@ -968,7 +977,7 @@ const EnhancedMenu = () => {
                       formatPrice={formatPrice} 
                       getLocalizedText={getLocalizedText} 
                       getMenuItemImageUrl={getMenuItemImageUrl} 
-                      categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} 
+                      categoryName={getLocalizedCategoryName(item.category_id)} 
                       index={index} 
                       onClick={handleMenuItemClick} 
                     />
@@ -1048,7 +1057,7 @@ const EnhancedMenu = () => {
           formatPrice={formatPrice} 
           getLocalizedText={getLocalizedText} 
           getMenuItemImageUrl={getMenuItemImageUrl} 
-          categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} 
+          categoryName={getLocalizedCategoryName(selectedMenuItem.category_id)} 
           customTheme={customTheme} 
         />
       )}

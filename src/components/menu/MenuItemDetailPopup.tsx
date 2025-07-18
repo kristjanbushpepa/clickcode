@@ -108,8 +108,7 @@ export const MenuItemDetailPopup = ({
           variant="ghost"
           size="sm"
           onClick={onClose}
-          className="absolute right-2 top-2 z-10 h-8 w-8 p-0 rounded-full"
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)', color: '#ffffff' }}
+          className="absolute right-2 top-2 z-10 h-8 w-8 p-0 rounded-full bg-black/50 hover:bg-black/70 text-white"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -135,13 +134,9 @@ export const MenuItemDetailPopup = ({
             )}
 
             {/* Price badge */}
-            <div className="absolute top-3 right-3">
+            <div className="absolute top-3 right-12">
               <Badge 
-                className="text-sm font-semibold backdrop-blur-sm"
-                style={{
-                  backgroundColor: customTheme?.accentColor || '#3b82f6',
-                  color: '#ffffff'
-                }}
+                className="text-sm font-semibold backdrop-blur-sm bg-white/90 text-gray-900"
               >
                 {formatPrice(displayPrice, item.currency)}
               </Badge>
@@ -182,7 +177,14 @@ export const MenuItemDetailPopup = ({
             {/* Category and timing info */}
             <div className="flex items-center gap-3 flex-wrap">
               {categoryName && (
-                <Badge variant="outline" className="text-xs">
+                <Badge 
+                  variant="outline" 
+                  className="text-xs px-2 py-1"
+                  style={{
+                    borderColor: customTheme?.borderColor,
+                    color: customTheme?.mutedTextColor
+                  }}
+                >
                   {categoryName}
                 </Badge>
               )}
@@ -215,22 +217,26 @@ export const MenuItemDetailPopup = ({
               <h4 className="text-sm font-medium mb-3" style={headingStyles}>
                 Choose Size:
               </h4>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {item.sizes!.map((size, index) => (
                   <Button
                     key={index}
                     variant={selectedSize?.name === size.name ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedSize(size)}
-                    className="text-xs h-auto py-2 px-3 flex flex-col items-center gap-1"
+                    className="h-auto py-3 px-4 flex justify-between items-center"
                     style={selectedSize?.name === size.name ? {
                       backgroundColor: customTheme?.accentColor || '#3b82f6',
                       borderColor: customTheme?.accentColor || '#3b82f6',
                       color: '#ffffff'
-                    } : {}}
+                    } : {
+                      borderColor: customTheme?.borderColor,
+                      backgroundColor: 'transparent',
+                      color: customTheme?.textColor
+                    }}
                   >
                     <span className="font-medium">{size.name}</span>
-                    <span className="text-xs opacity-80">
+                    <span className="font-bold text-base">
                       {formatPrice(size.price, item.currency)}
                     </span>
                   </Button>
@@ -247,7 +253,15 @@ export const MenuItemDetailPopup = ({
               </h4>
               <div className="flex flex-wrap gap-1">
                 {item.allergens.map((allergen, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
+                  <Badge 
+                    key={index} 
+                    variant="secondary" 
+                    className="text-xs"
+                    style={{
+                      backgroundColor: customTheme?.mutedTextColor + '20',
+                      color: customTheme?.mutedTextColor
+                    }}
+                  >
                     {allergen}
                   </Badge>
                 ))}
@@ -256,18 +270,16 @@ export const MenuItemDetailPopup = ({
           )}
 
           {/* Final Price Display */}
-          {(hasSizes || !itemImageUrl) && (
-            <div className="pt-3 border-t" style={{ borderColor: customTheme?.borderColor }}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm" style={mutedTextStyles}>
-                  {hasSizes && selectedSize ? `${selectedSize.name} - ` : ''}Total:
-                </span>
-                <span className="text-xl font-bold" style={priceStyles}>
-                  {formatPrice(displayPrice, item.currency)}
-                </span>
-              </div>
+          <div className="pt-3 border-t" style={{ borderColor: customTheme?.borderColor }}>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium" style={mutedTextStyles}>
+                {hasSizes && selectedSize ? `${selectedSize.name} - ` : ''}Total:
+              </span>
+              <span className="text-2xl font-bold" style={priceStyles}>
+                {formatPrice(displayPrice, item.currency)}
+              </span>
             </div>
-          )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

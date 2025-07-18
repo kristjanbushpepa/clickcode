@@ -6,7 +6,7 @@ import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
 import { MenuFooter } from '@/components/menu/MenuFooter';
-import { MenuSkeleton } from '@/components/menu/MenuSkeleton';
+import { MenuLoadingSkeleton } from '@/components/menu/MenuSkeleton';
 import { ThemedPopupModal } from '@/components/menu/ThemedPopupModal';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { useToast } from '@/hooks/use-toast';
@@ -45,7 +45,6 @@ interface MenuOption {
 
 interface Profile {
   id: string;
-  username?: string;
   full_name?: string;
   avatar_url?: string;
   website?: string;
@@ -105,11 +104,12 @@ export default function EnhancedMenu() {
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-	const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [customization, setCustomization] = useState<Customization | null>(null);
   const [currency, setCurrency] = useState<string>('USD');
   const [language, setLanguage] = useState<string>('en');
   const [popupSettings, setPopupSettings] = useState<PopupSettings | null>(null);
+  const [restaurantSupabase, setRestaurantSupabase] = useState<any>(null);
   const { toast } = useToast();
 
   const themeStyles = customization?.theme ? JSON.parse(customization.theme) : {};
@@ -159,13 +159,14 @@ export default function EnhancedMenu() {
           
           setRestaurant(mappedRestaurant);
           
-          const restaurantSupabase = getRestaurantSupabase(
+          const restaurantSupabaseClient = getRestaurantSupabase(
             restaurantData.supabase_url,
             restaurantData.supabase_anon_key
           );
+          setRestaurantSupabase(restaurantSupabaseClient);
 
           try {
-            const { data: profileData, error: profileError } = await restaurantSupabase
+            const { data: profileData, error: profileError } = await restaurantSupabaseClient
               .from('profiles')
               .select('*')
               .eq('id', restaurantData.owner_full_name) // Using owner_full_name as fallback
@@ -181,7 +182,7 @@ export default function EnhancedMenu() {
           }
 
           try {
-            const { data: customizationData, error: customizationError } = await restaurantSupabase
+            const { data: customizationData, error: customizationError } = await restaurantSupabaseClient
               .from('customizations')
               .select('*')
               .eq('restaurant_id', restaurantData.id)
@@ -198,7 +199,7 @@ export default function EnhancedMenu() {
 
           // Fetch popup settings
           try {
-            const { data: popupData, error: popupError } = await restaurantSupabase
+            const { data: popupData, error: popupError } = await restaurantSupabaseClient
               .from('popup_settings')
               .select('*')
               .order('created_at', { ascending: false })
@@ -254,7 +255,7 @@ export default function EnhancedMenu() {
           }
 
           try {
-            const { data: menuData, error: menuError } = await restaurantSupabase
+            const { data: menuData, error: menuError } = await restaurantSupabaseClient
               .from('menu_items')
               .select('*')
               .order('created_at', { ascending: true });
@@ -289,7 +290,7 @@ export default function EnhancedMenu() {
     fetchRestaurantData();
   }, [slug, toast]);
 
-	useEffect(() => {
+  useEffect(() => {
     const params = new URLSearchParams(location.search);
     const currencyParam = params.get('currency');
     const languageParam = params.get('lang');
@@ -307,7 +308,7 @@ export default function EnhancedMenu() {
     return menu.filter(item => item.category === category);
   };
 
-  if (loading) return <MenuSkeleton />;
+  if (loading) return <MenuLoadingSkeleton />;
   if (error) return <div className="text-center text-red-500 p-4">{error}</div>;
   if (!restaurant) return <div className="text-center p-4">Restaurant not found</div>;
 
@@ -323,8 +324,20 @@ export default function EnhancedMenu() {
             <p className="text-sm text-muted-foreground">{restaurant.city}</p>
           </div>
           <div className="flex items-center space-x-4">
-            <CurrencySwitch />
-            <LanguageSwitch />
+            {restaurantSupabase && (
+              <>
+                <CurrencySwitch 
+                  restaurantSupabase={restaurantSupabase}
+                  currentCurrency={currency}
+                  onCurrencyChange={setCurrency}
+                />
+                <LanguageSwitch 
+                  restaurantSupabase={restaurantSupabase}
+                  currentLanguage={language}
+                  onLanguageChange={setLanguage}
+                />
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -364,7 +377,6 @@ export default function EnhancedMenu() {
           }} 
           profile={{
             name: profile.full_name || restaurant.owner_full_name,
-            username: profile.username || '',
             full_name: profile.full_name || restaurant.owner_full_name,
             avatar_url: profile.avatar_url || '',
             website: profile.website || '',

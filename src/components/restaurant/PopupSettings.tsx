@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Instagram, Facebook, MessageCircle, Youtube } from 'lucide-react';
+import { Plus, Trash2, Instagram, Facebook, MessageCircle, Youtube, Star, MapPin, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { useDashboardForm } from '@/contexts/DashboardFormContext';
@@ -25,9 +25,15 @@ interface SocialMediaOption {
   enabled: boolean;
 }
 
+interface ReviewOption {
+  platform: string;
+  url: string;
+  enabled: boolean;
+}
+
 interface PopupSettingsData {
   enabled: boolean;
-  type: 'cta' | 'wheel' | 'social';
+  type: 'review' | 'wheel' | 'social';
   title: string;
   description: string;
   link: string;
@@ -35,6 +41,7 @@ interface PopupSettingsData {
   showAfterSeconds: number;
   dailyLimit: number;
   socialMedia: SocialMediaOption[];
+  reviewOptions: ReviewOption[];
   wheelSettings: {
     enabled: boolean;
     unlockType: 'free' | 'link' | 'review';
@@ -57,19 +64,25 @@ const socialPlatforms = [
   { name: 'youtube', label: 'YouTube', icon: Youtube, color: '#FF0000' },
 ];
 
+const reviewPlatforms = [
+  { name: 'google', label: 'Google Maps', icon: MapPin, color: '#4285F4' },
+  { name: 'tripadvisor', label: 'TripAdvisor', icon: Camera, color: '#00AF87' },
+  { name: 'yelp', label: 'Yelp', icon: Star, color: '#FF1A1A' },
+  { name: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2' },
+];
+
 export const PopupSettings: React.FC = () => {
   const { formData, setFormData, getFormData } = useDashboardForm();
   const formKey = 'popupSettings';
   
   const [settings, setSettings] = useState<PopupSettingsData>(() => {
-    // Initialize with saved form data or defaults
     return getFormData(formKey) || {
       enabled: false,
-      type: 'cta',
-      title: 'Follow us on Instagram!',
-      description: 'Get the latest updates and special offers',
+      type: 'review',
+      title: 'Leave us a Review!',
+      description: 'Help us improve by sharing your experience',
       link: '',
-      buttonText: 'Follow Now',
+      buttonText: 'Leave Review',
       showAfterSeconds: 3,
       dailyLimit: 1,
       socialMedia: [
@@ -77,6 +90,12 @@ export const PopupSettings: React.FC = () => {
         { platform: 'facebook', url: '', enabled: false },
         { platform: 'tiktok', url: '', enabled: false },
         { platform: 'youtube', url: '', enabled: false },
+      ],
+      reviewOptions: [
+        { platform: 'google', url: '', enabled: true },
+        { platform: 'tripadvisor', url: '', enabled: false },
+        { platform: 'yelp', url: '', enabled: false },
+        { platform: 'facebook', url: '', enabled: false },
       ],
       wheelSettings: {
         enabled: false,
@@ -99,7 +118,6 @@ export const PopupSettings: React.FC = () => {
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Save form data whenever settings change
   useEffect(() => {
     setFormData(formKey, settings);
   }, [settings, setFormData, formKey]);
@@ -126,7 +144,6 @@ export const PopupSettings: React.FC = () => {
         const firstRecord = data[0];
         setSettingsId(firstRecord.id);
         
-        // Clean up duplicates if they exist
         if (data.length > 1) {
           console.log(`Found ${data.length} popup settings records, cleaning up duplicates...`);
           const idsToDelete = data.slice(1).map(record => record.id);
@@ -139,14 +156,13 @@ export const PopupSettings: React.FC = () => {
           }
         }
         
-        // Update settings with loaded data
         const loadedSettings = {
           enabled: Boolean(firstRecord.enabled),
-          type: firstRecord.type || 'cta',
-          title: firstRecord.title || 'Follow us on Instagram!',
+          type: firstRecord.type || 'review',
+          title: firstRecord.title || 'Leave us a Review!',
           description: firstRecord.description || '',
           link: firstRecord.link || '',
-          buttonText: firstRecord.button_text || 'Follow Now',
+          buttonText: firstRecord.button_text || 'Leave Review',
           showAfterSeconds: Number(firstRecord.show_after_seconds) || 3,
           dailyLimit: Number(firstRecord.daily_limit) || 1,
           socialMedia: Array.isArray(firstRecord.social_media) ? firstRecord.social_media : [
@@ -154,6 +170,12 @@ export const PopupSettings: React.FC = () => {
             { platform: 'facebook', url: '', enabled: false },
             { platform: 'tiktok', url: '', enabled: false },
             { platform: 'youtube', url: '', enabled: false },
+          ],
+          reviewOptions: Array.isArray(firstRecord.review_options) ? firstRecord.review_options : [
+            { platform: 'google', url: '', enabled: true },
+            { platform: 'tripadvisor', url: '', enabled: false },
+            { platform: 'yelp', url: '', enabled: false },
+            { platform: 'facebook', url: '', enabled: false },
           ],
           wheelSettings: {
             enabled: Boolean(firstRecord.wheel_enabled),
@@ -188,7 +210,6 @@ export const PopupSettings: React.FC = () => {
     try {
       const restaurantSupabase = getRestaurantSupabase();
       
-      // Prepare data with simplified column names and proper null handling
       const dbData = {
         enabled: settings.enabled,
         type: settings.type,
@@ -199,6 +220,7 @@ export const PopupSettings: React.FC = () => {
         show_after_seconds: settings.showAfterSeconds,
         daily_limit: settings.dailyLimit,
         social_media: settings.socialMedia,
+        review_options: settings.reviewOptions,
         wheel_enabled: settings.wheelSettings.enabled,
         wheel_unlock_type: settings.wheelSettings.unlockType,
         wheel_unlock_text: settings.wheelSettings.unlockText || null,
@@ -254,6 +276,15 @@ export const PopupSettings: React.FC = () => {
       ...prev,
       socialMedia: prev.socialMedia.map((social, i) => 
         i === index ? { ...social, [field]: value } : social
+      )
+    }));
+  };
+
+  const updateReviewOption = (index: number, field: keyof ReviewOption, value: string | boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      reviewOptions: prev.reviewOptions.map((review, i) => 
+        i === index ? { ...review, [field]: value } : review
       )
     }));
   };
@@ -371,13 +402,13 @@ export const PopupSettings: React.FC = () => {
                 <Label htmlFor="popup-type">Popup Type</Label>
                 <Select
                   value={settings.type}
-                  onValueChange={(type: 'cta' | 'wheel' | 'social') => setSettings(prev => ({ ...prev, type }))}
+                  onValueChange={(type: 'review' | 'wheel' | 'social') => setSettings(prev => ({ ...prev, type }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cta">Call to Action</SelectItem>
+                    <SelectItem value="review">Leave Review</SelectItem>
                     <SelectItem value="social">Social Media</SelectItem>
                     <SelectItem value="wheel">Spin Wheel</SelectItem>
                   </SelectContent>
@@ -452,26 +483,52 @@ export const PopupSettings: React.FC = () => {
                 </>
               )}
 
-              {settings.type === 'cta' && (
+              {settings.type === 'review' && (
                 <>
-                  <div className="space-y-2">
-                    <Label htmlFor="popup-link">Link (optional)</Label>
-                    <Input
-                      id="popup-link"
-                      type="url"
-                      value={settings.link}
-                      onChange={(e) => setSettings(prev => ({ ...prev, link: e.target.value }))}
-                      placeholder="https://instagram.com/yourrestaurant"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="popup-button">Button Text</Label>
-                    <Input
-                      id="popup-button"
-                      value={settings.buttonText}
-                      onChange={(e) => setSettings(prev => ({ ...prev, buttonText: e.target.value }))}
-                    />
+                  <Separator />
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Review Platform Links</h3>
+                    {settings.reviewOptions.map((review, index) => {
+                      const platform = reviewPlatforms.find(p => p.name === review.platform);
+                      const IconComponent = platform?.icon || Star;
+                      
+                      return (
+                        <Card key={index}>
+                          <CardContent className="pt-4">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-3 min-w-[140px]">
+                                <div 
+                                  className="p-2 rounded-md flex items-center justify-center"
+                                  style={{ backgroundColor: platform?.color + '20' }}
+                                >
+                                  <IconComponent 
+                                    className="h-5 w-5" 
+                                    style={{ color: platform?.color }} 
+                                  />
+                                </div>
+                                <Label className="font-medium text-sm">{platform?.label}</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Switch
+                                  checked={review.enabled}
+                                  onCheckedChange={(enabled) => updateReviewOption(index, 'enabled', enabled)}
+                                />
+                                <Label className="text-sm">Enabled</Label>
+                              </div>
+                              <div className="flex-1">
+                                <Input
+                                  value={review.url}
+                                  onChange={(e) => updateReviewOption(index, 'url', e.target.value)}
+                                  placeholder={`Review link for ${platform?.label}`}
+                                  disabled={!review.enabled}
+                                  className="text-sm"
+                                />
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 </>
               )}

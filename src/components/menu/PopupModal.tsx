@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { SpinWheel } from './SpinWheel';
-import { ExternalLink, Instagram, Facebook, MessageCircle, Youtube } from 'lucide-react';
+import { ExternalLink, Instagram, Facebook, MessageCircle, Youtube, Star, MapPin, Camera } from 'lucide-react';
 
 interface SocialMediaOption {
   platform: string;
@@ -11,9 +11,15 @@ interface SocialMediaOption {
   enabled: boolean;
 }
 
+interface ReviewOption {
+  platform: string;
+  url: string;
+  enabled: boolean;
+}
+
 interface PopupSettings {
   enabled: boolean;
-  type: 'cta' | 'wheel' | 'social';
+  type: 'review' | 'wheel' | 'social';
   title: string;
   description: string;
   link: string;
@@ -21,6 +27,7 @@ interface PopupSettings {
   showAfterSeconds: number;
   dailyLimit: number;
   socialMedia?: SocialMediaOption[];
+  reviewOptions?: ReviewOption[];
   wheelSettings: {
     enabled: boolean;
     unlockType: 'free' | 'link';
@@ -47,6 +54,13 @@ const socialPlatforms = [
   { name: 'youtube', label: 'YouTube', icon: Youtube, color: '#FF0000' },
 ];
 
+const reviewPlatforms = [
+  { name: 'google', label: 'Google Maps', icon: MapPin, color: '#4285F4' },
+  { name: 'tripadvisor', label: 'TripAdvisor', icon: Camera, color: '#00AF87' },
+  { name: 'yelp', label: 'Yelp', icon: Star, color: '#FF1A1A' },
+  { name: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2' },
+];
+
 // Preview wheel component that shows colors without text
 const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }> }> = ({ rewards }) => {
   // Normalize rewards to ensure they add up to 100%
@@ -62,7 +76,6 @@ const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }>
 
   const normalizedRewards = normalizeRewards(rewards);
   
-  // Calculate segments
   const segments = normalizedRewards.map((reward, index) => {
     const startAngle = index === 0 ? 0 : normalizedRewards.slice(0, index).reduce((sum, r) => sum + (r.chance / 100) * 360, 0);
     const segmentAngle = (reward.chance / 100) * 360;
@@ -79,12 +92,10 @@ const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }>
   return (
     <div className="flex flex-col items-center space-y-2">
       <div className="relative">
-        {/* Pointer */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-10">
           <div className="w-0 h-0 border-l-2 border-r-2 border-b-4 border-transparent border-b-foreground"></div>
         </div>
         
-        {/* Wheel */}
         <div className="w-32 h-32 rounded-full border-2 border-border relative overflow-hidden opacity-75">
           <svg className="w-full h-full" viewBox="0 0 200 200">
             {segments.map((segment, index) => {
@@ -155,12 +166,10 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
       if (settings.wheelSettings.unlockType === 'free') {
         setShowWheel(true);
       } else if (settings.wheelSettings.unlockType === 'link' && settings.wheelSettings.unlockLink) {
-        // Use the actual link URL without any prefix
         const linkUrl = settings.wheelSettings.unlockLink.startsWith('http') 
           ? settings.wheelSettings.unlockLink 
           : `https://${settings.wheelSettings.unlockLink}`;
         window.open(linkUrl, '_blank');
-        // Start 5-second countdown for wheel unlock
         setTimeLeft(5);
         const countdown = setInterval(() => {
           setTimeLeft(prev => {
@@ -187,10 +196,14 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
     window.open(linkUrl, '_blank');
   };
 
+  const handleReviewClick = (url: string) => {
+    const linkUrl = url.startsWith('http') ? url : `https://${url}`;
+    window.open(linkUrl, '_blank');
+  };
+
   const handleWheelComplete = (result: string) => {
     setWonReward(result);
     setHasSpun(true);
-    // Show result for 5 seconds then close
     setTimeout(() => {
       setIsOpen(false);
       setShowWheel(false);
@@ -202,6 +215,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
   if (!settings.enabled) return null;
 
   const enabledSocialMedia = settings.socialMedia?.filter(social => social.enabled && social.url) || [];
+  const enabledReviewOptions = settings.reviewOptions?.filter(review => review.enabled && review.url) || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -233,10 +247,35 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                         <Button
                           key={index}
                           onClick={() => handleSocialClick(social.url)}
-                          className="flex items-center gap-2 h-12"
+                          className="flex items-center gap-2 h-12 text-white hover:opacity-90"
                           style={{ 
-                            backgroundColor: platform?.color,
-                            color: 'white'
+                            backgroundColor: platform?.color || '#6b7280'
+                          }}
+                        >
+                          <IconComponent className="h-5 w-5" />
+                          {platform?.label}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : settings.type === 'review' && enabledReviewOptions.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-center">
+                    Leave us a review!
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {enabledReviewOptions.map((review, index) => {
+                      const platform = reviewPlatforms.find(p => p.name === review.platform);
+                      const IconComponent = platform?.icon || Star;
+                      
+                      return (
+                        <Button
+                          key={index}
+                          onClick={() => handleReviewClick(review.url)}
+                          className="flex items-center gap-2 h-12 text-white hover:opacity-90"
+                          style={{ 
+                            backgroundColor: platform?.color || '#6b7280'
                           }}
                         >
                           <IconComponent className="h-5 w-5" />
@@ -248,7 +287,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                 </div>
               ) : settings.type === 'wheel' && settings.wheelSettings.enabled ? (
                 <div className="space-y-3">
-                  {/* Show preview wheel */}
                   <div className="flex justify-center">
                     <PreviewWheel rewards={settings.wheelSettings.rewards.map(r => ({ color: r.color, chance: r.chance }))} />
                   </div>

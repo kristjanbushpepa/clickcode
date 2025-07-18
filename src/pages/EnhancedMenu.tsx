@@ -18,6 +18,7 @@ import { PopupModal } from '@/components/menu/PopupModal';
 import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import MenuItemPopup from '@/components/menu/MenuItemPopup';
+import { MenuItemDetailPopup } from '@/components/menu/MenuItemDetailPopup';
 
 interface SocialMediaOption {
   platform: string;
@@ -775,6 +776,20 @@ const EnhancedMenu = () => {
             </div>
           </div>
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
+          
+          {/* Menu Item Detail Popup */}
+          {selectedMenuItem && (
+            <MenuItemDetailPopup 
+              item={selectedMenuItem} 
+              isOpen={!!selectedMenuItem} 
+              onClose={() => setSelectedMenuItem(null)} 
+              formatPrice={formatPrice} 
+              getLocalizedText={getLocalizedText} 
+              getMenuItemImageUrl={getMenuItemImageUrl} 
+              categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} 
+              customTheme={customTheme} 
+            />
+          )}
         </div>;
     }
     
@@ -826,6 +841,20 @@ const EnhancedMenu = () => {
             </div>
           </div>
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
+          
+          {/* Menu Item Detail Popup */}
+          {selectedMenuItem && (
+            <MenuItemDetailPopup 
+              item={selectedMenuItem} 
+              isOpen={!!selectedMenuItem} 
+              onClose={() => setSelectedMenuItem(null)} 
+              formatPrice={formatPrice} 
+              getLocalizedText={getLocalizedText} 
+              getMenuItemImageUrl={getMenuItemImageUrl} 
+              categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} 
+              customTheme={customTheme} 
+            />
+          )}
         </div>;
     }
     
@@ -1010,9 +1039,9 @@ const EnhancedMenu = () => {
         />
       )}
 
-      {/* Menu Item Detail Popup */}
+      {/* Menu Item Detail Popup - Updated */}
       {selectedMenuItem && (
-        <MenuItemPopup 
+        <MenuItemDetailPopup 
           item={selectedMenuItem} 
           isOpen={!!selectedMenuItem} 
           onClose={() => setSelectedMenuItem(null)} 

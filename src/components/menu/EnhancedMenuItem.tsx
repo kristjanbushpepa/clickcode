@@ -105,50 +105,6 @@ const LazyImage = ({ src, alt, className, onLoad }: {
   );
 };
 
-const SizeSelector = ({ 
-  sizes, 
-  selectedSize, 
-  onSizeSelect, 
-  formatPrice, 
-  currency, 
-  customTheme 
-}: {
-  sizes: MenuItemSize[];
-  selectedSize?: MenuItemSize;
-  onSizeSelect: (size: MenuItemSize) => void;
-  formatPrice: (price: number, currency: string) => string;
-  currency: string;
-  customTheme?: MenuTheme;
-}) => {
-  const accentColor = customTheme?.accentColor || '#3b82f6';
-  
-  return (
-    <div className="space-y-2">
-      <p className="text-xs font-medium" style={{ color: customTheme?.textColor }}>
-        Zgjidh madhësinë:
-      </p>
-      <div className="flex flex-wrap gap-1">
-        {sizes.map((size, index) => (
-          <Button
-            key={index}
-            size="sm"
-            variant={selectedSize?.name === size.name ? "default" : "outline"}
-            onClick={() => onSizeSelect(size)}
-            className="text-xs"
-            style={selectedSize?.name === size.name ? {
-              backgroundColor: accentColor,
-              borderColor: accentColor,
-              color: '#ffffff'
-            } : {}}
-          >
-            {size.name} - {formatPrice(size.price, currency)}
-          </Button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 export const EnhancedMenuItem = ({
   item,
   layoutStyle,
@@ -161,10 +117,6 @@ export const EnhancedMenuItem = ({
   index = 0,
   onClick
 }: EnhancedMenuItemProps) => {
-  const [selectedSize, setSelectedSize] = useState<MenuItemSize | undefined>(
-    item.sizes && item.sizes.length > 0 ? item.sizes[0] : undefined
-  );
-  
   const itemImageUrl = getMenuItemImageUrl(item);
   
   const cardStyles = customTheme ? {
@@ -190,11 +142,11 @@ export const EnhancedMenuItem = ({
   } : {};
 
   const handleClick = () => {
-    onClick?.(item, selectedSize);
+    onClick?.(item);
   };
 
   const hasSizes = item.sizes && item.sizes.length > 0;
-  const displayPrice = selectedSize ? selectedSize.price : item.price;
+  const displayPrice = hasSizes ? item.sizes[0].price : item.price;
 
   const renderItemContent = () => {
     switch (layoutStyle) {
@@ -225,7 +177,7 @@ export const EnhancedMenuItem = ({
                         color: priceStyles.color 
                       }}
                     >
-                      {formatPrice(displayPrice, item.currency)}
+                      {hasSizes ? `from ${formatPrice(displayPrice, item.currency)}` : formatPrice(displayPrice, item.currency)}
                     </Badge>
                   </div>
                   {getLocalizedText(item, 'description') && (
@@ -234,21 +186,12 @@ export const EnhancedMenuItem = ({
                     </p>
                   )}
                   
-                  {/* Size selector for compact layout */}
-                  {hasSizes && (
-                    <div className="mb-2">
-                      <SizeSelector
-                        sizes={item.sizes!}
-                        selectedSize={selectedSize}
-                        onSizeSelect={setSelectedSize}
-                        formatPrice={formatPrice}
-                        currency={item.currency}
-                        customTheme={customTheme}
-                      />
-                    </div>
-                  )}
-                  
                   <div className="flex items-center gap-2 flex-wrap">
+                    {hasSizes && (
+                      <Badge variant="outline" className="text-xs">
+                        {item.sizes!.length} sizes
+                      </Badge>
+                    )}
                     {!isCompact && categoryName && (
                       <Badge variant="outline" className="text-xs">
                         {categoryName}
@@ -312,20 +255,6 @@ export const EnhancedMenuItem = ({
                 </p>
               )}
               
-              {/* Size selector for card grid layout */}
-              {hasSizes && (
-                <div className="mb-3">
-                  <SizeSelector
-                    sizes={item.sizes!}
-                    selectedSize={selectedSize}
-                    onSizeSelect={setSelectedSize}
-                    formatPrice={formatPrice}
-                    currency={item.currency}
-                    customTheme={customTheme}
-                  />
-                </div>
-              )}
-              
               <div className="flex items-center justify-between">
                 <Badge 
                   variant="secondary" 
@@ -335,14 +264,21 @@ export const EnhancedMenuItem = ({
                     color: priceStyles.color 
                   }}
                 >
-                  {formatPrice(displayPrice, item.currency)}
+                  {hasSizes ? `from ${formatPrice(displayPrice, item.currency)}` : formatPrice(displayPrice, item.currency)}
                 </Badge>
-                {item.preparation_time && (
-                  <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
-                    <Clock className="h-3 w-3" />
-                    {item.preparation_time}min
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  {hasSizes && (
+                    <Badge variant="outline" className="text-xs">
+                      {item.sizes!.length} sizes
+                    </Badge>
+                  )}
+                  {item.preparation_time && (
+                    <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                      <Clock className="h-3 w-3" />
+                      {item.preparation_time}min
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -389,7 +325,7 @@ export const EnhancedMenuItem = ({
                     color: priceStyles.color 
                   }}
                 >
-                  {formatPrice(displayPrice, item.currency)}
+                  {hasSizes ? `from ${formatPrice(displayPrice, item.currency)}` : formatPrice(displayPrice, item.currency)}
                 </Badge>
               </div>
               {getLocalizedText(item, 'description') && (
@@ -397,22 +333,12 @@ export const EnhancedMenuItem = ({
                   {getLocalizedText(item, 'description')}
                 </p>
               )}
-              
-              {/* Size selector for image focus layout */}
-              {hasSizes && (
-                <div className="mb-3">
-                  <SizeSelector
-                    sizes={item.sizes!}
-                    selectedSize={selectedSize}
-                    onSizeSelect={setSelectedSize}
-                    formatPrice={formatPrice}
-                    currency={item.currency}
-                    customTheme={customTheme}
-                  />
-                </div>
-              )}
-              
               <div className="flex items-center gap-2 flex-wrap">
+                {hasSizes && (
+                  <Badge variant="outline" className="text-xs">
+                    {item.sizes!.length} sizes
+                  </Badge>
+                )}
                 {!isCompact && categoryName && (
                   <Badge variant="outline" className="text-xs">
                     {categoryName}
@@ -445,7 +371,7 @@ export const EnhancedMenuItem = ({
                 )}
               </div>
               <span className="text-sm font-medium flex-shrink-0" style={priceStyles}>
-                {formatPrice(displayPrice, item.currency)}
+                {hasSizes ? `from ${formatPrice(displayPrice, item.currency)}` : formatPrice(displayPrice, item.currency)}
               </span>
             </div>
             {getLocalizedText(item, 'description') && (
@@ -453,22 +379,12 @@ export const EnhancedMenuItem = ({
                 {getLocalizedText(item, 'description')}
               </p>
             )}
-            
-            {/* Size selector for minimal layout */}
-            {hasSizes && (
-              <div className="mb-2">
-                <SizeSelector
-                  sizes={item.sizes!}
-                  selectedSize={selectedSize}
-                  onSizeSelect={setSelectedSize}
-                  formatPrice={formatPrice}
-                  currency={item.currency}
-                  customTheme={customTheme}
-                />
-              </div>
-            )}
-            
             <div className="flex items-center gap-2 flex-wrap">
+              {hasSizes && (
+                <Badge variant="outline" className="text-xs">
+                  {item.sizes!.length} sizes
+                </Badge>
+              )}
               {item.preparation_time && (
                 <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
                   <Clock className="h-3 w-3" />
@@ -529,7 +445,7 @@ export const EnhancedMenuItem = ({
                         color: priceStyles.color 
                       }}
                     >
-                      {formatPrice(displayPrice, item.currency)}
+                      {hasSizes ? `from ${formatPrice(displayPrice, item.currency)}` : formatPrice(displayPrice, item.currency)}
                     </Badge>
                   </div>
                 </div>

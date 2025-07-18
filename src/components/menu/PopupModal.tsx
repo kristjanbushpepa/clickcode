@@ -302,7 +302,51 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                 {settings.description}
               </p>
 
-              {settings.type === 'social' && enabledSocialMedia.length > 0 ? (
+              {settings.type === 'review' && enabledReviewOptions.length > 0 ? (
+                <div className="space-y-4">
+                  {/* 5 Yellow Stars */}
+                  <div className="flex justify-center items-center space-x-1 mb-4">
+                    {[...Array(5)].map((_, index) => (
+                      <Star 
+                        key={index} 
+                        className="h-8 w-8 fill-yellow-400 text-yellow-400" 
+                      />
+                    ))}
+                  </div>
+                  
+                  <p 
+                    className="text-sm font-medium text-center"
+                    style={headingStyles}
+                  >
+                    Leave us a review!
+                  </p>
+                  
+                  <div className="flex justify-center items-center space-x-6">
+                    {enabledReviewOptions.map((review, index) => {
+                      const platform = reviewPlatforms.find(p => p.name === review.platform);
+                      const IconComponent = platform?.icon || Star;
+                      
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleReviewClick(review.url)}
+                          className="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 hover:scale-110 hover:shadow-lg"
+                          style={{ 
+                            backgroundColor: `${platform?.color}20`,
+                            borderColor: platform?.color,
+                            border: `2px solid ${platform?.color}`
+                          }}
+                        >
+                          <IconComponent 
+                            className="h-8 w-8" 
+                            style={{ color: platform?.color }} 
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : settings.type === 'social' && enabledSocialMedia.length > 0 ? (
                 <div className="space-y-4">
                   <p 
                     className="text-sm font-medium text-center"
@@ -319,35 +363,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                         <Button
                           key={index}
                           onClick={() => handleSocialClick(social.url)}
-                          className="flex items-center justify-center gap-3 h-12 text-white font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                          style={{ 
-                            backgroundColor: platform?.color || '#6b7280'
-                          }}
-                        >
-                          <IconComponent className="h-5 w-5" />
-                          <span className="text-sm">{platform?.label}</span>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : settings.type === 'review' && enabledReviewOptions.length > 0 ? (
-                <div className="space-y-4">
-                  <p 
-                    className="text-sm font-medium text-center"
-                    style={headingStyles}
-                  >
-                    Leave us a review!
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {enabledReviewOptions.map((review, index) => {
-                      const platform = reviewPlatforms.find(p => p.name === review.platform);
-                      const IconComponent = platform?.icon || Star;
-                      
-                      return (
-                        <Button
-                          key={index}
-                          onClick={() => handleReviewClick(review.url)}
                           className="flex items-center justify-center gap-3 h-12 text-white font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
                           style={{ 
                             backgroundColor: platform?.color || '#6b7280'

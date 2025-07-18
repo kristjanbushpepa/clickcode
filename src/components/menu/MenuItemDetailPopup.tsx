@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -228,14 +227,13 @@ export const MenuItemDetailPopup = ({
                       onClick={() => setSelectedSize(size)}
                       className={`h-auto py-3 px-4 flex justify-between items-center transition-all duration-200 ${
                         isSelected 
-                          ? 'ring-2 ring-offset-2 shadow-md' 
+                          ? 'ring-2 ring-blue-500/50 ring-offset-2 shadow-md' 
                           : 'hover:shadow-sm'
                       }`}
                       style={isSelected ? {
                         backgroundColor: customTheme?.accentColor || '#3b82f6',
                         borderColor: customTheme?.accentColor || '#3b82f6',
-                        color: '#ffffff',
-                        ringColor: customTheme?.accentColor + '50' || '#3b82f650'
+                        color: '#ffffff'
                       } : {
                         borderColor: customTheme?.borderColor || '#e5e7eb',
                         backgroundColor: customTheme?.cardBackground || 'transparent',

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { SpinWheel } from './SpinWheel';
-import { ExternalLink, X } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 interface PopupSettings {
   enabled: boolean;
@@ -102,25 +102,17 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>{settings.title}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="h-6 w-6 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <DialogTitle>
+            {settings.title}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {!showWheel ? (
             <>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {settings.description}
               </p>
 
@@ -178,12 +170,12 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                 </>
               ) : (
                 <div className="space-y-3">
-                  <div className="text-6xl">🎉</div>
+                  <div className="text-4xl">🎉</div>
                   <p className="text-lg font-semibold text-primary">
                     Congratulations!
                   </p>
-                  <div className="bg-primary/10 p-4 rounded-lg">
-                    <p className="text-xl font-bold text-primary">
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <p className="text-lg font-bold text-primary">
                       {wonReward}
                     </p>
                   </div>

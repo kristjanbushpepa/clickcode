@@ -32,7 +32,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
 
   const normalizedRewards = normalizeRewards(rewards);
   
-  // Calculate segments
+  // Calculate segments with proper angles
   const segments = normalizedRewards.map((reward, index) => {
     const prevSegments = normalizedRewards.slice(0, index);
     const startAngle = prevSegments.reduce((sum, r) => sum + (r.chance / 100) * 360, 0);
@@ -67,13 +67,12 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
       }
     }
     
-    // Calculate rotation - we want the pointer at top (12 o'clock) to point to selected segment
+    // Calculate rotation - we want the pointer at top to point to selected segment
     const segment = segments.find(s => s.text === selectedReward.text);
     if (!segment) return;
     
-    // Calculate target angle - pointer points to middle of segment
-    // We subtract from 360 because we want to rotate the wheel so the segment aligns with top pointer
-    const targetAngle = 360 - segment.midAngle + 90; // +90 to align with top pointer
+    // Calculate target angle so the segment aligns with the top pointer
+    const targetAngle = 360 - segment.midAngle;
     const spins = 5 + Math.random() * 3; // 5-8 full rotations
     const finalRotation = rotation + spins * 360 + targetAngle;
     
@@ -87,13 +86,13 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
   };
 
   // Create SVG path for segment
-  const createSegmentPath = (startAngle: number, endAngle: number) => {
-    const radius = 90;
+  const createSegmentPath = (startAngle: number, endAngle: number, radius: number = 90) => {
     const centerX = 100;
     const centerY = 100;
     
-    const startAngleRad = (startAngle * Math.PI) / 180;
-    const endAngleRad = (endAngle * Math.PI) / 180;
+    // Convert angles to radians and adjust for SVG coordinate system (0° at top)
+    const startAngleRad = ((startAngle - 90) * Math.PI) / 180;
+    const endAngleRad = ((endAngle - 90) * Math.PI) / 180;
     
     const x1 = centerX + radius * Math.cos(startAngleRad);
     const y1 = centerY + radius * Math.sin(startAngleRad);
@@ -115,7 +114,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
       <div className="relative">
         {/* Fixed pointer at top */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-20">
-          <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[24px] border-transparent border-b-red-500 drop-shadow-lg filter"></div>
+          <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[24px] border-transparent border-b-red-500 drop-shadow-lg"></div>
         </div>
         
         {/* Wheel container with golden border */}
@@ -130,32 +129,40 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
             }}
           >
             <svg className="w-full h-full" viewBox="0 0 200 200">
+              <defs>
+                <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fbbf24" />
+                  <stop offset="100%" stopColor="#f59e0b" />
+                </radialGradient>
+              </defs>
+              
               {/* Segment backgrounds */}
               {segments.map((segment, index) => {
                 const pathData = createSegmentPath(segment.startAngle, segment.endAngle);
                 
                 return (
-                  <g key={`segment-${index}`}>
-                    <path
-                      d={pathData}
-                      fill={segment.color}
-                      stroke="#ffffff"
-                      strokeWidth="2"
-                      className="drop-shadow-sm"
-                    />
-                  </g>
+                  <path
+                    key={`segment-${index}`}
+                    d={pathData}
+                    fill={segment.color}
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                    className="drop-shadow-sm"
+                  />
                 );
               })}
               
               {/* Text labels */}
               {segments.map((segment, index) => {
                 const textRadius = 60;
-                const textAngle = (segment.midAngle * Math.PI) / 180;
-                const textX = 100 + textRadius * Math.cos(textAngle);
-                const textY = 100 + textRadius * Math.sin(textAngle);
+                // Convert angle to radians and adjust for SVG coordinate system
+                const textAngleRad = ((segment.midAngle - 90) * Math.PI) / 180;
+                const textX = 100 + textRadius * Math.cos(textAngleRad);
+                const textY = 100 + textRadius * Math.sin(textAngleRad);
                 
                 // Calculate text rotation for readability
                 let textRotation = segment.midAngle;
+                // Flip text if it would be upside down
                 if (segment.midAngle > 90 && segment.midAngle < 270) {
                   textRotation = segment.midAngle + 180;
                 }
@@ -166,13 +173,13 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
                     x={textX}
                     y={textY}
                     fill="white"
-                    fontSize="11"
+                    fontSize="10"
                     fontWeight="bold"
                     textAnchor="middle"
                     dominantBaseline="middle"
                     transform={`rotate(${textRotation}, ${textX}, ${textY})`}
                     style={{
-                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
                       filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
                     }}
                   >
@@ -191,14 +198,6 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
                 strokeWidth="3"
                 className="drop-shadow-lg"
               />
-              
-              {/* Gradients */}
-              <defs>
-                <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#fbbf24" />
-                  <stop offset="100%" stopColor="#f59e0b" />
-                </radialGradient>
-              </defs>
             </svg>
           </div>
         </div>
@@ -208,7 +207,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
         onClick={spin} 
         disabled={isSpinning}
         size="lg"
-        className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none disabled:hover:scale-100"
+        className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none"
       >
         {isSpinning ? (
           <span className="flex items-center gap-2">

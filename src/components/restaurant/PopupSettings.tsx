@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Instagram, Facebook, MessageCircle, Youtube } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { useDashboardForm } from '@/contexts/DashboardFormContext';
@@ -19,15 +19,22 @@ interface Reward {
   color: string;
 }
 
+interface SocialMediaOption {
+  platform: string;
+  url: string;
+  enabled: boolean;
+}
+
 interface PopupSettingsData {
   enabled: boolean;
-  type: 'cta' | 'wheel';
+  type: 'cta' | 'wheel' | 'social';
   title: string;
   description: string;
   link: string;
   buttonText: string;
   showAfterSeconds: number;
   dailyLimit: number;
+  socialMedia: SocialMediaOption[];
   wheelSettings: {
     enabled: boolean;
     unlockType: 'free' | 'link' | 'review';
@@ -41,6 +48,13 @@ interface PopupSettingsData {
 const defaultColors = [
   '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#6b7280', 
   '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316'
+];
+
+const socialPlatforms = [
+  { name: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F' },
+  { name: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2' },
+  { name: 'tiktok', label: 'TikTok', icon: MessageCircle, color: '#000000' },
+  { name: 'youtube', label: 'YouTube', icon: Youtube, color: '#FF0000' },
 ];
 
 export const PopupSettings: React.FC = () => {
@@ -58,6 +72,12 @@ export const PopupSettings: React.FC = () => {
       buttonText: 'Follow Now',
       showAfterSeconds: 3,
       dailyLimit: 1,
+      socialMedia: [
+        { platform: 'instagram', url: '', enabled: true },
+        { platform: 'facebook', url: '', enabled: false },
+        { platform: 'tiktok', url: '', enabled: false },
+        { platform: 'youtube', url: '', enabled: false },
+      ],
       wheelSettings: {
         enabled: false,
         unlockType: 'review',
@@ -129,6 +149,12 @@ export const PopupSettings: React.FC = () => {
           buttonText: firstRecord.button_text || 'Follow Now',
           showAfterSeconds: Number(firstRecord.show_after_seconds) || 3,
           dailyLimit: Number(firstRecord.daily_limit) || 1,
+          socialMedia: Array.isArray(firstRecord.social_media) ? firstRecord.social_media : [
+            { platform: 'instagram', url: '', enabled: true },
+            { platform: 'facebook', url: '', enabled: false },
+            { platform: 'tiktok', url: '', enabled: false },
+            { platform: 'youtube', url: '', enabled: false },
+          ],
           wheelSettings: {
             enabled: Boolean(firstRecord.wheel_enabled),
             unlockType: firstRecord.wheel_unlock_type || 'review',
@@ -172,6 +198,7 @@ export const PopupSettings: React.FC = () => {
         button_text: settings.buttonText,
         show_after_seconds: settings.showAfterSeconds,
         daily_limit: settings.dailyLimit,
+        social_media: settings.socialMedia,
         wheel_enabled: settings.wheelSettings.enabled,
         wheel_unlock_type: settings.wheelSettings.unlockType,
         wheel_unlock_text: settings.wheelSettings.unlockText || null,
@@ -220,6 +247,15 @@ export const PopupSettings: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateSocialMedia = (index: number, field: keyof SocialMediaOption, value: string | boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      socialMedia: prev.socialMedia.map((social, i) => 
+        i === index ? { ...social, [field]: value } : social
+      )
+    }));
   };
 
   const addReward = () => {
@@ -335,13 +371,14 @@ export const PopupSettings: React.FC = () => {
                 <Label htmlFor="popup-type">Popup Type</Label>
                 <Select
                   value={settings.type}
-                  onValueChange={(type: 'cta' | 'wheel') => setSettings(prev => ({ ...prev, type }))}
+                  onValueChange={(type: 'cta' | 'wheel' | 'social') => setSettings(prev => ({ ...prev, type }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cta">Call to Action</SelectItem>
+                    <SelectItem value="social">Social Media</SelectItem>
                     <SelectItem value="wheel">Spin Wheel</SelectItem>
                   </SelectContent>
                 </Select>
@@ -364,6 +401,50 @@ export const PopupSettings: React.FC = () => {
                   onChange={(e) => setSettings(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
+
+              {settings.type === 'social' && (
+                <>
+                  <Separator />
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Social Media Links</h3>
+                    {settings.socialMedia.map((social, index) => {
+                      const platform = socialPlatforms.find(p => p.name === social.platform);
+                      const IconComponent = platform?.icon || Instagram;
+                      
+                      return (
+                        <Card key={index}>
+                          <CardContent className="pt-4">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-2">
+                                <IconComponent 
+                                  className="h-5 w-5" 
+                                  style={{ color: platform?.color }} 
+                                />
+                                <Label className="font-medium">{platform?.label}</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Switch
+                                  checked={social.enabled}
+                                  onCheckedChange={(enabled) => updateSocialMedia(index, 'enabled', enabled)}
+                                />
+                                <Label>Enabled</Label>
+                              </div>
+                              <div className="flex-1">
+                                <Input
+                                  value={social.url}
+                                  onChange={(e) => updateSocialMedia(index, 'url', e.target.value)}
+                                  placeholder={`https://${social.platform}.com/yourrestaurant`}
+                                  disabled={!social.enabled}
+                                />
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
 
               {settings.type === 'cta' && (
                 <>

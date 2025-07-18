@@ -3,17 +3,24 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { SpinWheel } from './SpinWheel';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Instagram, Facebook, MessageCircle, Youtube } from 'lucide-react';
+
+interface SocialMediaOption {
+  platform: string;
+  url: string;
+  enabled: boolean;
+}
 
 interface PopupSettings {
   enabled: boolean;
-  type: 'cta' | 'wheel';
+  type: 'cta' | 'wheel' | 'social';
   title: string;
   description: string;
   link: string;
   buttonText: string;
   showAfterSeconds: number;
   dailyLimit: number;
+  socialMedia?: SocialMediaOption[];
   wheelSettings: {
     enabled: boolean;
     unlockType: 'free' | 'link';
@@ -32,6 +39,13 @@ interface PopupModalProps {
   settings: PopupSettings;
   restaurantName: string;
 }
+
+const socialPlatforms = [
+  { name: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F' },
+  { name: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2' },
+  { name: 'tiktok', label: 'TikTok', icon: MessageCircle, color: '#000000' },
+  { name: 'youtube', label: 'YouTube', icon: Youtube, color: '#FF0000' },
+];
 
 // Preview wheel component that shows colors without text
 const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }> }> = ({ rewards }) => {
@@ -168,6 +182,11 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
     }
   };
 
+  const handleSocialClick = (url: string) => {
+    const linkUrl = url.startsWith('http') ? url : `https://${url}`;
+    window.open(linkUrl, '_blank');
+  };
+
   const handleWheelComplete = (result: string) => {
     setWonReward(result);
     setHasSpun(true);
@@ -181,6 +200,8 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
   };
 
   if (!settings.enabled) return null;
+
+  const enabledSocialMedia = settings.socialMedia?.filter(social => social.enabled && social.url) || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -198,7 +219,34 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                 {settings.description}
               </p>
 
-              {settings.type === 'wheel' && settings.wheelSettings.enabled ? (
+              {settings.type === 'social' && enabledSocialMedia.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-center">
+                    Follow us on social media!
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {enabledSocialMedia.map((social, index) => {
+                      const platform = socialPlatforms.find(p => p.name === social.platform);
+                      const IconComponent = platform?.icon || Instagram;
+                      
+                      return (
+                        <Button
+                          key={index}
+                          onClick={() => handleSocialClick(social.url)}
+                          className="flex items-center gap-2 h-12"
+                          style={{ 
+                            backgroundColor: platform?.color,
+                            color: 'white'
+                          }}
+                        >
+                          <IconComponent className="h-5 w-5" />
+                          {platform?.label}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : settings.type === 'wheel' && settings.wheelSettings.enabled ? (
                 <div className="space-y-3">
                   {/* Show preview wheel */}
                   <div className="flex justify-center">

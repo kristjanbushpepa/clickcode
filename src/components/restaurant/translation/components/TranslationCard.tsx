@@ -40,9 +40,41 @@ export function TranslationCard({
 
   const currentName = currentTranslations[`name_${selectedLanguage}`] ?? (item[nameField] as string) ?? '';
   const currentDesc = currentTranslations[`description_${selectedLanguage}`] ?? (item[descField] as string) ?? '';
-  const currentSizes = item[sizesField] as any[] || [];
+  
+  // Parse sizes from translations or get existing localized sizes
+  let currentSizes: any[] = [];
+  try {
+    if (currentTranslations[`sizes_${selectedLanguage}`]) {
+      currentSizes = typeof currentTranslations[`sizes_${selectedLanguage}`] === 'string' 
+        ? JSON.parse(currentTranslations[`sizes_${selectedLanguage}`])
+        : currentTranslations[`sizes_${selectedLanguage}`];
+    } else {
+      currentSizes = (item[sizesField] as any[]) || [];
+    }
+  } catch (error) {
+    console.error('Error parsing sizes:', error);
+    currentSizes = [];
+  }
 
   const hasUnsavedChanges = Object.keys(currentTranslations).length > 0;
+
+  const handleSizeChange = (index: number, name: string) => {
+    const updatedSizes = [...currentSizes];
+    if (!updatedSizes[index]) {
+      // If size doesn't exist, create it with price from original sizes
+      const originalSize = item.sizes?.[index];
+      updatedSizes[index] = {
+        name: name,
+        price: originalSize?.price || 0
+      };
+    } else {
+      updatedSizes[index] = {
+        ...updatedSizes[index],
+        name: name
+      };
+    }
+    onTranslationChange(item.id, `sizes_${selectedLanguage}`, JSON.stringify(updatedSizes));
+  };
 
   return (
     <Card>
@@ -112,28 +144,24 @@ export function TranslationCard({
         {item.type === 'menu_item' && item.sizes && item.sizes.length > 0 && (
           <div className="space-y-2">
             <Label>Madhësitë në {languageData?.name}</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {item.sizes.map((size, index) => {
+            <div className="grid grid-cols-1 gap-3">
+              {item.sizes.map((originalSize, index) => {
                 const translatedSize = currentSizes[index];
                 return (
-                  <div key={index} className="space-y-1">
+                  <div key={index} className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Origjinali: {size.name}</span>
-                      <span>{size.price} ALL</span>
+                      <span>Origjinali: <strong>{originalSize.name}</strong></span>
+                      <span>{originalSize.price} ALL</span>
                     </div>
                     <Input
                       value={translatedSize?.name || ''}
-                      onChange={(e) => {
-                        const updatedSizes = [...currentSizes];
-                        updatedSizes[index] = {
-                          name: e.target.value,
-                          price: size.price
-                        };
-                        onTranslationChange(item.id, `sizes_${selectedLanguage}`, JSON.stringify(updatedSizes));
-                      }}
-                      placeholder={`Përktheni "${size.name}"`}
-                      className="text-xs"
+                      onChange={(e) => handleSizeChange(index, e.target.value)}
+                      placeholder={`Përktheni "${originalSize.name}" në ${languageData?.name}`}
+                      className="text-sm"
                     />
+                    <div className="text-xs text-muted-foreground">
+                      Çmimi: {originalSize.price} ALL
+                    </div>
                   </div>
                 );
               })}

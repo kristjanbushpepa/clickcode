@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -30,8 +31,18 @@ interface MenuItem {
   category_id: string;
   name: string;
   name_sq?: string;
+  name_en?: string;
+  name_it?: string;
+  name_de?: string;
+  name_fr?: string;
+  name_zh?: string;
   description?: string;
   description_sq?: string;
+  description_en?: string;
+  description_it?: string;
+  description_de?: string;
+  description_fr?: string;
+  description_zh?: string;
   price: number;
   currency: string;
   image_url?: string;
@@ -42,6 +53,12 @@ interface MenuItem {
   preparation_time?: number;
   display_order: number;
   sizes?: MenuItemSize[];
+  sizes_sq?: MenuItemSize[];
+  sizes_en?: MenuItemSize[];
+  sizes_it?: MenuItemSize[];
+  sizes_de?: MenuItemSize[];
+  sizes_fr?: MenuItemSize[];
+  sizes_zh?: MenuItemSize[];
 }
 
 interface MenuItemDetailPopupProps {
@@ -53,6 +70,7 @@ interface MenuItemDetailPopupProps {
   getMenuItemImageUrl: (item: MenuItem) => string | null;
   categoryName?: string;
   customTheme?: MenuTheme;
+  currentLanguage?: string;
 }
 
 export const MenuItemDetailPopup = ({
@@ -63,12 +81,28 @@ export const MenuItemDetailPopup = ({
   getLocalizedText,
   getMenuItemImageUrl,
   categoryName,
-  customTheme
+  customTheme,
+  currentLanguage = 'sq'
 }: MenuItemDetailPopupProps) => {
   if (!item) return null;
 
   const itemImageUrl = getMenuItemImageUrl(item);
-  const hasSizes = item.sizes && item.sizes.length > 0;
+  
+  // Get localized sizes based on current language
+  const getLocalizedSizes = (): MenuItemSize[] => {
+    const sizesField = `sizes_${currentLanguage}` as keyof MenuItem;
+    const localizedSizes = item[sizesField] as MenuItemSize[];
+    
+    // If localized sizes exist, use them; otherwise fall back to default sizes
+    if (localizedSizes && localizedSizes.length > 0) {
+      return localizedSizes;
+    }
+    
+    return item.sizes || [];
+  };
+
+  const localizedSizes = getLocalizedSizes();
+  const hasSizes = localizedSizes && localizedSizes.length > 0;
 
   const contentStyles = customTheme ? {
     backgroundColor: customTheme.cardBackground,
@@ -212,7 +246,7 @@ export const MenuItemDetailPopup = ({
                 Available Sizes:
               </h4>
               <div className="grid grid-cols-1 gap-2">
-                {item.sizes!.map((size, index) => (
+                {localizedSizes.map((size, index) => (
                   <div
                     key={index}
                     className="flex justify-between items-center py-2 px-3 border rounded-lg"

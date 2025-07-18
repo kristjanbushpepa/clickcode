@@ -33,6 +33,82 @@ interface PopupModalProps {
   restaurantName: string;
 }
 
+// Preview wheel component that shows colors without text
+const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }> }> = ({ rewards }) => {
+  // Normalize rewards to ensure they add up to 100%
+  const normalizeRewards = (rewards: Array<{ color: string; chance: number }>) => {
+    const totalChance = rewards.reduce((sum, reward) => sum + reward.chance, 0);
+    if (totalChance === 0) return rewards;
+    
+    return rewards.map(reward => ({
+      ...reward,
+      chance: (reward.chance / totalChance) * 100
+    }));
+  };
+
+  const normalizedRewards = normalizeRewards(rewards);
+  
+  // Calculate segments
+  const segments = normalizedRewards.map((reward, index) => {
+    const startAngle = index === 0 ? 0 : normalizedRewards.slice(0, index).reduce((sum, r) => sum + (r.chance / 100) * 360, 0);
+    const segmentAngle = (reward.chance / 100) * 360;
+    const endAngle = startAngle + segmentAngle;
+    
+    return {
+      ...reward,
+      startAngle,
+      endAngle,
+      midAngle: startAngle + segmentAngle / 2
+    };
+  });
+
+  return (
+    <div className="flex flex-col items-center space-y-2">
+      <div className="relative">
+        {/* Pointer */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-10">
+          <div className="w-0 h-0 border-l-2 border-r-2 border-b-4 border-transparent border-b-foreground"></div>
+        </div>
+        
+        {/* Wheel */}
+        <div className="w-32 h-32 rounded-full border-2 border-border relative overflow-hidden opacity-75">
+          <svg className="w-full h-full" viewBox="0 0 200 200">
+            {segments.map((segment, index) => {
+              const startAngleRad = (segment.startAngle * Math.PI) / 180;
+              const endAngleRad = (segment.endAngle * Math.PI) / 180;
+              
+              const x1 = 100 + 90 * Math.cos(startAngleRad);
+              const y1 = 100 + 90 * Math.sin(startAngleRad);
+              const x2 = 100 + 90 * Math.cos(endAngleRad);
+              const y2 = 100 + 90 * Math.sin(endAngleRad);
+              
+              const largeArcFlag = segment.endAngle - segment.startAngle > 180 ? 1 : 0;
+              
+              const pathData = [
+                `M 100 100`,
+                `L ${x1} ${y1}`,
+                `A 90 90 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                'Z'
+              ].join(' ');
+              
+              return (
+                <path
+                  key={index}
+                  d={pathData}
+                  fill={segment.color}
+                  stroke="white"
+                  strokeWidth="1"
+                />
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground text-center">Spin to win prizes!</p>
+    </div>
+  );
+};
+
 export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showWheel, setShowWheel] = useState(false);
@@ -65,8 +141,11 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
       if (settings.wheelSettings.unlockType === 'free') {
         setShowWheel(true);
       } else if (settings.wheelSettings.unlockType === 'link' && settings.wheelSettings.unlockLink) {
-        // Open the actual link provided, not just any subdomain
-        window.open(settings.wheelSettings.unlockLink, '_blank');
+        // Use the actual link URL without any prefix
+        const linkUrl = settings.wheelSettings.unlockLink.startsWith('http') 
+          ? settings.wheelSettings.unlockLink 
+          : `https://${settings.wheelSettings.unlockLink}`;
+        window.open(linkUrl, '_blank');
         // Start 5-second countdown for wheel unlock
         setTimeLeft(5);
         const countdown = setInterval(() => {
@@ -81,7 +160,10 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
         }, 1000);
       }
     } else if (settings.link) {
-      window.open(settings.link, '_blank');
+      const linkUrl = settings.link.startsWith('http') 
+        ? settings.link 
+        : `https://${settings.link}`;
+      window.open(linkUrl, '_blank');
       setIsOpen(false);
     }
   };
@@ -118,7 +200,12 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
 
               {settings.type === 'wheel' && settings.wheelSettings.enabled ? (
                 <div className="space-y-3">
-                  <p className="text-sm font-medium">
+                  {/* Show preview wheel */}
+                  <div className="flex justify-center">
+                    <PreviewWheel rewards={settings.wheelSettings.rewards.map(r => ({ color: r.color, chance: r.chance }))} />
+                  </div>
+                  
+                  <p className="text-sm font-medium text-center">
                     {settings.wheelSettings.unlockText}
                   </p>
                   {settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5 ? (

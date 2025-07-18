@@ -778,6 +778,57 @@ const EnhancedMenu = () => {
         </div>;
     }
     
+    // Categories layout - show search results when searching
+    if (searchTerm) {
+      return <div className="viewport-fill smooth-scroll" style={themeStyles}>
+          {/* Viewport background fill */}
+          <div 
+            className="fixed inset-0 -z-10" 
+            style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
+          />
+          
+          <MenuHeader />
+          {SearchBar}
+          <div className="px-3 py-3">
+            <div className="max-w-sm mx-auto">
+              <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
+                Search Results ({filteredMenuItems.length} found)
+              </h3>
+              {filteredMenuItems.length === 0 ? (
+                <div className="text-center py-8 fade-in">
+                  <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
+                  <p className="text-sm" style={mutedTextStyles}>
+                    No items found matching your search.
+                  </p>
+                  <Button variant="outline" onClick={clearSearch} className="mt-3">
+                    Clear search
+                  </Button>
+                </div>
+              ) : (
+                <div className={layoutStyle === 'card-grid' ? 'grid grid-cols-2 gap-3' : 'space-y-3'}>
+                  {filteredMenuItems.map((item, index) => (
+                    <EnhancedMenuItem 
+                      key={item.id} 
+                      item={item} 
+                      layoutStyle={layoutStyle} 
+                      customTheme={customTheme} 
+                      formatPrice={formatPrice} 
+                      getLocalizedText={getLocalizedText} 
+                      getMenuItemImageUrl={getMenuItemImageUrl} 
+                      categoryName={categories.find(cat => cat.id === item.category_id)?.name_sq || categories.find(cat => cat.id === item.category_id)?.name} 
+                      isCompact={true} 
+                      index={index} 
+                      onClick={handleMenuItemClick} 
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
+        </div>;
+    }
+    
     return <div className="viewport-fill smooth-scroll" style={themeStyles}>
         {/* Viewport background fill */}
         <div 
@@ -799,11 +850,6 @@ const EnhancedMenu = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categories.map((category, index) => {
                   const categoryItems = getFilteredItemsByCategory(category.id);
-                  
-                  // Hide categories with no matching items when searching
-                  if (searchTerm && categoryItems.length === 0) {
-                    return null;
-                  }
                   
                   return (
                     <div 

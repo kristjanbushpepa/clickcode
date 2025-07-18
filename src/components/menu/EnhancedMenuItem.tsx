@@ -189,11 +189,6 @@ export const EnhancedMenuItem = ({
                   )}
                   
                   <div className="flex items-center gap-2 flex-wrap">
-                    {!isCompact && categoryName && (
-                      <Badge variant="outline" className="text-xs">
-                        {categoryName}
-                      </Badge>
-                    )}
                     {item.preparation_time && (
                       <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
                         <Clock className="h-3 w-3" />
@@ -328,11 +323,6 @@ export const EnhancedMenuItem = ({
                 </p>
               )}
               <div className="flex items-center gap-2 flex-wrap">
-                {!isCompact && categoryName && (
-                  <Badge variant="outline" className="text-xs">
-                    {categoryName}
-                  </Badge>
-                )}
                 {item.preparation_time && (
                   <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
                     <Clock className="h-3 w-3" />
@@ -375,11 +365,6 @@ export const EnhancedMenuItem = ({
                   {item.preparation_time}min
                 </div>
               )}
-              {!isCompact && categoryName && (
-                <Badge variant="outline" className="text-xs">
-                  {categoryName}
-                </Badge>
-              )}
             </div>
           </div>
         );
@@ -414,11 +399,6 @@ export const EnhancedMenuItem = ({
                           <Clock className="h-3 w-3" />
                           {item.preparation_time}min
                         </div>
-                      )}
-                      {!isCompact && categoryName && (
-                        <Badge variant="outline" className="text-xs">
-                          {categoryName}
-                        </Badge>
                       )}
                     </div>
                     <Badge 

@@ -415,19 +415,24 @@ export const PopupSettings: React.FC = () => {
                         <Card key={index}>
                           <CardContent className="pt-4">
                             <div className="flex items-center space-x-4">
-                              <div className="flex items-center space-x-2">
-                                <IconComponent 
-                                  className="h-5 w-5" 
-                                  style={{ color: platform?.color }} 
-                                />
-                                <Label className="font-medium">{platform?.label}</Label>
+                              <div className="flex items-center space-x-3 min-w-[140px]">
+                                <div 
+                                  className="p-2 rounded-md flex items-center justify-center"
+                                  style={{ backgroundColor: platform?.color + '20' }}
+                                >
+                                  <IconComponent 
+                                    className="h-5 w-5" 
+                                    style={{ color: platform?.color }} 
+                                  />
+                                </div>
+                                <Label className="font-medium text-sm">{platform?.label}</Label>
                               </div>
                               <div className="flex items-center space-x-2">
                                 <Switch
                                   checked={social.enabled}
                                   onCheckedChange={(enabled) => updateSocialMedia(index, 'enabled', enabled)}
                                 />
-                                <Label>Enabled</Label>
+                                <Label className="text-sm">Enabled</Label>
                               </div>
                               <div className="flex-1">
                                 <Input
@@ -435,6 +440,7 @@ export const PopupSettings: React.FC = () => {
                                   onChange={(e) => updateSocialMedia(index, 'url', e.target.value)}
                                   placeholder={`https://${social.platform}.com/yourrestaurant`}
                                   disabled={!social.enabled}
+                                  className="text-sm"
                                 />
                               </div>
                             </div>

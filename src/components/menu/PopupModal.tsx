@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -76,7 +75,6 @@ const reviewPlatforms = [
 
 // Preview wheel component that shows colors without text
 const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }> }> = ({ rewards }) => {
-  // Normalize rewards to ensure they add up to 100%
   const normalizeRewards = (rewards: Array<{ color: string; chance: number }>) => {
     const totalChance = rewards.reduce((sum, reward) => sum + reward.chance, 0);
     if (totalChance === 0) return rewards;
@@ -106,10 +104,10 @@ const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }>
     <div className="flex flex-col items-center space-y-2">
       <div className="relative">
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-10">
-          <div className="w-0 h-0 border-l-2 border-r-2 border-b-4 border-transparent border-b-foreground"></div>
+          <div className="w-0 h-0 border-l-2 border-r-2 border-b-4 border-transparent border-b-gray-800"></div>
         </div>
         
-        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-2 border-border relative overflow-hidden opacity-75">
+        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-2 border-gray-300 relative overflow-hidden opacity-75 animate-pulse">
           <svg className="w-full h-full" viewBox="0 0 200 200">
             {segments.map((segment, index) => {
               const startAngleRad = (segment.startAngle * Math.PI) / 180;
@@ -142,7 +140,7 @@ const PreviewWheel: React.FC<{ rewards: Array<{ color: string; chance: number }>
           </svg>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground text-center">Spin to win prizes!</p>
+      <p className="text-xs text-gray-600 text-center">Spin to win prizes!</p>
     </div>
   );
 };
@@ -230,44 +228,44 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
   const enabledSocialMedia = settings.socialMedia?.filter(social => social.enabled && social.url) || [];
   const enabledReviewOptions = settings.reviewOptions?.filter(review => review.enabled && review.url) || [];
 
-  // Theme styles
-  const dialogStyles = customTheme ? {
-    backgroundColor: customTheme.cardBackground,
-    borderColor: customTheme.borderColor,
-    color: customTheme.textColor
-  } : {};
+  // Force white theme styles
+  const dialogStyles = {
+    backgroundColor: '#ffffff',
+    borderColor: '#e5e7eb',
+    color: '#1f2937'
+  };
 
-  const headingStyles = customTheme ? {
-    color: customTheme.headingColor || customTheme.textColor
-  } : {};
+  const headingStyles = {
+    color: '#1f2937'
+  };
 
-  const mutedTextStyles = customTheme ? {
-    color: customTheme.mutedTextColor
-  } : {};
+  const mutedTextStyles = {
+    color: '#6b7280'
+  };
 
-  const primaryButtonStyles = customTheme ? {
-    backgroundColor: customTheme.primaryColor,
-    borderColor: customTheme.primaryColor,
-    color: customTheme.mode === 'dark' ? '#ffffff' : '#ffffff'
-  } : {};
+  const primaryButtonStyles = {
+    backgroundColor: customTheme?.primaryColor || '#3b82f6',
+    borderColor: customTheme?.primaryColor || '#3b82f6',
+    color: '#ffffff'
+  };
 
-  const accentButtonStyles = customTheme ? {
-    backgroundColor: customTheme.accentColor,
-    borderColor: customTheme.accentColor,
-    color: customTheme.mode === 'dark' ? '#ffffff' : '#ffffff'
-  } : {};
+  const accentButtonStyles = {
+    backgroundColor: customTheme?.accentColor || '#3b82f6',
+    borderColor: customTheme?.accentColor || '#3b82f6',
+    color: '#ffffff'
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent 
-        className="max-w-[95vw] w-full sm:max-w-md mx-auto p-0 gap-0 border-2 rounded-2xl shadow-2xl"
+        className="max-w-[95vw] w-full sm:max-w-md mx-auto p-0 gap-0 border-2 rounded-2xl shadow-2xl bg-white"
         style={dialogStyles}
       >
         {/* Close button */}
         <button
           onClick={() => setIsOpen(false)}
-          className="absolute right-3 top-3 z-10 p-1.5 rounded-full transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-          style={{ color: customTheme?.mutedTextColor }}
+          className="absolute right-3 top-3 z-10 p-1.5 rounded-full transition-colors hover:bg-gray-100"
+          style={{ color: '#6b7280' }}
         >
           <X className="h-4 w-4" />
         </button>
@@ -284,7 +282,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
           <DialogHeader className="text-center">
             <DialogTitle 
               className="text-lg sm:text-xl font-bold text-white mb-2"
-              style={{ color: '#ffffff' }}
             >
               {settings.title}
             </DialogTitle>
@@ -292,7 +289,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 bg-white">
           {!showWheel ? (
             <>
               <p 
@@ -309,7 +306,8 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                     {[...Array(5)].map((_, index) => (
                       <Star 
                         key={index} 
-                        className="h-8 w-8 fill-yellow-400 text-yellow-400" 
+                        className="h-8 w-8 fill-yellow-400 text-yellow-400 animate-pulse" 
+                        style={{ animationDelay: `${index * 0.1}s` }}
                       />
                     ))}
                   </div>
@@ -330,11 +328,13 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                         <button
                           key={index}
                           onClick={() => handleReviewClick(review.url)}
-                          className="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 hover:scale-110 hover:shadow-lg"
+                          className="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 hover:scale-110 hover:shadow-lg animate-bounce"
                           style={{ 
                             backgroundColor: `${platform?.color}20`,
                             borderColor: platform?.color,
-                            border: `2px solid ${platform?.color}`
+                            border: `2px solid ${platform?.color}`,
+                            animationDelay: `${index * 0.2}s`,
+                            animationDuration: '2s'
                           }}
                         >
                           <IconComponent 
@@ -363,12 +363,14 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                         <Button
                           key={index}
                           onClick={() => handleSocialClick(social.url)}
-                          className="flex items-center justify-center gap-3 h-12 text-white font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                          className="flex items-center justify-center gap-3 h-12 text-white font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg animate-pulse"
                           style={{ 
-                            backgroundColor: platform?.color || '#6b7280'
+                            backgroundColor: platform?.color || '#6b7280',
+                            animationDelay: `${index * 0.2}s`,
+                            animationDuration: '2s'
                           }}
                         >
-                          <IconComponent className="h-5 w-5" />
+                          <IconComponent className="h-5 w-5 animate-bounce" />
                           <span className="text-sm">{platform?.label}</span>
                         </Button>
                       );
@@ -397,8 +399,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                         Wheel unlocks in {timeLeft} seconds...
                       </p>
                       <div 
-                        className="w-full rounded-full h-2"
-                        style={{ backgroundColor: customTheme?.borderColor }}
+                        className="w-full rounded-full h-2 bg-gray-200"
                       >
                         <div 
                           className="h-2 rounded-full transition-all duration-1000" 
@@ -412,7 +413,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                   ) : (
                     <Button 
                       onClick={handleCtaClick}
-                      className="w-full h-12 font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white"
+                      className="w-full h-12 font-medium rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-pulse"
                       disabled={settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5}
                       style={accentButtonStyles}
                     >
@@ -432,7 +433,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
               )}
             </>
           ) : (
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-6 bg-white">
               {!hasSpun ? (
                 <>
                   <p 
@@ -453,7 +454,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({ settings, restaurantName
                 </>
               ) : (
                 <div className="space-y-4">
-                  <div className="text-5xl">🎉</div>
+                  <div className="text-5xl animate-bounce">🎉</div>
                   <h3 
                     className="text-xl font-bold"
                     style={{ color: customTheme?.accentColor || '#3b82f6' }}

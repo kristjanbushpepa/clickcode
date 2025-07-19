@@ -184,6 +184,10 @@ export const PopupModal: React.FC<PopupModalProps> = ({
     // Show popup after specified seconds
     const timer = setTimeout(() => {
       setIsOpen(true);
+      // For wheel type, show wheel directly
+      if (settings.type === 'wheel' && settings.wheelSettings.enabled && settings.wheelSettings.unlockType === 'free') {
+        setShowWheel(true);
+      }
       // Increment shown count
       localStorage.setItem(storageKey, (shownCount + 1).toString());
     }, settings.showAfterSeconds * 1000);

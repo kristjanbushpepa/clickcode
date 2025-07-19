@@ -14,7 +14,7 @@ interface LanguageSettings {
 }
 
 const LANGUAGE_OPTIONS = [{
-  code: 'sq',
+  code: 'ALB',
   name: 'Shqip',
   flag: '🇦🇱'
 }, {
@@ -78,7 +78,7 @@ export function LanguageSwitch({
     refetchInterval: 60 * 1000 // Refetch every minute to catch dashboard changes
   });
 
-  const supportedLanguages = languageSettings?.supported_ui_languages || ['sq', 'en'];
+  const supportedLanguages = languageSettings?.supported_ui_languages || ['ALB', 'en'];
   const currentLangData = LANGUAGE_OPTIONS.find(lang => lang.code === currentLanguage);
 
   // Auto-switch to main language if current language is not supported

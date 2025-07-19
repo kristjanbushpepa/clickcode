@@ -25,8 +25,9 @@ function checkPWALaunch() {
                 (window.navigator as any).standalone === true;
   
   if (isPWA && window.location.pathname === '/') {
-    // Check if user was previously logged in
-    const restaurantInfo = sessionStorage.getItem('restaurant_info');
+    // Check if user was previously logged in (check both storages)
+    const restaurantInfo = sessionStorage.getItem('restaurant_info') || 
+                          localStorage.getItem('restaurant_info');
     
     if (restaurantInfo) {
       // User was logged in before, redirect to dashboard

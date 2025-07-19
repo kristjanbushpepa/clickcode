@@ -5,24 +5,34 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 let restaurantSupabaseClient: SupabaseClient | null = null;
 let cachedRestaurantUrl: string | null = null;
 
-// Get restaurant database connection from session storage
+// Get restaurant database connection from appropriate storage
 export const getRestaurantSupabase = () => {
-  const restaurantInfo = sessionStorage.getItem('restaurant_info');
+  // Check both storages for restaurant info
+  let restaurantInfo = sessionStorage.getItem('restaurant_info');
+  let storage = sessionStorage;
+  
+  if (!restaurantInfo) {
+    restaurantInfo = localStorage.getItem('restaurant_info');
+    storage = localStorage;
+  }
+  
   if (!restaurantInfo) {
     throw new Error('Restaurant information not found. Please login again.');
   }
   
-  const { supabase_url, supabase_anon_key } = JSON.parse(restaurantInfo);
+  const { supabase_url, supabase_anon_key, keepLoggedIn } = JSON.parse(restaurantInfo);
   
   // Return cached client if URL matches
   if (restaurantSupabaseClient && cachedRestaurantUrl === supabase_url) {
     return restaurantSupabaseClient;
   }
   
-  // Create new client and cache it
+  // Create new client with appropriate storage
+  const authStorage = keepLoggedIn ? localStorage : sessionStorage;
+  
   restaurantSupabaseClient = createClient(supabase_url, supabase_anon_key, {
     auth: {
-      storage: sessionStorage,
+      storage: authStorage,
       persistSession: true,
       autoRefreshToken: true,
     }
@@ -33,7 +43,12 @@ export const getRestaurantSupabase = () => {
 };
 
 export const getRestaurantInfo = () => {
-  const restaurantInfo = sessionStorage.getItem('restaurant_info');
+  // Check both storages for restaurant info
+  let restaurantInfo = sessionStorage.getItem('restaurant_info');
+  if (!restaurantInfo) {
+    restaurantInfo = localStorage.getItem('restaurant_info');
+  }
+  
   if (!restaurantInfo) {
     return null;
   }
@@ -57,12 +72,24 @@ export const isRestaurantUserLoggedIn = async () => {
 };
 
 // Helper function to create restaurant supabase client from restaurant data
-export const createRestaurantSupabase = (supabase_url: string, supabase_anon_key: string) => {
+export const createRestaurantSupabase = (supabase_url: string, supabase_anon_key: string, keepLoggedIn = false) => {
+  const storage = keepLoggedIn ? localStorage : sessionStorage;
+  
   return createClient(supabase_url, supabase_anon_key, {
     auth: {
-      storage: sessionStorage,
+      storage: storage,
       persistSession: true,
       autoRefreshToken: true,
     }
   });
+};
+
+// Clear login data from both storages
+export const clearRestaurantLogin = () => {
+  sessionStorage.removeItem('restaurant_info');
+  localStorage.removeItem('restaurant_info');
+  
+  // Reset cached client
+  restaurantSupabaseClient = null;
+  cachedRestaurantUrl = null;
 };

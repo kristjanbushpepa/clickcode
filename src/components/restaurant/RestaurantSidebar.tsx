@@ -1,6 +1,7 @@
 
 import { Building2, Menu as MenuIcon, Palette, QrCode, Zap, LogOut, Languages } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { clearRestaurantLogin } from '@/utils/restaurantDatabase';
 import {
   Sidebar,
   SidebarContent,
@@ -33,9 +34,18 @@ export function RestaurantSidebar({ onTabChange, activeTab }: RestaurantSidebarP
 
   const handleLogout = async () => {
     try {
+      // Clear restaurant login data
+      clearRestaurantLogin();
+      
+      // Also sign out from main auth
       await signOut();
+      
+      // Redirect to login page
+      window.location.href = '/restaurant/login';
     } catch (error) {
       console.error('Error signing out:', error);
+      // Force redirect even if there's an error
+      window.location.href = '/restaurant/login';
     }
   };
 

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Building2, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@supabase/supabase-js';
@@ -16,6 +17,7 @@ const RestaurantLogin = () => {
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
 
@@ -70,7 +72,14 @@ const RestaurantLogin = () => {
         try {
           const restaurantSupabase = createClient(
             restaurant.supabase_url,
-            restaurant.supabase_anon_key
+            restaurant.supabase_anon_key,
+            {
+              auth: {
+                storage: keepLoggedIn ? localStorage : sessionStorage,
+                persistSession: true,
+                autoRefreshToken: true,
+              }
+            }
           );
 
           const { data: authResponse, error: authError } = await restaurantSupabase.auth.signInWithPassword({
@@ -98,14 +107,19 @@ const RestaurantLogin = () => {
         return;
       }
 
-      // Store restaurant info in sessionStorage for the dashboard
-      sessionStorage.setItem('restaurant_info', JSON.stringify({
+      // Store restaurant info in the appropriate storage based on keepLoggedIn preference
+      const storage = keepLoggedIn ? localStorage : sessionStorage;
+      storage.setItem('restaurant_info', JSON.stringify({
         id: authenticatedRestaurant.id,
         name: authenticatedRestaurant.name,
         supabase_url: authenticatedRestaurant.supabase_url,
         supabase_anon_key: authenticatedRestaurant.supabase_anon_key,
-        user: authData.user
+        user: authData.user,
+        keepLoggedIn: keepLoggedIn
       }));
+
+      // Also store the preference for future logins
+      localStorage.setItem('keep_logged_in_preference', keepLoggedIn.toString());
 
       toast({
         title: "Success",
@@ -124,6 +138,14 @@ const RestaurantLogin = () => {
       setIsLoading(false);
     }
   };
+
+  // Load the saved preference on component mount
+  useEffect(() => {
+    const savedPreference = localStorage.getItem('keep_logged_in_preference');
+    if (savedPreference === 'true') {
+      setKeepLoggedIn(true);
+    }
+  }, []);
 
   return (
     <div className={cn(
@@ -183,6 +205,20 @@ const RestaurantLogin = () => {
                   )}
                 </Button>
               </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="keep-logged-in"
+                checked={keepLoggedIn}
+                onCheckedChange={(checked) => setKeepLoggedIn(checked as boolean)}
+              />
+              <Label
+                htmlFor="keep-logged-in"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Keep me logged in
+              </Label>
             </div>
 
             <Button 

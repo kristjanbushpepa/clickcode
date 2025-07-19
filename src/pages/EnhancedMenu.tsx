@@ -735,7 +735,7 @@ const EnhancedMenu = () => {
             placeholder="Search menu items..." 
             value={searchTerm} 
             onChange={handleSearchChange}
-            className="pl-10 pr-10 h-10 border backdrop-blur-sm text-sm" 
+            className="pl-12 pr-10 h-10 border backdrop-blur-sm text-sm" 
           />
           {searchTerm && (
             <button

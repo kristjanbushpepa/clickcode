@@ -110,11 +110,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete, disab
   };
 
   return (
-    <div className="flex flex-col items-center space-y-6 bg-white text-black p-6 rounded-lg" style={{ 
-      backgroundColor: '#ffffff',
-      color: '#000000',
-      borderRadius: '0.5rem'
-    }}>
+    <div className="flex flex-col items-center space-y-6">
       <div className="relative">
         {/* Fixed pointer at top */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-20">

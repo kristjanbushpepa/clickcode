@@ -43,14 +43,12 @@ interface CurrencySwitchProps {
   restaurantSupabase: any;
   currentCurrency: string;
   onCurrencyChange: (currency: string) => void;
-  customTheme?: any;
 }
 
 export function CurrencySwitch({
   restaurantSupabase,
   currentCurrency,
-  onCurrencyChange,
-  customTheme
+  onCurrencyChange
 }: CurrencySwitchProps) {
   // Fetch currency settings with shorter stale time for better reactivity
   const {

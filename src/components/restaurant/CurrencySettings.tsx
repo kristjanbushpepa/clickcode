@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { DollarSign, RefreshCw } from 'lucide-react';
 
 interface CurrencySettings {
@@ -34,52 +34,72 @@ export function CurrencySettings() {
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
 
   // Fetch currency settings
-  const { data: currencySettings, isLoading } = useQuery({
+  const { data: currencySettings, isLoading, error: queryError } = useQuery({
     queryKey: ['currency_settings'],
     queryFn: async () => {
       const restaurantSupabase = getRestaurantSupabase();
+      console.log('Fetching currency settings...');
+      
       const { data, error } = await restaurantSupabase
         .from('currency_settings')
         .select('*')
         .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Currency settings query error:', error);
+        throw error;
+      }
+      
+      console.log('Currency settings fetched:', data);
       return data as CurrencySettings | null;
-    }
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 3
   });
 
   // Update currency settings mutation
   const updateSettingsMutation = useMutation({
     mutationFn: async (updates: Partial<CurrencySettings>) => {
       const restaurantSupabase = getRestaurantSupabase();
+      console.log('Updating currency settings:', updates);
       
-      // First try to update existing record
-      const { data: updateData, error: updateError } = await restaurantSupabase
-        .from('currency_settings')
-        .update({ ...updates, last_updated: new Date().toISOString() })
-        .eq('id', currencySettings?.id || '00000000-0000-0000-0000-000000000000')
-        .select()
-        .maybeSingle();
-      
-      if (updateData) {
-        return updateData;
+      if (currencySettings?.id) {
+        // Update existing record
+        const { data, error } = await restaurantSupabase
+          .from('currency_settings')
+          .update({ ...updates, last_updated: new Date().toISOString() })
+          .eq('id', currencySettings.id)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
+        console.log('Updated currency settings:', data);
+        return data;
+      } else {
+        // Insert new record
+        const { data, error } = await restaurantSupabase
+          .from('currency_settings')
+          .insert([{ ...updates, last_updated: new Date().toISOString() }])
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
+        console.log('Inserted currency settings:', data);
+        return data;
       }
-      
-      // If no existing record, insert new one
-      const { data: insertData, error: insertError } = await restaurantSupabase
-        .from('currency_settings')
-        .insert([{ ...updates, last_updated: new Date().toISOString() }])
-        .select()
-        .maybeSingle();
-      
-      if (insertError) throw insertError;
-      return insertData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currency_settings'] });
       toast({ title: 'Cilësimet e monedhës u përditësuan me sukses' });
     },
     onError: (error: any) => {
+      console.error('Mutation error:', error);
       toast({ 
         title: 'Gabim në përditësimin e cilësimeve', 
         description: error.message, 
@@ -165,6 +185,24 @@ export function CurrencySettings() {
 
   if (isLoading) {
     return <div className="flex justify-center p-8">Duke ngarkuar...</div>;
+  }
+
+  if (queryError) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-center">
+          <p className="text-destructive">Gabim në ngarkimin e cilësimeve të monedhës</p>
+          <p className="text-sm text-muted-foreground mt-2">{(queryError as Error).message}</p>
+          <Button 
+            variant="outline" 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['currency_settings'] })}
+            className="mt-4"
+          >
+            Provo përsëri
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

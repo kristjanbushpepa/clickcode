@@ -23,7 +23,9 @@ export const QRCodeGenerator = () => {
     const info = getRestaurantInfo();
     if (info) {
       setRestaurantInfo(info);
-      const url = `${window.location.origin}/menu/${info.restaurant_id}`;
+      // Use restaurant name for the URL, convert spaces to hyphens and make lowercase
+      const restaurantNameForUrl = info.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const url = `${window.location.origin}/menu/${restaurantNameForUrl}`;
       setMenuUrl(url);
     }
   }, []);
@@ -63,7 +65,7 @@ export const QRCodeGenerator = () => {
         ctx.drawImage(img, 0, 0);
         
         const link = document.createElement('a');
-        link.download = `menu-qr-code-${restaurantInfo?.restaurant_name || 'restaurant'}.png`;
+        link.download = `menu-qr-code-${restaurantInfo?.name || 'restaurant'}.png`;
         link.href = canvas.toDataURL();
         link.click();
       }

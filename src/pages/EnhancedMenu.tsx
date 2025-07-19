@@ -674,14 +674,22 @@ const EnhancedMenu = () => {
           placeholder="Search menu items..." 
           value={searchTerm} 
           onChange={handleSearchChange}
-          className="pl-10 pr-10 h-10 border backdrop-blur-sm text-sm" 
+          className="pl-10 pr-10 h-10 border backdrop-blur-sm text-sm placeholder:opacity-60" 
           style={{
             backgroundColor: customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff',
             borderColor: customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb',
             color: customTheme?.searchBarText || customTheme?.textColor || '#1f2937',
-            fontSize: '14px'
-          }}
+            fontSize: '14px',
+            '--placeholder-color': customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'
+          } as React.CSSProperties & { '--placeholder-color': string }}
         />
+        <style>
+          {`
+            input[style*="--placeholder-color"]::placeholder {
+              color: ${customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'} !important;
+            }
+          `}
+        </style>
         {searchTerm && (
           <button
             onClick={clearSearch}

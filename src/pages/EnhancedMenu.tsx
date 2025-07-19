@@ -57,6 +57,7 @@ interface MenuItem {
   price: number;
   category_id: string;
   image_url?: string;
+  image_path?: string;
   is_available: boolean;
   display_order: number;
   allergens?: string[];
@@ -144,7 +145,6 @@ const EnhancedMenu = () => {
     enabled: !!restaurantSupabase,
   });
 
-  // Add theme customization with proper arguments
   const { data: customTheme } = useThemeCustomization(restaurantSupabase, slug || '');
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
@@ -276,6 +276,12 @@ const EnhancedMenu = () => {
     return `${symbol}${convertedPrice.toFixed(2)}`;
   };
 
+  const getMenuItemImageUrl = (item: MenuItem): string | null => {
+    if (item.image_url) return item.image_url;
+    if (item.image_path) return item.image_path;
+    return null;
+  };
+
   const filteredItems = useMemo(() => {
     if (!menuItems) return [];
     
@@ -311,7 +317,7 @@ const EnhancedMenu = () => {
     );
   }
 
-  const backgroundStyle = restaurant.background_image_url 
+  const backgroundStyle = restaurant?.background_image_url 
     ? { 
         backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%), url(${restaurant.background_image_url})`,
         backgroundSize: 'cover',
@@ -505,8 +511,10 @@ const EnhancedMenu = () => {
                       is_featured: item.is_featured || false,
                       allergens: item.allergens || []
                     }}
+                    layoutStyle="compact"
                     getLocalizedText={getLocalizedText}
                     formatPrice={formatPrice}
+                    getMenuItemImageUrl={getMenuItemImageUrl}
                     customTheme={customTheme}
                   />
                 ))}
@@ -527,7 +535,19 @@ const EnhancedMenu = () => {
             enabled: popupSettings.is_active,
             type: popupSettings.popup_type === 'image' ? 'review' : popupSettings.popup_type,
             title: popupSettings.popup_content?.title || '',
-            description: popupSettings.popup_content?.description || ''
+            description: popupSettings.popup_content?.description || '',
+            link: popupSettings.popup_content?.link || '',
+            buttonText: popupSettings.popup_content?.buttonText || 'Click Here',
+            showAfterSeconds: 2,
+            dailyLimit: popupSettings.display_frequency || 1,
+            wheelSettings: {
+              enabled: popupSettings.popup_type === 'wheel',
+              unlockType: 'free',
+              unlockText: 'Spin the wheel for your reward!',
+              unlockButtonText: 'Spin Now',
+              unlockLink: '',
+              rewards: popupSettings.wheel_prizes || []
+            }
           }}
           restaurantName={restaurant.name}
           customTheme={customTheme}

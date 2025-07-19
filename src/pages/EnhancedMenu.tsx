@@ -989,19 +989,15 @@ const EnhancedMenu = () => {
                 className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm" 
                 style={{
                   backgroundColor: customTheme?.accentColor + '20',
-                  borderColor: customTheme?.accentColor,
-                  '--data-state-active-bg': customTheme?.accentColor + '30'
+                  borderColor: customTheme?.accentColor
                 }}
               >
                 <TabsTrigger 
                   value="all" 
-                  className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-transparent"
+                  className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:shadow-none"
                   style={{
                     color: customTheme?.textColor || '#1f2937',
                     backgroundColor: 'transparent'
-                  }}
-                  data-state-active-style={{
-                    backgroundColor: customTheme?.accentColor + '30'
                   }}
                 >
                   All
@@ -1018,13 +1014,10 @@ const EnhancedMenu = () => {
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id} 
-                      className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-transparent"
+                      className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:shadow-none"
                       style={{
                         color: customTheme?.textColor || '#1f2937',
                         backgroundColor: 'transparent'
-                      }}
-                      data-state-active-style={{
-                        backgroundColor: customTheme?.accentColor + '30'
                       }}
                     >
                       {getLocalizedText(category, 'name')}

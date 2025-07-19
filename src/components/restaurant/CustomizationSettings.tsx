@@ -31,6 +31,9 @@ interface Theme {
   currencySwitchText?: string;
   badgeBackgroundColor?: string;
   badgeTextColor?: string;
+  tabActiveBackground?: string;
+  tabActiveText?: string;
+  tabHoverBackground?: string;
 }
 
 // Modern Theme Presets
@@ -55,7 +58,10 @@ const modernMinimalTheme: Theme = {
   currencySwitchBorder: '#e5e5e5',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#f3f4f6',
-  badgeTextColor: '#374151'
+  badgeTextColor: '#374151',
+  tabActiveBackground: '#1f2937',
+  tabActiveText: '#ffffff',
+  tabHoverBackground: '#111827'
 };
 
 const oceanBreezTheme: Theme = {
@@ -79,7 +85,10 @@ const oceanBreezTheme: Theme = {
   currencySwitchBorder: '#0ea5e9',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#dbeafe',
-  badgeTextColor: '#1e3a8a'
+  badgeTextColor: '#1e3a8a',
+  tabActiveBackground: '#0369a1',
+  tabActiveText: '#ffffff',
+  tabHoverBackground: '#0284c7'
 };
 
 const sunsetTheme: Theme = {
@@ -103,7 +112,10 @@ const sunsetTheme: Theme = {
   currencySwitchBorder: '#f97316',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#fed7aa',
-  badgeTextColor: '#c2410c'
+  badgeTextColor: '#c2410c',
+  tabActiveBackground: '#ea580c',
+  tabActiveText: '#ffffff',
+  tabHoverBackground: '#dc2626'
 };
 
 const forestGreenTheme: Theme = {
@@ -127,7 +139,10 @@ const forestGreenTheme: Theme = {
   currencySwitchBorder: '#3d5a4d',
   currencySwitchText: '#f2e7c7',
   badgeBackgroundColor: '#3d5a4d',
-  badgeTextColor: '#f2e7c7'
+  badgeTextColor: '#f2e7c7',
+  tabActiveBackground: '#2d4a3d',
+  tabActiveText: '#f2e7c7',
+  tabHoverBackground: '#1a2e25'
 };
 
 const royalPurpleTheme: Theme = {
@@ -151,7 +166,10 @@ const royalPurpleTheme: Theme = {
   currencySwitchBorder: '#8b5cf6',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#e9d5ff',
-  badgeTextColor: '#581c87'
+  badgeTextColor: '#581c87',
+  tabActiveBackground: '#6b21a8',
+  tabActiveText: '#ffffff',
+  tabHoverBackground: '#7c3aed'
 };
 
 const elegantDarkTheme: Theme = {
@@ -175,7 +193,10 @@ const elegantDarkTheme: Theme = {
   currencySwitchBorder: '#334155',
   currencySwitchText: '#f1f5f9',
   badgeBackgroundColor: '#334155',
-  badgeTextColor: '#f1f5f9'
+  badgeTextColor: '#f1f5f9',
+  tabActiveBackground: '#1e293b',
+  tabActiveText: '#f1f5f9',
+  tabHoverBackground: '#0f172a'
 };
 
 const rosePinkTheme: Theme = {
@@ -199,7 +220,10 @@ const rosePinkTheme: Theme = {
   currencySwitchBorder: '#ec4899',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#fce7f3',
-  badgeTextColor: '#9f1239'
+  badgeTextColor: '#9f1239',
+  tabActiveBackground: '#be185d',
+  tabActiveText: '#ffffff',
+  tabHoverBackground: '#e11d48'
 };
 
 const vintageGoldTheme: Theme = {
@@ -223,7 +247,10 @@ const vintageGoldTheme: Theme = {
   currencySwitchBorder: '#ca8a04',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#fef3c7',
-  badgeTextColor: '#92400e'
+  badgeTextColor: '#92400e',
+  tabActiveBackground: '#a16207',
+  tabActiveText: '#ffffff',
+  tabHoverBackground: '#d97706'
 };
 
 const redBlackTheme: Theme = {
@@ -247,7 +274,10 @@ const redBlackTheme: Theme = {
   currencySwitchBorder: '#404040',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#262626',
-  badgeTextColor: '#ef4444'
+  badgeTextColor: '#ef4444',
+  tabActiveBackground: '#dc2626',
+  tabActiveText: '#ffffff',
+  tabHoverBackground: '#b91c1c'
 };
 
 const CustomizationSettings = () => {
@@ -589,7 +619,7 @@ const CustomizationSettings = () => {
               )}
             </div>
 
-            {/* Color Customization */}
+            {/* Color Customization - Enhanced with tab colors */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="primaryColor">Primary Color</Label>
@@ -723,6 +753,43 @@ const CustomizationSettings = () => {
                   }}
                 />
               </div>
+              
+              {/* Tab Colors */}
+              <div>
+                <Label htmlFor="tabActiveBackground">Tab Active Background</Label>
+                <ColorPicker
+                  id="tabActiveBackground"
+                  color={theme.tabActiveBackground || theme.primaryColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, tabActiveBackground: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="tabActiveText">Tab Active Text</Label>
+                <ColorPicker
+                  id="tabActiveText"
+                  color={theme.tabActiveText || '#ffffff'}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, tabActiveText: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="tabHoverBackground">Tab Hover Background</Label>
+                <ColorPicker
+                  id="tabHoverBackground"
+                  color={theme.tabHoverBackground || theme.primaryColor}
+                  onColorChange={(color: string) => {
+                    setTheme({ ...theme, tabHoverBackground: color });
+                    setSelectedPreset('custom');
+                  }}
+                />
+              </div>
+              
+              {/* Language/Currency Switch Colors */}
               <div>
                 <Label htmlFor="languageSwitchBackground">Language Switch Background</Label>
                 <ColorPicker

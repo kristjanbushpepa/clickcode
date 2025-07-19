@@ -87,9 +87,9 @@ export function LanguageSwitch({
     <Popover>
       <PopoverTrigger asChild>
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm" 
-          className="h-8 px-2 bg-muted/50 border-border hover:bg-muted text-foreground rounded-md flex items-center gap-1"
+          className="h-8 px-2 text-inherit bg-transparent border-transparent hover:bg-white/20 rounded-md flex items-center gap-1"
         >
           <span className="text-sm">{currentLangData?.flag}</span>
           <span className="text-xs font-medium">{currentLanguage.toUpperCase()}</span>

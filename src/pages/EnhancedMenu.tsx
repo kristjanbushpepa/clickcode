@@ -813,6 +813,15 @@ const EnhancedMenu = () => {
           </div>
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
           
+          {/* Popup Modal - Added here */}
+          {popupSettings && restaurant && (
+            <PopupModal 
+              settings={popupSettings} 
+              restaurantName={restaurant.name} 
+              customTheme={customTheme}
+            />
+          )}
+          
           {/* Menu Item Detail Popup */}
           {selectedMenuItem && (
             <MenuItemDetailPopup 
@@ -878,6 +887,15 @@ const EnhancedMenu = () => {
           </div>
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
           
+          {/* Popup Modal - Added here */}
+          {popupSettings && restaurant && (
+            <PopupModal 
+              settings={popupSettings} 
+              restaurantName={restaurant.name} 
+              customTheme={customTheme}
+            />
+          )}
+          
           {/* Menu Item Detail Popup */}
           {selectedMenuItem && (
             <MenuItemDetailPopup 
@@ -935,6 +953,15 @@ const EnhancedMenu = () => {
           </div>
         </div>
         <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
+        
+        {/* Popup Modal - Added here */}
+        {popupSettings && restaurant && (
+          <PopupModal 
+            settings={popupSettings} 
+            restaurantName={restaurant.name} 
+            customTheme={customTheme}
+          />
+        )}
       </div>;
   }
 

@@ -161,6 +161,7 @@ const EnhancedMenu = () => {
   const [layoutPreference, setLayoutPreference] = useState<'categories' | 'items'>('items');
   const [layoutStyle, setLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
   
   // Add ref for search input to maintain focus
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -470,6 +471,13 @@ const EnhancedMenu = () => {
       });
     }
   }, [customization]);
+
+  // Set animation flag on initial load
+  useEffect(() => {
+    if (!hasAnimated && profile && categories.length > 0) {
+      setHasAnimated(true);
+    }
+  }, [profile, categories, hasAnimated]);
 
   // Image URL helpers
   const getImageUrl = useCallback((imagePath: string) => {
@@ -859,7 +867,7 @@ const EnhancedMenu = () => {
             </div>
           </div>
           
-          <div className="text-center slide-up">
+          <div className={`text-center ${!hasAnimated ? 'slide-up' : ''}`}>
             <h1 className="text-lg font-bold mb-1 uppercase tracking-wide" style={headingStyles}>
               {selectedCategory && layoutPreference === 'categories' ? getLocalizedText(categories.find(cat => cat.id === selectedCategory), 'name') : profile?.name || 'Restaurant Menu'}
             </h1>

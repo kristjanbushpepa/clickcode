@@ -972,7 +972,7 @@ const EnhancedMenu = () => {
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
           
           {/* Popup Modal - Added here */}
-          {popupSettings && restaurant && (
+          {popupSettings && popupSettings.enabled && restaurant && (
             <PopupModal 
               settings={popupSettings} 
               restaurantName={restaurant.name} 
@@ -1046,7 +1046,7 @@ const EnhancedMenu = () => {
           <MenuFooter profile={profile} customTheme={customTheme} showFullContent={false} />
           
           {/* Popup Modal - Added here */}
-          {popupSettings && restaurant && (
+          {popupSettings && popupSettings.enabled && restaurant && (
             <PopupModal 
               settings={popupSettings} 
               restaurantName={restaurant.name} 
@@ -1113,7 +1113,7 @@ const EnhancedMenu = () => {
         <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
         
         {/* Popup Modal - Added here */}
-        {popupSettings && restaurant && (
+        {popupSettings && popupSettings.enabled && restaurant && (
           <PopupModal 
             settings={popupSettings} 
             restaurantName={restaurant.name} 
@@ -1278,7 +1278,7 @@ const EnhancedMenu = () => {
       <MenuFooter profile={profile} customTheme={customTheme} showFullContent={true} />
       
       {/* Popup Modal with theme */}
-      {popupSettings && restaurant && (
+      {popupSettings && popupSettings.enabled && restaurant && (
         <PopupModal 
           settings={popupSettings} 
           restaurantName={restaurant.name} 

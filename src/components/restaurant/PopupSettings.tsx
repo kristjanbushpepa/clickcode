@@ -361,7 +361,68 @@ export const PopupSettings: React.FC = () => {
             <Switch
               id="popup-enabled"
               checked={settings.enabled}
-              onCheckedChange={(enabled) => setSettings(prev => ({ ...prev, enabled }))}
+              onCheckedChange={async (enabled) => {
+                setSettings(prev => ({ ...prev, enabled }));
+                // Auto-save when toggling enabled/disabled
+                setLoading(true);
+                try {
+                  const restaurantSupabase = getRestaurantSupabase();
+                  const dbData = {
+                    enabled,
+                    type: settings.type,
+                    title: settings.title,
+                    description: settings.description || null,
+                    link: settings.link || null,
+                    button_text: settings.buttonText,
+                    show_after_seconds: settings.showAfterSeconds,
+                    daily_limit: settings.dailyLimit,
+                    social_media: settings.socialMedia,
+                    review_options: settings.reviewOptions,
+                    wheel_enabled: settings.wheelSettings.enabled,
+                    wheel_unlock_type: settings.wheelSettings.unlockType,
+                    wheel_unlock_text: settings.wheelSettings.unlockText || null,
+                    wheel_unlock_button_text: settings.wheelSettings.unlockButtonText || null,
+                    wheel_unlock_link: settings.wheelSettings.unlockLink || null,
+                    wheel_rewards: settings.wheelSettings.rewards
+                  };
+
+                  let result;
+                  if (settingsId) {
+                    result = await restaurantSupabase
+                      .from('popup_settings')
+                      .update(dbData)
+                      .eq('id', settingsId);
+                  } else {
+                    result = await restaurantSupabase
+                      .from('popup_settings')
+                      .insert([dbData])
+                      .select()
+                      .single();
+                    
+                    if (result.data) {
+                      setSettingsId(result.data.id);
+                    }
+                  }
+
+                  if (result.error) {
+                    throw result.error;
+                  }
+
+                  toast({
+                    title: enabled ? 'Popup enabled' : 'Popup disabled',
+                    description: 'Settings saved automatically.',
+                  });
+                } catch (error) {
+                  console.error('Error auto-saving popup settings:', error);
+                  toast({
+                    title: 'Error',
+                    description: 'Failed to save popup settings.',
+                    variant: 'destructive',
+                  });
+                } finally {
+                  setLoading(false);
+                }
+              }}
             />
             <Label htmlFor="popup-enabled">Enable popup</Label>
           </div>

@@ -25,6 +25,15 @@ interface Theme {
   currencySwitchText?: string;
   badgeBackgroundColor?: string;
   badgeTextColor?: string;
+  tabSwitcherBackground?: string;
+  tabSwitcherBorder?: string;
+  tabSwitcherText?: string;
+  tabSwitcherActiveBackground?: string;
+  tabSwitcherActiveText?: string;
+  searchBarBackground?: string;
+  searchBarBorder?: string;
+  searchBarText?: string;
+  searchBarPlaceholder?: string;
 }
 
 interface ThemePreviewProps {
@@ -83,6 +92,40 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
   const badgeStyles = {
     backgroundColor: theme.badgeBackgroundColor || theme.accentColor + '20',
     color: theme.badgeTextColor || theme.accentColor
+  };
+
+  const tabSwitcherStyles = {
+    backgroundColor: theme.tabSwitcherBackground || theme.cardBackground,
+    border: `1px solid ${theme.tabSwitcherBorder || theme.borderColor}`,
+    borderRadius: '0.5rem',
+    padding: '0.25rem',
+    display: 'flex',
+    gap: '0.25rem'
+  };
+
+  const tabStyles = {
+    padding: '0.5rem 1rem',
+    borderRadius: '0.375rem',
+    fontSize: '0.75rem',
+    fontWeight: '500',
+    color: theme.tabSwitcherText || theme.mutedTextColor,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  };
+
+  const activeTabStyles = {
+    backgroundColor: theme.tabSwitcherActiveBackground || theme.primaryColor,
+    color: theme.tabSwitcherActiveText || '#ffffff'
+  };
+
+  const searchBarStyles = {
+    backgroundColor: theme.searchBarBackground || theme.cardBackground,
+    border: `1px solid ${theme.searchBarBorder || theme.borderColor}`,
+    borderRadius: '0.5rem',
+    padding: '0.5rem 0.75rem',
+    fontSize: '0.75rem',
+    color: theme.searchBarText || theme.textColor,
+    width: '100%'
   };
 
   const renderLayoutStyle = () => {
@@ -304,6 +347,31 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
 
       {/* Content */}
       <div className="px-3 py-3" style={themeStyles}>
+        {/* Search Bar */}
+        <div className="mb-3">
+          <input
+            type="text"
+            placeholder="Search menu items..."
+            style={{
+              ...searchBarStyles,
+              outline: 'none'
+            }}
+          />
+        </div>
+
+        {/* Tab Switcher */}
+        <div style={tabSwitcherStyles} className="mb-3">
+          <div style={{ ...tabStyles, ...activeTabStyles }}>
+            Appetizers
+          </div>
+          <div style={tabStyles}>
+            Main
+          </div>
+          <div style={tabStyles}>
+            Desserts
+          </div>
+        </div>
+
         {/* Category Name */}
         <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
           Popular Items

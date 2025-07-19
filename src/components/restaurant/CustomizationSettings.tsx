@@ -31,6 +31,15 @@ interface Theme {
   currencySwitchText?: string;
   badgeBackgroundColor?: string;
   badgeTextColor?: string;
+  tabSwitcherBackground?: string;
+  tabSwitcherBorder?: string;
+  tabSwitcherText?: string;
+  tabSwitcherActiveBackground?: string;
+  tabSwitcherActiveText?: string;
+  searchBarBackground?: string;
+  searchBarBorder?: string;
+  searchBarText?: string;
+  searchBarPlaceholder?: string;
 }
 
 // Modern Theme Presets
@@ -55,7 +64,16 @@ const modernMinimalTheme: Theme = {
   currencySwitchBorder: '#e5e5e5',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#f3f4f6',
-  badgeTextColor: '#374151'
+  badgeTextColor: '#374151',
+  tabSwitcherBackground: '#f8f9fa',
+  tabSwitcherBorder: '#e5e5e5',
+  tabSwitcherText: '#666666',
+  tabSwitcherActiveBackground: '#0c0c0c',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#ffffff',
+  searchBarBorder: '#e5e5e5',
+  searchBarText: '#0c0c0c',
+  searchBarPlaceholder: '#666666'
 };
 
 const oceanBreezTheme: Theme = {
@@ -79,7 +97,16 @@ const oceanBreezTheme: Theme = {
   currencySwitchBorder: '#0ea5e9',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#dbeafe',
-  badgeTextColor: '#1e3a8a'
+  badgeTextColor: '#1e3a8a',
+  tabSwitcherBackground: '#f0f9ff',
+  tabSwitcherBorder: '#bae6fd',
+  tabSwitcherText: '#64748b',
+  tabSwitcherActiveBackground: '#0369a1',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#ffffff',
+  searchBarBorder: '#bae6fd',
+  searchBarText: '#0c4a6e',
+  searchBarPlaceholder: '#64748b'
 };
 
 const sunsetTheme: Theme = {
@@ -103,7 +130,16 @@ const sunsetTheme: Theme = {
   currencySwitchBorder: '#f97316',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#fed7aa',
-  badgeTextColor: '#c2410c'
+  badgeTextColor: '#c2410c',
+  tabSwitcherBackground: '#fff7ed',
+  tabSwitcherBorder: '#fed7aa',
+  tabSwitcherText: '#78716c',
+  tabSwitcherActiveBackground: '#ea580c',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#ffffff',
+  searchBarBorder: '#fed7aa',
+  searchBarText: '#c2410c',
+  searchBarPlaceholder: '#78716c'
 };
 
 const forestGreenTheme: Theme = {
@@ -127,7 +163,16 @@ const forestGreenTheme: Theme = {
   currencySwitchBorder: '#3d5a4d',
   currencySwitchText: '#f2e7c7',
   badgeBackgroundColor: '#3d5a4d',
-  badgeTextColor: '#f2e7c7'
+  badgeTextColor: '#f2e7c7',
+  tabSwitcherBackground: '#2d4a3d',
+  tabSwitcherBorder: '#3d5a4d',
+  tabSwitcherText: '#c7b899',
+  tabSwitcherActiveBackground: '#f2e7c7',
+  tabSwitcherActiveText: '#1a2e25',
+  searchBarBackground: '#2d4a3d',
+  searchBarBorder: '#3d5a4d',
+  searchBarText: '#f2e7c7',
+  searchBarPlaceholder: '#c7b899'
 };
 
 const royalPurpleTheme: Theme = {
@@ -151,7 +196,16 @@ const royalPurpleTheme: Theme = {
   currencySwitchBorder: '#8b5cf6',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#e9d5ff',
-  badgeTextColor: '#581c87'
+  badgeTextColor: '#581c87',
+  tabSwitcherBackground: '#faf5ff',
+  tabSwitcherBorder: '#e9d5ff',
+  tabSwitcherText: '#6b7280',
+  tabSwitcherActiveBackground: '#6b21a8',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#ffffff',
+  searchBarBorder: '#e9d5ff',
+  searchBarText: '#581c87',
+  searchBarPlaceholder: '#6b7280'
 };
 
 const elegantDarkTheme: Theme = {
@@ -175,7 +229,16 @@ const elegantDarkTheme: Theme = {
   currencySwitchBorder: '#334155',
   currencySwitchText: '#f1f5f9',
   badgeBackgroundColor: '#334155',
-  badgeTextColor: '#f1f5f9'
+  badgeTextColor: '#f1f5f9',
+  tabSwitcherBackground: '#1e293b',
+  tabSwitcherBorder: '#334155',
+  tabSwitcherText: '#94a3b8',
+  tabSwitcherActiveBackground: '#3b82f6',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#1e293b',
+  searchBarBorder: '#334155',
+  searchBarText: '#f1f5f9',
+  searchBarPlaceholder: '#94a3b8'
 };
 
 const rosePinkTheme: Theme = {
@@ -199,7 +262,16 @@ const rosePinkTheme: Theme = {
   currencySwitchBorder: '#ec4899',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#fce7f3',
-  badgeTextColor: '#9f1239'
+  badgeTextColor: '#9f1239',
+  tabSwitcherBackground: '#fdf2f8',
+  tabSwitcherBorder: '#f9a8d4',
+  tabSwitcherText: '#6b7280',
+  tabSwitcherActiveBackground: '#be185d',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#ffffff',
+  searchBarBorder: '#f9a8d4',
+  searchBarText: '#9f1239',
+  searchBarPlaceholder: '#6b7280'
 };
 
 const vintageGoldTheme: Theme = {
@@ -223,7 +295,16 @@ const vintageGoldTheme: Theme = {
   currencySwitchBorder: '#ca8a04',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#fef3c7',
-  badgeTextColor: '#92400e'
+  badgeTextColor: '#92400e',
+  tabSwitcherBackground: '#fffbeb',
+  tabSwitcherBorder: '#fde68a',
+  tabSwitcherText: '#78716c',
+  tabSwitcherActiveBackground: '#a16207',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#ffffff',
+  searchBarBorder: '#fde68a',
+  searchBarText: '#92400e',
+  searchBarPlaceholder: '#78716c'
 };
 
 const redBlackTheme: Theme = {
@@ -247,7 +328,16 @@ const redBlackTheme: Theme = {
   currencySwitchBorder: '#404040',
   currencySwitchText: '#ffffff',
   badgeBackgroundColor: '#262626',
-  badgeTextColor: '#ef4444'
+  badgeTextColor: '#ef4444',
+  tabSwitcherBackground: '#1a1a1a',
+  tabSwitcherBorder: '#404040',
+  tabSwitcherText: '#a3a3a3',
+  tabSwitcherActiveBackground: '#dc2626',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#1a1a1a',
+  searchBarBorder: '#404040',
+  searchBarText: '#f5f5f5',
+  searchBarPlaceholder: '#a3a3a3'
 };
 
 const CustomizationSettings = () => {
@@ -809,12 +899,111 @@ const CustomizationSettings = () => {
                     setTheme({ ...theme, badgeTextColor: color });
                     setSelectedPreset('custom');
                   }}
-                />
-              </div>
-            </div>
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="tabSwitcherBackground">Tab Switcher Background</Label>
+                 <ColorPicker
+                   id="tabSwitcherBackground"
+                   color={theme.tabSwitcherBackground || theme.cardBackground}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, tabSwitcherBackground: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="tabSwitcherBorder">Tab Switcher Border</Label>
+                 <ColorPicker
+                   id="tabSwitcherBorder"
+                   color={theme.tabSwitcherBorder || theme.borderColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, tabSwitcherBorder: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="tabSwitcherText">Tab Switcher Text</Label>
+                 <ColorPicker
+                   id="tabSwitcherText"
+                   color={theme.tabSwitcherText || theme.mutedTextColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, tabSwitcherText: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="tabSwitcherActiveBackground">Tab Switcher Active Background</Label>
+                 <ColorPicker
+                   id="tabSwitcherActiveBackground"
+                   color={theme.tabSwitcherActiveBackground || theme.primaryColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, tabSwitcherActiveBackground: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="tabSwitcherActiveText">Tab Switcher Active Text</Label>
+                 <ColorPicker
+                   id="tabSwitcherActiveText"
+                   color={theme.tabSwitcherActiveText || '#ffffff'}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, tabSwitcherActiveText: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="searchBarBackground">Search Bar Background</Label>
+                 <ColorPicker
+                   id="searchBarBackground"
+                   color={theme.searchBarBackground || theme.cardBackground}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, searchBarBackground: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="searchBarBorder">Search Bar Border</Label>
+                 <ColorPicker
+                   id="searchBarBorder"
+                   color={theme.searchBarBorder || theme.borderColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, searchBarBorder: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="searchBarText">Search Bar Text</Label>
+                 <ColorPicker
+                   id="searchBarText"
+                   color={theme.searchBarText || theme.textColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, searchBarText: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="searchBarPlaceholder">Search Bar Placeholder</Label>
+                 <ColorPicker
+                   id="searchBarPlaceholder"
+                   color={theme.searchBarPlaceholder || theme.mutedTextColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, searchBarPlaceholder: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+             </div>
 
-            {/* Save Button */}
-            <Button onClick={handleSaveTheme}>Save Theme</Button>
+             {/* Save Button */}
+             <Button onClick={handleSaveTheme}>Save Theme</Button>
           </CardContent>
         </Card>
 

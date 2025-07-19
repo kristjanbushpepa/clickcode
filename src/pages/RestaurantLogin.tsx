@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Building2, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@supabase/supabase-js';
+import { cn } from '@/lib/utils';
 
 const RestaurantLogin = () => {
   const navigate = useNavigate();
@@ -17,6 +18,22 @@ const RestaurantLogin = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPWA, setIsPWA] = useState(false);
+
+  useEffect(() => {
+    // Detect if running in PWA mode
+    const checkPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                     (window.navigator as any).standalone === true;
+    setIsPWA(checkPWA);
+
+    // Handle viewport for PWA
+    if (checkPWA) {
+      const viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content');
+      }
+    }
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -110,7 +127,10 @@ const RestaurantLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden">
+    <div className={cn(
+      "min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden",
+      isPWA && "min-h-[100dvh]" // Use dynamic viewport height for PWA
+    )}>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"></div>
       <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-md border-border shadow-2xl">
         <CardHeader className="text-center">
@@ -133,10 +153,12 @@ const RestaurantLogin = () => {
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="Enter your email"
                 required
+                autoComplete="email"
+                inputMode="email"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2">  
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
@@ -146,6 +168,7 @@ const RestaurantLogin = () => {
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   placeholder="Enter your password"
                   required
+                  autoComplete="current-password"
                 />
                 <Button
                   type="button"

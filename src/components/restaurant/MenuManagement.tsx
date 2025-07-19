@@ -398,26 +398,46 @@ export function MenuManagement() {
       </div>
 
       <Tabs defaultValue="menu" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="menu" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-5 h-auto p-1 bg-muted/50 rounded-lg gap-1">
+          <TabsTrigger 
+            value="menu" 
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+          >
             <Utensils className="h-4 w-4" />
-            Artikujt e Menusë
+            <span className="hidden sm:inline">Artikujt e Menusë</span>
+            <span className="sm:hidden">Menu</span>
           </TabsTrigger>
-          <TabsTrigger value="categories" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="categories" 
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+          >
             <Tag className="h-4 w-4" />
-            Kategoritë
+            <span className="hidden sm:inline">Kategoritë</span>
+            <span className="sm:hidden">Categories</span>
           </TabsTrigger>
-          <TabsTrigger value="currency" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="currency" 
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+          >
             <DollarSign className="h-4 w-4" />
-            Monedha
+            <span className="hidden sm:inline">Monedha</span>
+            <span className="sm:hidden">Currency</span>
           </TabsTrigger>
-          <TabsTrigger value="language" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="language" 
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+          >
             <Languages className="h-4 w-4" />
-            Gjuha
+            <span className="hidden sm:inline">Gjuha</span>
+            <span className="sm:hidden">Language</span>
           </TabsTrigger>
-          <TabsTrigger value="translations" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="translations" 
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+          >
             <Languages className="h-4 w-4" />
-            Përkthimet
+            <span className="hidden sm:inline">Përkthimet</span>
+            <span className="sm:hidden">Translate</span>
           </TabsTrigger>
         </TabsList>
 

@@ -27,21 +27,18 @@ const TabsTrigger = React.forwardRef<
     'data-active-style'?: React.CSSProperties;
   }
 >(({ className, style, 'data-active-style': activeStyle, ...props }, ref) => {
-  const [isActive, setIsActive] = React.useState(false);
-  
   return (
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:font-semibold",
         className
       )}
-      style={props['data-state'] === 'active' ? { ...style, ...activeStyle } : style}
-      onMouseEnter={(e) => {
-        if (props['data-state'] === 'active' && activeStyle) {
-          Object.assign(e.currentTarget.style, activeStyle);
-        }
-      }}
+      style={props['data-state'] === 'active' ? { 
+        ...style, 
+        ...activeStyle,
+        color: activeStyle?.backgroundColor ? '#000000' : style?.color || activeStyle?.color
+      } : style}
       {...props}
     />
   )

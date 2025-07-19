@@ -18,8 +18,47 @@ export const usePWAInput = () => {
     setIsPWA(pwaMode);
 
     if (pwaMode) {
-      console.log('PWA mode detected - applying input fixes');
+      console.log('PWA mode detected - applying input fixes and viewport controls');
       
+      // Set strict viewport meta tag for PWA
+      const viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+        viewport.setAttribute('content', 
+          'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no'
+        );
+      }
+
+      // Prevent zoom on orientation change and tab switching
+      const preventZoom = (e: Event) => {
+        e.preventDefault();
+        const viewport = document.querySelector('meta[name=viewport]');
+        if (viewport) {
+          viewport.setAttribute('content', 
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no'
+          );
+        }
+      };
+
+      // Listen for orientation changes
+      window.addEventListener('orientationchange', preventZoom);
+      window.addEventListener('resize', preventZoom);
+      
+      // Listen for visibility changes (tab switching)
+      document.addEventListener('visibilitychange', preventZoom);
+      
+      // Prevent pinch-to-zoom gestures
+      document.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
       // Remove existing style if present
       const existingStyle = document.getElementById('pwa-input-styles');
       if (existingStyle) {
@@ -35,6 +74,7 @@ export const usePWAInput = () => {
           -webkit-tap-highlight-color: transparent;
         }
         
+        /* Prevent zoom on any input focus */
         input, textarea, select, [contenteditable] {
           font-size: 16px !important;
           -webkit-appearance: none !important;
@@ -56,6 +96,8 @@ export const usePWAInput = () => {
           cursor: text !important;
           z-index: 1 !important;
           position: relative !important;
+          -webkit-transform: translateZ(0) !important;
+          transform: translateZ(0) !important;
         }
         
         input:focus, textarea:focus, select:focus, [contenteditable]:focus {
@@ -65,11 +107,31 @@ export const usePWAInput = () => {
           color: #000000 !important;
           border-color: #3b82f6 !important;
           box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+          font-size: 16px !important;
+          -webkit-transform: translateZ(0) !important;
+          transform: translateZ(0) !important;
         }
         
         input:active, textarea:active {
           background-color: #ffffff !important;
           color: #000000 !important;
+          font-size: 16px !important;
+        }
+        
+        /* Prevent zoom on double tap */
+        body {
+          touch-action: manipulation !important;
+          -webkit-touch-callout: none !important;
+          -webkit-user-select: none !important;
+          user-select: none !important;
+          -webkit-text-size-adjust: 100% !important;
+          text-size-adjust: 100% !important;
+        }
+        
+        /* Allow text selection only in inputs and text areas */
+        input, textarea, [contenteditable] {
+          -webkit-user-select: text !important;
+          user-select: text !important;
         }
         
         /* iOS specific fixes */
@@ -123,6 +185,12 @@ export const usePWAInput = () => {
           cursor: pointer !important;
           -webkit-tap-highlight-color: transparent !important;
         }
+        
+        /* Prevent zoom on any element */
+        * {
+          -webkit-text-size-adjust: 100% !important;
+          text-size-adjust: 100% !important;
+        }
       `;
       
       document.head.appendChild(style);
@@ -145,6 +213,9 @@ export const usePWAInput = () => {
         if (styleElement) {
           styleElement.remove();
         }
+        window.removeEventListener('orientationchange', preventZoom);
+        window.removeEventListener('resize', preventZoom);
+        document.removeEventListener('visibilitychange', preventZoom);
         document.removeEventListener('touchstart', handleInputFocus);
         document.removeEventListener('click', handleInputFocus);
       };

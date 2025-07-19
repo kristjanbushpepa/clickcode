@@ -5,77 +5,148 @@ export const usePWAInput = () => {
   const [isPWA, setIsPWA] = useState(false);
 
   useEffect(() => {
-    // Detect PWA mode
-    const checkPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                     (window.navigator as any).standalone === true;
-    setIsPWA(checkPWA);
+    // More comprehensive PWA detection
+    const checkPWA = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      const isIosStandalone = (window.navigator as any).standalone === true;
+      const isFromHomeScreen = document.referrer === "" || document.referrer.includes('android-app://');
+      
+      return isStandalone || isIosStandalone || isFromHomeScreen;
+    };
 
-    if (checkPWA) {
-      // Add global PWA input styles
-      const style = document.createElement('style');
-      style.id = 'pwa-input-styles';
-      style.textContent = `
-        /* PWA Input Fixes */
-        input, textarea, select {
-          font-size: 16px !important;
-          -webkit-appearance: none !important;
-          appearance: none !important;
-          border-radius: 6px !important;
-          background-color: white !important;
-          color: black !important;
-        }
-        
-        input:focus, textarea:focus {
-          outline: 2px solid #3b82f6 !important;
-          outline-offset: 2px !important;
-          background-color: white !important;
-          color: black !important;
-        }
-        
-        /* iOS specific fixes */
-        @supports (-webkit-touch-callout: none) {
-          input[type="email"], 
-          input[type="password"], 
-          input[type="text"],
-          input[type="search"],
-          textarea {
-            font-size: 16px !important;
-            -webkit-appearance: none !important;
-            -webkit-text-fill-color: black !important;
-            background-color: white !important;
-            opacity: 1 !important;
-          }
-          
-          input::-webkit-input-placeholder,
-          textarea::-webkit-input-placeholder {
-            color: #6b7280 !important;
-            opacity: 1 !important;
-          }
-        }
-        
-        /* Prevent zoom on focus */
-        @media screen and (max-width: 768px) {
-          input, textarea, select {
-            font-size: 16px !important;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-          }
-        }
-      `;
+    const pwaMode = checkPWA();
+    setIsPWA(pwaMode);
+
+    if (pwaMode) {
+      console.log('PWA mode detected - applying input fixes');
       
       // Remove existing style if present
       const existingStyle = document.getElementById('pwa-input-styles');
       if (existingStyle) {
         existingStyle.remove();
       }
+
+      // Add comprehensive PWA input styles
+      const style = document.createElement('style');
+      style.id = 'pwa-input-styles';
+      style.textContent = `
+        /* Critical PWA Input Fixes */
+        * {
+          -webkit-tap-highlight-color: transparent;
+        }
+        
+        input, textarea, select, [contenteditable] {
+          font-size: 16px !important;
+          -webkit-appearance: none !important;
+          appearance: none !important;
+          border-radius: 6px !important;
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border: 1px solid #d1d5db !important;
+          padding: 8px 12px !important;
+          outline: none !important;
+          box-shadow: none !important;
+          -webkit-user-select: text !important;
+          user-select: text !important;
+          pointer-events: auto !important;
+          touch-action: manipulation !important;
+          -webkit-touch-callout: default !important;
+          -webkit-text-size-adjust: 100% !important;
+          text-size-adjust: 100% !important;
+          cursor: text !important;
+          z-index: 1 !important;
+          position: relative !important;
+        }
+        
+        input:focus, textarea:focus, select:focus, [contenteditable]:focus {
+          outline: 2px solid #3b82f6 !important;
+          outline-offset: -2px !important;
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border-color: #3b82f6 !important;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+        
+        input:active, textarea:active {
+          background-color: #ffffff !important;
+          color: #000000 !important;
+        }
+        
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+          input, textarea {
+            -webkit-appearance: none !important;
+            -webkit-text-fill-color: #000000 !important;
+            -webkit-opacity: 1 !important;
+            opacity: 1 !important;
+            -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+          }
+          
+          input::-webkit-input-placeholder,
+          textarea::-webkit-input-placeholder {
+            color: #6b7280 !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #6b7280 !important;
+          }
+          
+          input:focus::-webkit-input-placeholder,
+          textarea:focus::-webkit-input-placeholder {
+            color: transparent !important;
+          }
+        }
+        
+        /* Android Chrome fixes */
+        @media screen and (max-width: 768px) {
+          input, textarea, select {
+            font-size: 16px !important;
+            transform: translateZ(0) !important;
+            -webkit-transform: translateZ(0) !important;
+            will-change: transform !important;
+          }
+        }
+        
+        /* Ensure form elements are clickable */
+        form input, form textarea, form select {
+          pointer-events: auto !important;
+          -webkit-user-select: text !important;
+          user-select: text !important;
+        }
+        
+        /* Fix for button interference */
+        button:not([type="submit"]):not([type="button"]) {
+          pointer-events: auto !important;
+        }
+        
+        /* Ensure labels work */
+        label {
+          pointer-events: auto !important;
+          cursor: pointer !important;
+          -webkit-tap-highlight-color: transparent !important;
+        }
+      `;
       
       document.head.appendChild(style);
+      
+      // Add touch event listeners to ensure inputs are focusable
+      const handleInputFocus = (e: Event) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+          setTimeout(() => {
+            (target as HTMLInputElement).focus();
+          }, 10);
+        }
+      };
+
+      document.addEventListener('touchstart', handleInputFocus, { passive: true });
+      document.addEventListener('click', handleInputFocus, { passive: true });
       
       return () => {
         const styleElement = document.getElementById('pwa-input-styles');
         if (styleElement) {
           styleElement.remove();
         }
+        document.removeEventListener('touchstart', handleInputFocus);
+        document.removeEventListener('click', handleInputFocus);
       };
     }
   }, []);

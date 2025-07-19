@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Globe, RefreshCw, Sparkles, Settings, Users, BarChart3, Palette, Bell, Star, MessageCircle, Smartphone, QrCode, Zap, User, MessageSquare } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-
 interface Restaurant {
   id: string;
   name: string;
@@ -17,7 +16,6 @@ interface Restaurant {
   connection_status: string;
   created_at: string;
 }
-
 interface CompanySettings {
   id: string;
   company_name: string;
@@ -32,7 +30,6 @@ interface CompanySettings {
     website?: string;
   };
 }
-
 const Index = () => {
   const navigate = useNavigate();
 
@@ -50,7 +47,6 @@ const Index = () => {
       return data as CompanySettings;
     }
   });
-
   const {
     data: restaurants,
     isLoading
@@ -67,7 +63,6 @@ const Index = () => {
       return data as Restaurant[];
     }
   });
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'connected':
@@ -76,7 +71,6 @@ const Index = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
-
   const scrollToFeatures = () => {
     const featuresSection = document.getElementById('features-section');
     if (featuresSection) {
@@ -85,21 +79,17 @@ const Index = () => {
       });
     }
   };
-
   const handlePricingClick = () => {
     navigate('/contact');
   };
-
   const handleScheduleDemo = () => {
     navigate('/calendar-booking');
   };
-
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-background">
         <RefreshCw className="h-8 w-8 animate-spin text-primary" />
       </div>;
   }
-
   return <div className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
@@ -299,12 +289,9 @@ const Index = () => {
             <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 text-primary-foreground/90">
               Join hundreds of restaurants already using Click Code to create amazing digital dining experiences
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" onClick={() => navigate('/contact')}>
-                <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                Start Your Free Trial
-              </Button>
-              <Button variant="outline" size="lg" className="border-primary-foreground/30 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg hover:scale-105 transition-all duration-300 text-slate-50 bg-slate-950 hover:bg-slate-800" onClick={handleScheduleDemo}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center bg-slate-50 rounded-none">
+              
+              <Button variant="outline" size="lg" onClick={handleScheduleDemo} className="border-primary-foreground/30 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg hover:scale-105 transition-all duration-300 text-gray-950 bg-slate-50">
                 Schedule Demo
               </Button>
             </div>
@@ -359,5 +346,4 @@ const Index = () => {
       </footer>
     </div>;
 };
-
 export default Index;

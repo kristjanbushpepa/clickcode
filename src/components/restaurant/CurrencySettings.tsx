@@ -70,7 +70,7 @@ export function CurrencySettings() {
           .update({ ...updates, last_updated: new Date().toISOString() })
           .eq('id', currencySettings.id)
           .select()
-          .single();
+          .maybeSingle();
         
         if (error) {
           console.error('Update error:', error);
@@ -79,12 +79,26 @@ export function CurrencySettings() {
         console.log('Updated currency settings:', data);
         return data;
       } else {
-        // Insert new record
+        // Insert new record with default values
+        const defaultValues = {
+          default_currency: 'ALL',
+          supported_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+          enabled_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+          exchange_rates: {
+            'ALL': 1.0,
+            'EUR': 0.0092,
+            'USD': 0.010,
+            'GBP': 0.0082,
+            'CHF': 0.0093
+          },
+          ...updates
+        };
+        
         const { data, error } = await restaurantSupabase
           .from('currency_settings')
-          .insert([{ ...updates, last_updated: new Date().toISOString() }])
+          .insert([{ ...defaultValues, last_updated: new Date().toISOString() }])
           .select()
-          .single();
+          .maybeSingle();
         
         if (error) {
           console.error('Insert error:', error);

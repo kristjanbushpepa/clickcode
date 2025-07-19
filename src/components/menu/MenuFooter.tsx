@@ -100,7 +100,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
   };
 
   return (
-    <div className="sticky bottom-0 left-0 right-0 mt-auto border-t border-border/20 bg-background/95 backdrop-blur-sm z-40">
+    <div className="mt-6 border-t border-border/20">
       <div className="px-3 py-4">
         <div className="max-w-sm mx-auto space-y-3">
           

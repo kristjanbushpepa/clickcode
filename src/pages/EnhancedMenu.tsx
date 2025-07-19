@@ -728,11 +728,11 @@ const EnhancedMenu = () => {
           `}
         </style>
         <div className="max-w-sm mx-auto relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10 pointer-events-none" style={{ color: placeholderColor }} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 z-10 pointer-events-none" style={{ color: placeholderColor }} />
           <Input 
             id={searchBarId}
             ref={searchInputRef}
-            placeholder="Search menu items..." 
+            placeholder="" 
             value={searchTerm} 
             onChange={handleSearchChange}
             className="pl-12 pr-10 h-10 border backdrop-blur-sm text-sm" 

@@ -43,12 +43,18 @@ interface CurrencySwitchProps {
   restaurantSupabase: any;
   currentCurrency: string;
   onCurrencyChange: (currency: string) => void;
+  customTheme?: {
+    currencySwitchBackground?: string;
+    currencySwitchBorder?: string;
+    currencySwitchText?: string;
+  };
 }
 
 export function CurrencySwitch({
   restaurantSupabase,
   currentCurrency,
-  onCurrencyChange
+  onCurrencyChange,
+  customTheme
 }: CurrencySwitchProps) {
   // Fetch currency settings with shorter stale time for better reactivity
   const {
@@ -89,7 +95,12 @@ export function CurrencySwitch({
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-8 px-2 bg-muted/50 border-border hover:bg-muted text-foreground rounded-md flex items-center gap-1"
+          className="h-8 px-2 rounded-md flex items-center gap-1"
+          style={{
+            backgroundColor: customTheme?.currencySwitchBackground,
+            borderColor: customTheme?.currencySwitchBorder,
+            color: customTheme?.currencySwitchText
+          }}
         >
           <span className="text-sm">{currentCurrencyData?.flag}</span>
           <span className="text-xs font-medium">{currentCurrency}</span>

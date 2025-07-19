@@ -124,6 +124,21 @@ interface MenuTheme {
   priceColor?: string;
   badgeBackgroundColor?: string;
   badgeTextColor?: string;
+  languageSwitchBackground?: string;
+  languageSwitchBorder?: string;
+  languageSwitchText?: string;
+  currencySwitchBackground?: string;
+  currencySwitchBorder?: string;
+  currencySwitchText?: string;
+  tabSwitcherBackground?: string;
+  tabSwitcherBorder?: string;
+  tabSwitcherText?: string;
+  tabSwitcherActiveBackground?: string;
+  tabSwitcherActiveText?: string;
+  searchBarBackground?: string;
+  searchBarBorder?: string;
+  searchBarText?: string;
+  searchBarPlaceholder?: string;
 }
 
 interface Restaurant {
@@ -653,7 +668,7 @@ const EnhancedMenu = () => {
   const SearchBar = useMemo(() => (
     <div className="px-3 py-3">
       <div className="max-w-sm mx-auto relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10 pointer-events-none" style={mutedTextStyles} />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10 pointer-events-none" style={{ color: customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280' }} />
         <Input 
           ref={searchInputRef}
           placeholder="Search menu items..." 
@@ -661,9 +676,9 @@ const EnhancedMenu = () => {
           onChange={handleSearchChange}
           className="pl-10 pr-10 h-10 border backdrop-blur-sm text-sm" 
           style={{
-            backgroundColor: customTheme?.cardBackground || '#ffffff',
-            borderColor: customTheme?.borderColor || '#e5e7eb',
-            color: customTheme?.textColor || '#1f2937',
+            backgroundColor: customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff',
+            borderColor: customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb',
+            color: customTheme?.searchBarText || customTheme?.textColor || '#1f2937',
             fontSize: '14px'
           }}
         />
@@ -672,7 +687,7 @@ const EnhancedMenu = () => {
             onClick={clearSearch}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-medium transition-colors z-10"
             style={{
-              color: customTheme?.mutedTextColor || '#6b7280'
+              color: customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'
             }}
             aria-label="Clear search"
           >
@@ -734,8 +749,26 @@ const EnhancedMenu = () => {
               {logoImageUrl && <img src={logoImageUrl} alt={profile?.name} className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1" />}
             </div>
             <div className="flex gap-1">
-              <LanguageSwitch restaurantSupabase={restaurantSupabase} currentLanguage={currentLanguage} onLanguageChange={setCurrentLanguage} />
-              <CurrencySwitch restaurantSupabase={restaurantSupabase} currentCurrency={currentCurrency} onCurrencyChange={setCurrentCurrency} />
+              <LanguageSwitch 
+                restaurantSupabase={restaurantSupabase} 
+                currentLanguage={currentLanguage} 
+                onLanguageChange={setCurrentLanguage} 
+                customTheme={customTheme ? {
+                  languageSwitchBackground: customTheme.languageSwitchBackground,
+                  languageSwitchBorder: customTheme.languageSwitchBorder,
+                  languageSwitchText: customTheme.languageSwitchText
+                } : undefined}
+              />
+              <CurrencySwitch 
+                restaurantSupabase={restaurantSupabase} 
+                currentCurrency={currentCurrency} 
+                onCurrencyChange={setCurrentCurrency}
+                customTheme={customTheme ? {
+                  currencySwitchBackground: customTheme.currencySwitchBackground,
+                  currencySwitchBorder: customTheme.currencySwitchBorder,
+                  currencySwitchText: customTheme.currencySwitchText
+                } : undefined}
+              />
             </div>
           </div>
           
@@ -988,22 +1021,20 @@ const EnhancedMenu = () => {
               <TabsList 
                 className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm border" 
                 style={{
-                  backgroundColor: customTheme?.cardBackground || '#f8f9fa',
-                  borderColor: customTheme?.borderColor || '#e5e7eb'
+                  backgroundColor: customTheme?.tabSwitcherBackground || customTheme?.cardBackground || '#f8f9fa',
+                  borderColor: customTheme?.tabSwitcherBorder || customTheme?.borderColor || '#e5e7eb'
                 }}
               >
                 <TabsTrigger 
                   value="all" 
-                  className="text-xs h-7 px-3 flex-shrink-0 rounded-sm transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:font-medium hover:bg-white/50"
+                  className="text-xs h-7 px-3 flex-shrink-0 rounded-sm transition-all duration-200 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:font-medium"
                   style={{
-                    color: customTheme?.textColor || '#1f2937',
-                    '--active-bg': customTheme?.accentColor || '#3b82f6',
-                    '--active-text': '#ffffff'
-                  } as React.CSSProperties & { '--active-bg': string; '--active-text': string }}
+                    color: customTheme?.tabSwitcherText || customTheme?.mutedTextColor || '#6b7280'
+                  }}
                   data-active-style={{
-                    backgroundColor: customTheme?.accentColor || '#3b82f6',
-                    color: '#ffffff',
-                    borderColor: customTheme?.accentColor || '#3b82f6'
+                    backgroundColor: customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6',
+                    color: customTheme?.tabSwitcherActiveText || '#ffffff',
+                    borderColor: customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6'
                   }}
                 >
                   All
@@ -1020,16 +1051,14 @@ const EnhancedMenu = () => {
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id} 
-                      className="text-xs h-7 px-3 flex-shrink-0 rounded-sm transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:font-medium hover:bg-white/50"
+                      className="text-xs h-7 px-3 flex-shrink-0 rounded-sm transition-all duration-200 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:font-medium"
                       style={{
-                        color: customTheme?.textColor || '#1f2937',
-                        '--active-bg': customTheme?.accentColor || '#3b82f6',
-                        '--active-text': '#ffffff'
-                      } as React.CSSProperties & { '--active-bg': string; '--active-text': string }}
+                        color: customTheme?.tabSwitcherText || customTheme?.mutedTextColor || '#6b7280'
+                      }}
                       data-active-style={{
-                        backgroundColor: customTheme?.accentColor || '#3b82f6',
-                        color: '#ffffff',
-                        borderColor: customTheme?.accentColor || '#3b82f6'
+                        backgroundColor: customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6',
+                        color: customTheme?.tabSwitcherActiveText || '#ffffff',
+                        borderColor: customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6'
                       }}
                     >
                       {getLocalizedText(category, 'name')}

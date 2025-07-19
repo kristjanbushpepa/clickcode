@@ -43,12 +43,18 @@ interface LanguageSwitchProps {
   restaurantSupabase: any;
   currentLanguage: string;
   onLanguageChange: (language: string) => void;
+  customTheme?: {
+    languageSwitchBackground?: string;
+    languageSwitchBorder?: string;
+    languageSwitchText?: string;
+  };
 }
 
 export function LanguageSwitch({
   restaurantSupabase,
   currentLanguage,
-  onLanguageChange
+  onLanguageChange,
+  customTheme
 }: LanguageSwitchProps) {
   // Fetch language settings with shorter stale time for better reactivity
   const {
@@ -89,7 +95,12 @@ export function LanguageSwitch({
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-8 px-2 bg-muted/50 border-border hover:bg-muted text-foreground rounded-md flex items-center gap-1"
+          className="h-8 px-2 rounded-md flex items-center gap-1"
+          style={{
+            backgroundColor: customTheme?.languageSwitchBackground,
+            borderColor: customTheme?.languageSwitchBorder,
+            color: customTheme?.languageSwitchText
+          }}
         >
           <span className="text-sm">{currentLangData?.flag}</span>
           <span className="text-xs font-medium">{currentLanguage.toUpperCase()}</span>

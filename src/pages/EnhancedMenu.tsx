@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,12 +18,10 @@ import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
 
-// Lazy load non-critical components for better initial load
-const PopupModal = lazy(() => import('@/components/menu/PopupModal').then(module => ({ default: module.PopupModal })));
-const MenuItemDetailPopup = lazy(() => import('@/components/menu/MenuItemDetailPopup').then(module => ({ default: module.MenuItemDetailPopup })));
-
-// Preload critical components
-const MenuItemPopup = lazy(() => import('@/components/menu/MenuItemPopup'));
+// Import components directly to avoid Suspense issues
+import { PopupModal } from '@/components/menu/PopupModal';
+import { MenuItemDetailPopup } from '@/components/menu/MenuItemDetailPopup';
+import MenuItemPopup from '@/components/menu/MenuItemPopup';
 
 interface SocialMediaOption {
   platform: string;
@@ -250,7 +248,8 @@ const EnhancedMenu = () => {
       return data as Category[];
     },
     enabled: !!restaurantSupabase,
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 5 * 60 * 1000, // 5 minutes - categories change less frequently
     refetchOnWindowFocus: false,
     select: (data) => data?.filter(cat => cat.is_active) || [], // Filter in selector
@@ -307,7 +306,8 @@ const EnhancedMenu = () => {
       return data as MenuItem[];
     },
     enabled: !!restaurantSupabase,
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 3 * 60 * 1000, // 3 minutes - menu items change more frequently
     refetchOnWindowFocus: false,
     select: (data) => data?.filter(item => item.is_available) || [],
@@ -909,29 +909,25 @@ const EnhancedMenu = () => {
           
           {/* Popup Modal - Added here */}
           {popupSettings && restaurant && (
-            <Suspense fallback={null}>
-              <PopupModal 
-                settings={popupSettings} 
-                restaurantName={restaurant.name} 
-                customTheme={customTheme}
-              />
-            </Suspense>
+            <PopupModal 
+              settings={popupSettings} 
+              restaurantName={restaurant.name} 
+              customTheme={customTheme}
+            />
           )}
           
           {/* Menu Item Detail Popup */}
           {selectedMenuItem && (
-            <Suspense fallback={null}>
-              <MenuItemDetailPopup 
-                item={selectedMenuItem} 
-                isOpen={!!selectedMenuItem} 
-                onClose={() => setSelectedMenuItem(null)} 
-                formatPrice={formatPrice} 
-                getLocalizedText={getLocalizedText} 
-                getMenuItemImageUrl={getMenuItemImageUrl} 
-                categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} 
-                customTheme={customTheme} 
-              />
-            </Suspense>
+            <MenuItemDetailPopup 
+              item={selectedMenuItem} 
+              isOpen={!!selectedMenuItem} 
+              onClose={() => setSelectedMenuItem(null)} 
+              formatPrice={formatPrice} 
+              getLocalizedText={getLocalizedText} 
+              getMenuItemImageUrl={getMenuItemImageUrl} 
+              categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} 
+              customTheme={customTheme} 
+            />
           )}
         </div>;
     }
@@ -1219,29 +1215,25 @@ const EnhancedMenu = () => {
       
       {/* Popup Modal with theme */}
       {popupSettings && restaurant && (
-        <Suspense fallback={null}>
-          <PopupModal 
-            settings={popupSettings} 
-            restaurantName={restaurant.name} 
-            customTheme={customTheme}
-          />
-        </Suspense>
+        <PopupModal 
+          settings={popupSettings} 
+          restaurantName={restaurant.name} 
+          customTheme={customTheme}
+        />
       )}
 
       {/* Menu Item Detail Popup - Updated */}
       {selectedMenuItem && (
-        <Suspense fallback={null}>
-          <MenuItemDetailPopup 
-            item={selectedMenuItem} 
-            isOpen={!!selectedMenuItem} 
-            onClose={() => setSelectedMenuItem(null)} 
-            formatPrice={formatPrice} 
-            getLocalizedText={getLocalizedText} 
-            getMenuItemImageUrl={getMenuItemImageUrl} 
-            categoryName={getLocalizedCategoryName(selectedMenuItem.category_id)} 
-            customTheme={customTheme} 
-          />
-        </Suspense>
+        <MenuItemDetailPopup 
+          item={selectedMenuItem} 
+          isOpen={!!selectedMenuItem} 
+          onClose={() => setSelectedMenuItem(null)} 
+          formatPrice={formatPrice} 
+          getLocalizedText={getLocalizedText} 
+          getMenuItemImageUrl={getMenuItemImageUrl} 
+          categoryName={getLocalizedCategoryName(selectedMenuItem.category_id)} 
+          customTheme={customTheme} 
+        />
       )}
     </div>
   );

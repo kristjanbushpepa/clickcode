@@ -62,7 +62,15 @@ export const isRestaurantUserLoggedIn = async () => {
     if (!restaurantInfo) return false;
     
     const supabase = getRestaurantSupabase();
-    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Session check timeout')), 5000)
+    );
+    
+    const sessionPromise = supabase.auth.getSession();
+    
+    const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
     
     return !!session?.user;
   } catch (error) {

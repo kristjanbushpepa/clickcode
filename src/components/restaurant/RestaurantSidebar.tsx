@@ -34,17 +34,22 @@ export function RestaurantSidebar({ onTabChange, activeTab }: RestaurantSidebarP
 
   const handleLogout = async () => {
     try {
-      // Clear restaurant login data
+      console.log('Starting logout process...');
+      
+      // Clear restaurant login data first
       clearRestaurantLogin();
+      console.log('Restaurant login data cleared');
       
-      // Also sign out from main auth
+      // Sign out from main auth context
       await signOut();
+      console.log('Auth context signed out');
       
-      // Redirect to login page
+      // Force redirect to login page
       window.location.href = '/restaurant/login';
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Error during logout:', error);
       // Force redirect even if there's an error
+      clearRestaurantLogin();
       window.location.href = '/restaurant/login';
     }
   };
@@ -77,7 +82,10 @@ export function RestaurantSidebar({ onTabChange, activeTab }: RestaurantSidebarP
               ))}
               
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleLogout}>
+                <SidebarMenuButton 
+                  onClick={handleLogout}
+                  className="hover:bg-red-500/10 hover:text-red-600"
+                >
                   <LogOut className="h-4 w-4" />
                   {!isCollapsed && <span>Logout</span>}
                 </SidebarMenuButton>

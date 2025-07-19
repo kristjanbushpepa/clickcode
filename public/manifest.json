@@ -1,0 +1,28 @@
+
+{
+  "name": "Click Code - Digital Menu Platform",
+  "short_name": "Click Code",
+  "description": "Transform your restaurant with our cutting-edge digital menu platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["business", "food"],
+  "lang": "en",
+  "dir": "ltr"
+}

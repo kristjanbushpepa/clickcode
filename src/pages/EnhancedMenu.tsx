@@ -699,6 +699,18 @@ const EnhancedMenu = () => {
               background-color: ${backgroundColor} !important;
               border-color: ${borderColor} !important;
               color: ${textColor} !important;
+              box-sizing: border-box !important;
+              font-family: inherit !important;
+              font-size: 0.875rem !important;
+              line-height: 1.25rem !important;
+              padding-left: 3rem !important;
+              padding-right: 2.5rem !important;
+              height: 2.5rem !important;
+              border-width: 1px !important;
+              border-style: solid !important;
+              border-radius: 0.375rem !important;
+              backdrop-filter: blur(4px) !important;
+              -webkit-backdrop-filter: blur(4px) !important;
             }
             #${searchBarId}::placeholder {
               color: ${placeholderColor} !important;
@@ -724,19 +736,38 @@ const EnhancedMenu = () => {
               background-color: ${backgroundColor} !important;
               border-color: ${borderColor} !important;
               color: ${textColor} !important;
+              outline: none !important;
+              box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+            }
+            .search-container-${searchBarId} {
+              position: relative !important;
+              max-width: 24rem !important;
+              margin-left: auto !important;
+              margin-right: auto !important;
+            }
+            .search-icon-${searchBarId} {
+              position: absolute !important;
+              left: 0.75rem !important;
+              top: 50% !important;
+              transform: translateY(-50%) !important;
+              height: 0.75rem !important;
+              width: 0.75rem !important;
+              z-index: 10 !important;
+              pointer-events: none !important;
+              color: ${placeholderColor} !important;
             }
           `}
         </style>
-        <div className="max-w-sm mx-auto relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 z-10 pointer-events-none" style={{ color: placeholderColor }} />
+        <div className={`search-container-${searchBarId}`}>
+          <Search className={`search-icon-${searchBarId}`} />
           <Input 
             id={searchBarId}
             ref={searchInputRef}
             placeholder="" 
             value={searchTerm} 
             onChange={handleSearchChange}
-            className="pl-12 pr-10 h-10 border backdrop-blur-sm text-sm" 
-          />
+            className="w-full" 
+           />
           {searchTerm && (
             <button
               onClick={clearSearch}

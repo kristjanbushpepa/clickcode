@@ -451,10 +451,10 @@ export function MenuManagement() {
               Kategoritë
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3 p-4">
             <Button
               variant={selectedCategory === null ? "default" : "ghost"}
-              className="w-full justify-start"
+              className="w-full justify-start h-10"
               onClick={() => setSelectedCategory(null)}
             >
               Të gjitha artikujt
@@ -463,29 +463,35 @@ export function MenuManagement() {
               <div key={category.id} className="flex items-center gap-2">
                 <Button
                   variant={selectedCategory === category.id ? "default" : "ghost"}
-                  className="flex-1 justify-start"
+                  className="flex-1 justify-start h-10 min-w-0"
                   onClick={() => setSelectedCategory(category.id)}
                 >
-                  {category.name_sq || category.name}
-                  {!category.is_active && <EyeOff className="h-4 w-4 ml-2" />}
+                  <span className="truncate">
+                    {category.name_sq || category.name}
+                  </span>
+                  {!category.is_active && <EyeOff className="h-4 w-4 ml-2 flex-shrink-0" />}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setEditingCategory(category);
-                    setShowCategoryDialog(true);
-                  }}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => deleteCategoryMutation.mutate(category.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-1 flex-shrink-0">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => {
+                      setEditingCategory(category);
+                      setShowCategoryDialog(true);
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => deleteCategoryMutation.mutate(category.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </CardContent>

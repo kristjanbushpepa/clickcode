@@ -12,7 +12,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { TabsTrigger } from '@/components/ui/tabs';
 
 interface RestaurantSidebarProps {
   onTabChange: (tab: string) => void;
@@ -54,18 +53,16 @@ export function RestaurantSidebar({ onTabChange, activeTab }: RestaurantSidebarP
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <TabsTrigger value={item.value} asChild>
-                    <SidebarMenuButton
-                      onClick={() => onTabChange(item.value)}
-                      className={activeTab === item.value 
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
-                        : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                      }
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
-                    </SidebarMenuButton>
-                  </TabsTrigger>
+                  <SidebarMenuButton
+                    onClick={() => onTabChange(item.value)}
+                    className={activeTab === item.value 
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+                      : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                    }
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {!isCollapsed && <span>{item.title}</span>}
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
               

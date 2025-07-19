@@ -1,12 +1,13 @@
 
-const CACHE_NAME = 'click-code-v1';
+const CACHE_NAME = 'click-code-v2';
 const urlsToCache = [
   '/',
   '/restaurant/login',
   '/restaurant/dashboard',
   '/static/css/main.css',
   '/static/js/main.js',
-  '/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png'
+  '/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png',
+  '/lovable-uploads/b3f03c08-8343-4600-8bb8-c11b5543f234.png'
 ];
 
 self.addEventListener('install', (event) => {

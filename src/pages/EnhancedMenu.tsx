@@ -998,7 +998,7 @@ const EnhancedMenu = () => {
     
     // Categories layout - show search results when searching
     if (searchTerm) {
-      return <div ref={swipeRef} className="viewport-fill smooth-scroll" style={themeStyles}>
+      return <div ref={swipeRef} className="min-h-screen flex flex-col viewport-fill smooth-scroll" style={themeStyles}>
           {/* Viewport background fill */}
           <div 
             className="fixed inset-0 -z-10" 
@@ -1007,7 +1007,7 @@ const EnhancedMenu = () => {
           
           <MenuHeader />
           {SearchBar}
-          <div className="px-3 py-3">
+          <div className="flex-1 px-3 py-3">
             <div className="max-w-sm mx-auto">
               <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
                 Search Results ({filteredMenuItems.length} found)
@@ -1070,7 +1070,7 @@ const EnhancedMenu = () => {
         </div>;
     }
     
-    return <div ref={swipeRef} className="viewport-fill smooth-scroll" style={themeStyles}>
+    return <div ref={swipeRef} className="min-h-screen flex flex-col viewport-fill smooth-scroll" style={themeStyles}>
         {/* Viewport background fill */}
         <div 
           className="fixed inset-0 -z-10" 
@@ -1079,7 +1079,7 @@ const EnhancedMenu = () => {
         
         <MenuHeader />
         {SearchBar}
-        <div className="px-4 pb-6">
+        <div className="flex-1 px-4 pb-6">
           <div className="max-w-2xl mx-auto">
             {categories.length === 0 ? (
               <div className="text-center py-12 fade-in">

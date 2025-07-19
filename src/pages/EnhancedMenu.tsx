@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense, lazy } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,12 +14,16 @@ import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameC
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
 import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
 import { MenuFooter } from '@/components/menu/MenuFooter';
-import { PopupModal } from '@/components/menu/PopupModal';
 import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
-import MenuItemPopup from '@/components/menu/MenuItemPopup';
-import { MenuItemDetailPopup } from '@/components/menu/MenuItemDetailPopup';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
+
+// Lazy load non-critical components for better initial load
+const PopupModal = lazy(() => import('@/components/menu/PopupModal').then(module => ({ default: module.PopupModal })));
+const MenuItemDetailPopup = lazy(() => import('@/components/menu/MenuItemDetailPopup').then(module => ({ default: module.MenuItemDetailPopup })));
+
+// Preload critical components
+const MenuItemPopup = lazy(() => import('@/components/menu/MenuItemPopup'));
 
 interface SocialMediaOption {
   platform: string;
@@ -194,7 +198,9 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantName,
     retry: 1,
-    staleTime: 5 * 60 * 1000 // 5 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes - longer cache for Cloudflare
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
+    refetchOnMount: false // Rely on cache when possible
   });
 
   // Create restaurant supabase client
@@ -222,7 +228,10 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 1,
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    select: (data) => data, // Enable structural sharing
+    notifyOnChangeProps: ['data', 'error'] // Only re-render on data/error changes
   });
 
   // Categories query
@@ -242,7 +251,10 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 1,
-    staleTime: 2 * 60 * 1000
+    staleTime: 5 * 60 * 1000, // 5 minutes - categories change less frequently
+    refetchOnWindowFocus: false,
+    select: (data) => data?.filter(cat => cat.is_active) || [], // Filter in selector
+    notifyOnChangeProps: ['data', 'error']
   });
 
   // Updated swipe gesture handling with improved logic for category navigation
@@ -296,7 +308,10 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 1,
-    staleTime: 2 * 60 * 1000
+    staleTime: 3 * 60 * 1000, // 3 minutes - menu items change more frequently
+    refetchOnWindowFocus: false,
+    select: (data) => data?.filter(item => item.is_available) || [],
+    notifyOnChangeProps: ['data', 'error']
   });
 
   // Customization query
@@ -317,7 +332,9 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 0,
-    staleTime: 30 * 1000 // Reduced for faster customization updates
+    staleTime: 2 * 60 * 1000, // 2 minutes for customization
+    refetchOnWindowFocus: false,
+    notifyOnChangeProps: ['data']
   });
 
   // Language settings query - now separate for better control
@@ -335,8 +352,9 @@ const EnhancedMenu = () => {
       return data;
     },
     enabled: !!restaurantSupabase,
-    staleTime: 30 * 1000, // Reduced for faster updates
-    refetchInterval: 60 * 1000 // Refetch every minute
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes instead of 1
+    refetchOnWindowFocus: false
   });
 
   // Currency settings query - now separate for better control
@@ -354,8 +372,9 @@ const EnhancedMenu = () => {
       return data;
     },
     enabled: !!restaurantSupabase,
-    staleTime: 30 * 1000, // Reduced for faster updates
-    refetchInterval: 60 * 1000 // Refetch every minute
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes instead of 1
+    refetchOnWindowFocus: false
   });
 
   // Popup settings query
@@ -400,7 +419,7 @@ const EnhancedMenu = () => {
       } as PopupSettings;
     },
     enabled: !!restaurantSupabase,
-    staleTime: 5 * 60 * 1000
+    staleTime: 10 * 60 * 1000 // 10 minutes - popup settings rarely change
   });
 
   // Initialize language and currency from settings
@@ -573,8 +592,8 @@ const EnhancedMenu = () => {
     color: customTheme.mutedTextColor
   } : {}, [customTheme]);
 
-  // Enhanced category card component
-  const CategoryCard = ({ category, categoryItems, index }: { 
+  // Enhanced category card component - memoized for performance
+  const CategoryCard = React.memo(({ category, categoryItems, index }: { 
     category: Category; 
     categoryItems: MenuItem[]; 
     index: number;
@@ -649,7 +668,7 @@ const EnhancedMenu = () => {
         </CardContent>
       </Card>
     );
-  };
+  });
 
   // Memoized search handler to prevent re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -766,8 +785,8 @@ const EnhancedMenu = () => {
     return <MenuLoadingSkeleton layoutStyle={layoutStyle} />;
   }
 
-  // Enhanced MenuHeader component
-  const MenuHeader = () => <div className="relative">
+  // Enhanced MenuHeader component - memoized for performance
+  const MenuHeader = React.memo(() => <div className="relative">
       {bannerImageUrl && <div className="absolute inset-0 bg-cover bg-center" style={{
       backgroundImage: `url(${bannerImageUrl})`
     }}>
@@ -783,7 +802,7 @@ const EnhancedMenu = () => {
               {selectedCategory && layoutPreference === 'categories' && <Button variant="ghost" size="sm" onClick={() => setSelectedCategory(null)} className="text-white hover:bg-white/20 p-2 h-8 w-8">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>}
-              {logoImageUrl && <img src={logoImageUrl} alt={profile?.name} className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1" />}
+              {logoImageUrl && <img src={logoImageUrl} alt={profile?.name} className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1" loading="lazy" />}
             </div>
             <div className="flex gap-1">
               <LanguageSwitch 
@@ -835,7 +854,7 @@ const EnhancedMenu = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>);
 
   // Categories layout
   if (layoutPreference === 'categories') {
@@ -890,25 +909,29 @@ const EnhancedMenu = () => {
           
           {/* Popup Modal - Added here */}
           {popupSettings && restaurant && (
-            <PopupModal 
-              settings={popupSettings} 
-              restaurantName={restaurant.name} 
-              customTheme={customTheme}
-            />
+            <Suspense fallback={null}>
+              <PopupModal 
+                settings={popupSettings} 
+                restaurantName={restaurant.name} 
+                customTheme={customTheme}
+              />
+            </Suspense>
           )}
           
           {/* Menu Item Detail Popup */}
           {selectedMenuItem && (
-            <MenuItemDetailPopup 
-              item={selectedMenuItem} 
-              isOpen={!!selectedMenuItem} 
-              onClose={() => setSelectedMenuItem(null)} 
-              formatPrice={formatPrice} 
-              getLocalizedText={getLocalizedText} 
-              getMenuItemImageUrl={getMenuItemImageUrl} 
-              categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} 
-              customTheme={customTheme} 
-            />
+            <Suspense fallback={null}>
+              <MenuItemDetailPopup 
+                item={selectedMenuItem} 
+                isOpen={!!selectedMenuItem} 
+                onClose={() => setSelectedMenuItem(null)} 
+                formatPrice={formatPrice} 
+                getLocalizedText={getLocalizedText} 
+                getMenuItemImageUrl={getMenuItemImageUrl} 
+                categoryName={categories.find(cat => cat.id === selectedMenuItem.category_id)?.name_sq || categories.find(cat => cat.id === selectedMenuItem.category_id)?.name} 
+                customTheme={customTheme} 
+              />
+            </Suspense>
           )}
         </div>;
     }
@@ -1196,28 +1219,33 @@ const EnhancedMenu = () => {
       
       {/* Popup Modal with theme */}
       {popupSettings && restaurant && (
-        <PopupModal 
-          settings={popupSettings} 
-          restaurantName={restaurant.name} 
-          customTheme={customTheme}
-        />
+        <Suspense fallback={null}>
+          <PopupModal 
+            settings={popupSettings} 
+            restaurantName={restaurant.name} 
+            customTheme={customTheme}
+          />
+        </Suspense>
       )}
 
       {/* Menu Item Detail Popup - Updated */}
       {selectedMenuItem && (
-        <MenuItemDetailPopup 
-          item={selectedMenuItem} 
-          isOpen={!!selectedMenuItem} 
-          onClose={() => setSelectedMenuItem(null)} 
-          formatPrice={formatPrice} 
-          getLocalizedText={getLocalizedText} 
-          getMenuItemImageUrl={getMenuItemImageUrl} 
-          categoryName={getLocalizedCategoryName(selectedMenuItem.category_id)} 
-          customTheme={customTheme} 
-        />
+        <Suspense fallback={null}>
+          <MenuItemDetailPopup 
+            item={selectedMenuItem} 
+            isOpen={!!selectedMenuItem} 
+            onClose={() => setSelectedMenuItem(null)} 
+            formatPrice={formatPrice} 
+            getLocalizedText={getLocalizedText} 
+            getMenuItemImageUrl={getMenuItemImageUrl} 
+            categoryName={getLocalizedCategoryName(selectedMenuItem.category_id)} 
+            customTheme={customTheme} 
+          />
+        </Suspense>
       )}
     </div>
   );
 };
 
-export default EnhancedMenu;
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(EnhancedMenu);

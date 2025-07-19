@@ -4,6 +4,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Performance optimizations for Cloudflare -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+    
+    <!-- Resource hints for faster loading -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+    <link rel="prefetch" href="/src/components/ui/button.tsx" />
+    
     <title>dish-digital-dream</title>
     <meta name="description" content="Transform your restaurant with our cutting-edge digital menu platform" />
     <meta name="author" content="Lovable" />

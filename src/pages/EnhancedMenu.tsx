@@ -719,14 +719,21 @@ const EnhancedMenu = () => {
               border-radius: 0.375rem !important;
               backdrop-filter: blur(4px) !important;
               -webkit-backdrop-filter: blur(4px) !important;
+              -webkit-text-fill-color: ${textColor} !important;
+              -webkit-opacity: 1 !important;
+              text-shadow: none !important;
+              -webkit-appearance: none !important;
+              appearance: none !important;
             }
             #${searchBarId}::placeholder {
               color: ${placeholderColor} !important;
               opacity: 1 !important;
+              -webkit-text-fill-color: ${placeholderColor} !important;
             }
             #${searchBarId}::-webkit-input-placeholder {
               color: ${placeholderColor} !important;
               opacity: 1 !important;
+              -webkit-text-fill-color: ${placeholderColor} !important;
             }
             #${searchBarId}::-moz-placeholder {
               color: ${placeholderColor} !important;
@@ -746,6 +753,7 @@ const EnhancedMenu = () => {
               color: ${textColor} !important;
               outline: none !important;
               box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+              -webkit-text-fill-color: ${textColor} !important;
             }
             .search-container-${searchBarId} {
               position: relative !important;

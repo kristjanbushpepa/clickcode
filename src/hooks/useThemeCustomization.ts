@@ -28,9 +28,9 @@ interface Theme {
   tabHoverBackground?: string;
 }
 
-export const useThemeCustomization = (restaurantSupabase: any) => {
+export const useThemeCustomization = (restaurantSupabase: any, slug: string) => {
   return useQuery({
-    queryKey: ['theme_customization'],
+    queryKey: ['theme_customization', slug],
     queryFn: async () => {
       if (!restaurantSupabase) return null;
       

@@ -43,12 +43,14 @@ interface LanguageSwitchProps {
   restaurantSupabase: any;
   currentLanguage: string;
   onLanguageChange: (language: string) => void;
+  customTheme?: any;
 }
 
 export function LanguageSwitch({
   restaurantSupabase,
   currentLanguage,
-  onLanguageChange
+  onLanguageChange,
+  customTheme
 }: LanguageSwitchProps) {
   // Fetch language settings with shorter stale time for better reactivity
   const {

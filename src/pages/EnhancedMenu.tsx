@@ -502,7 +502,8 @@ const EnhancedMenu = () => {
                     item={{
                       ...item,
                       currency: item.currency || currentCurrency,
-                      is_featured: item.is_featured || false
+                      is_featured: item.is_featured || false,
+                      allergens: item.allergens || []
                     }}
                     getLocalizedText={getLocalizedText}
                     formatPrice={formatPrice}
@@ -516,7 +517,7 @@ const EnhancedMenu = () => {
       </div>
 
       {/* Footer */}
-      <MenuFooter customTheme={customTheme} />
+      <MenuFooter customTheme={customTheme} profile={restaurant} />
 
       {/* Popup Modal */}
       {showPopup && popupSettings && (
@@ -524,11 +525,11 @@ const EnhancedMenu = () => {
           settings={{
             ...popupSettings,
             enabled: popupSettings.is_active,
-            type: popupSettings.popup_type,
+            type: popupSettings.popup_type === 'image' ? 'review' : popupSettings.popup_type,
             title: popupSettings.popup_content?.title || '',
             description: popupSettings.popup_content?.description || ''
           }}
-          onClose={() => setShowPopup(false)}
+          restaurantName={restaurant.name}
           customTheme={customTheme}
         />
       )}

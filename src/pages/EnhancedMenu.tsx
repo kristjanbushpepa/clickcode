@@ -986,18 +986,24 @@ const EnhancedMenu = () => {
           <Tabs defaultValue="all" className="w-full">
             <ScrollArea className="w-full whitespace-nowrap">
               <TabsList 
-                className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm" 
+                className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm border" 
                 style={{
-                  backgroundColor: customTheme?.accentColor + '20',
-                  borderColor: customTheme?.accentColor
+                  backgroundColor: customTheme?.cardBackground || '#f8f9fa',
+                  borderColor: customTheme?.borderColor || '#e5e7eb'
                 }}
               >
                 <TabsTrigger 
                   value="all" 
-                  className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-black/20 data-[state=active]:hover:bg-black/30 data-[state=active]:shadow-none"
+                  className="text-xs h-7 px-3 flex-shrink-0 rounded-sm transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:font-medium hover:bg-white/50"
                   style={{
                     color: customTheme?.textColor || '#1f2937',
-                    backgroundColor: 'transparent'
+                    '--active-bg': customTheme?.accentColor || '#3b82f6',
+                    '--active-text': '#ffffff'
+                  } as React.CSSProperties & { '--active-bg': string; '--active-text': string }}
+                  data-active-style={{
+                    backgroundColor: customTheme?.accentColor || '#3b82f6',
+                    color: '#ffffff',
+                    borderColor: customTheme?.accentColor || '#3b82f6'
                   }}
                 >
                   All
@@ -1014,10 +1020,16 @@ const EnhancedMenu = () => {
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id} 
-                      className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-black/20 data-[state=active]:hover:bg-black/30 data-[state=active]:shadow-none"
+                      className="text-xs h-7 px-3 flex-shrink-0 rounded-sm transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:font-medium hover:bg-white/50"
                       style={{
                         color: customTheme?.textColor || '#1f2937',
-                        backgroundColor: 'transparent'
+                        '--active-bg': customTheme?.accentColor || '#3b82f6',
+                        '--active-text': '#ffffff'
+                      } as React.CSSProperties & { '--active-bg': string; '--active-text': string }}
+                      data-active-style={{
+                        backgroundColor: customTheme?.accentColor || '#3b82f6',
+                        color: '#ffffff',
+                        borderColor: customTheme?.accentColor || '#3b82f6'
                       }}
                     >
                       {getLocalizedText(category, 'name')}

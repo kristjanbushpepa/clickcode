@@ -90,6 +90,10 @@ const Index = () => {
     navigate('/contact');
   };
 
+  const handleScheduleDemo = () => {
+    navigate('/calendar-booking');
+  };
+
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-background">
         <RefreshCw className="h-8 w-8 animate-spin text-primary" />
@@ -300,7 +304,7 @@ const Index = () => {
                 <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Start Your Free Trial
               </Button>
-              <Button variant="outline" size="lg" className="border-primary-foreground/30 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg hover:scale-105 transition-all duration-300 text-slate-50 bg-slate-950 hover:bg-slate-800">
+              <Button variant="outline" size="lg" className="border-primary-foreground/30 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg hover:scale-105 transition-all duration-300 text-slate-50 bg-slate-950 hover:bg-slate-800" onClick={handleScheduleDemo}>
                 Schedule Demo
               </Button>
             </div>

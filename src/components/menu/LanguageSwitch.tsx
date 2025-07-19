@@ -103,7 +103,7 @@ export function LanguageSwitch({
           }}
         >
           <span className="text-sm">{currentLangData?.flag}</span>
-          <span className="text-xs font-medium">{currentLanguage.toUpperCase()}</span>
+          <span className="text-xs font-medium">{currentLanguage === 'sq' ? 'ALB' : currentLanguage.toUpperCase()}</span>
           <ChevronDown className="h-3 w-3" />
         </Button>
       </PopoverTrigger>

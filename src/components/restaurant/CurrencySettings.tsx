@@ -35,7 +35,7 @@ export function CurrencySettings() {
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Fetch currency settings with stale time to avoid frequent refetches
+  // Fetch currency settings with optimized caching
   const { data: currencySettings, isLoading } = useQuery({
     queryKey: ['currency_settings'],
     queryFn: async () => {
@@ -48,17 +48,20 @@ export function CurrencySettings() {
       if (error) throw error;
       return data as CurrencySettings | null;
     },
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    refetchOnWindowFocus: false // Don't refetch on window focus
+    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
   });
 
-  // Update currency settings mutation with optimistic updates
+  // Debounced update function to batch database calls
+  const debouncedUpdateRef = React.useRef<NodeJS.Timeout>();
+  
   const updateSettingsMutation = useMutation({
     mutationFn: async (updates: Partial<CurrencySettings>) => {
       const restaurantSupabase = getRestaurantSupabase();
       
       if (currencySettings?.id) {
-        // Update existing record
         const { data, error } = await restaurantSupabase
           .from('currency_settings')
           .update({ ...updates, last_updated: new Date().toISOString() })
@@ -69,7 +72,6 @@ export function CurrencySettings() {
         if (error) throw error;
         return data;
       } else {
-        // Insert new record
         const { data, error } = await restaurantSupabase
           .from('currency_settings')
           .insert([{ ...updates, last_updated: new Date().toISOString() }])
@@ -80,40 +82,30 @@ export function CurrencySettings() {
         return data;
       }
     },
-    onMutate: async (newSettings) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['currency_settings'] });
-      
-      // Snapshot previous value
-      const previousSettings = queryClient.getQueryData(['currency_settings']);
-      
-      // Optimistically update
-      queryClient.setQueryData(['currency_settings'], (old: CurrencySettings | null) => {
-        return old ? { ...old, ...newSettings, last_updated: new Date().toISOString() } : null;
-      });
-      
-      return { previousSettings };
+    onSuccess: (data) => {
+      queryClient.setQueryData(['currency_settings'], data);
+      setHasChanges(false);
+      toast({ title: 'Cilësimet e monedhës u përditësuan me sukses' });
     },
-    onError: (error: any, variables, context) => {
-      // Rollback on error
-      if (context?.previousSettings) {
-        queryClient.setQueryData(['currency_settings'], context.previousSettings);
-      }
+    onError: (error: any) => {
       toast({ 
         title: 'Gabim në përditësimin e cilësimeve', 
         description: error.message, 
         variant: 'destructive' 
       });
-    },
-    onSuccess: () => {
-      setHasChanges(false);
-      toast({ title: 'Cilësimet e monedhës u përditësuan me sukses' });
-    },
-    onSettled: () => {
-      // Always refetch after mutation
-      queryClient.invalidateQueries({ queryKey: ['currency_settings'] });
     }
   });
+
+  // Debounced save function
+  const debouncedSave = useCallback((updates: Partial<CurrencySettings>) => {
+    if (debouncedUpdateRef.current) {
+      clearTimeout(debouncedUpdateRef.current);
+    }
+    
+    debouncedUpdateRef.current = setTimeout(() => {
+      updateSettingsMutation.mutate(updates);
+    }, 1000); // Wait 1 second before saving
+  }, [updateSettingsMutation]);
 
   // Initialize local state when data loads
   React.useEffect(() => {
@@ -136,8 +128,8 @@ export function CurrencySettings() {
     };
     
     setLocalSettings(prev => prev ? { ...prev, ...updates } : null);
-    updateSettingsMutation.mutate(updates);
-  }, [localSettings, updateSettingsMutation]);
+    debouncedSave(updates);
+  }, [localSettings, debouncedSave]);
 
   const handleCurrencyToggle = useCallback((currency: string) => {
     const currentEnabled = localSettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'];
@@ -153,8 +145,8 @@ export function CurrencySettings() {
     };
     
     setLocalSettings(prev => prev ? { ...prev, ...updates } : null);
-    updateSettingsMutation.mutate(updates);
-  }, [localSettings, updateSettingsMutation]);
+    debouncedSave(updates);
+  }, [localSettings, debouncedSave]);
 
   const handleExchangeRateInputChange = useCallback((currency: string, value: string) => {
     // Update the input value immediately for better UX
@@ -172,7 +164,11 @@ export function CurrencySettings() {
   }, []);
 
   const handleSaveRates = useCallback(() => {
-    // Validate all input values before saving
+    // Clear any pending debounced updates
+    if (debouncedUpdateRef.current) {
+      clearTimeout(debouncedUpdateRef.current);
+    }
+    
     const validatedRates: Record<string, number> = {};
     let hasInvalidRates = false;
 

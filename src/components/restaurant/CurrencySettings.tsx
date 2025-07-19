@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { DollarSign, RefreshCw } from 'lucide-react';
 
@@ -233,10 +232,12 @@ export function CurrencySettings() {
               return (
                 <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Switch
+                    <input
+                      type="checkbox"
                       checked={isEnabled}
-                      onCheckedChange={() => handleCurrencyToggle(currency.code)}
+                      onChange={() => handleCurrencyToggle(currency.code)}
                       disabled={isBaseCurrency}
+                      className="w-4 h-4"
                     />
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{currency.symbol}</span>

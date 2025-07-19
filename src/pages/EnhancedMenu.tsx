@@ -985,15 +985,23 @@ const EnhancedMenu = () => {
         <div className="max-w-sm mx-auto">
           <Tabs defaultValue="all" className="w-full">
             <ScrollArea className="w-full whitespace-nowrap">
-              <TabsList className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm" style={{
-                backgroundColor: customTheme?.accentColor + '20',
-                borderColor: customTheme?.accentColor
-              }}>
+              <TabsList 
+                className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm" 
+                style={{
+                  backgroundColor: customTheme?.accentColor + '20',
+                  borderColor: customTheme?.accentColor,
+                  '--data-state-active-bg': customTheme?.accentColor + '30'
+                }}
+              >
                 <TabsTrigger 
                   value="all" 
-                  className="text-xs h-7 px-3 flex-shrink-0"
+                  className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-transparent"
                   style={{
-                    color: customTheme?.textColor || '#1f2937'
+                    color: customTheme?.textColor || '#1f2937',
+                    backgroundColor: 'transparent'
+                  }}
+                  data-state-active-style={{
+                    backgroundColor: customTheme?.accentColor + '30'
                   }}
                 >
                   All
@@ -1010,9 +1018,13 @@ const EnhancedMenu = () => {
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id} 
-                      className="text-xs h-7 px-3 flex-shrink-0"
+                      className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-transparent"
                       style={{
-                        color: customTheme?.textColor || '#1f2937'
+                        color: customTheme?.textColor || '#1f2937',
+                        backgroundColor: 'transparent'
+                      }}
+                      data-state-active-style={{
+                        backgroundColor: customTheme?.accentColor + '30'
                       }}
                     >
                       {getLocalizedText(category, 'name')}

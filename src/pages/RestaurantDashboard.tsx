@@ -10,6 +10,7 @@ import CustomizationSettings from '@/components/restaurant/CustomizationSettings
 import { TranslationManager } from '@/components/restaurant/TranslationManager';
 import { PopupSettings } from '@/components/restaurant/PopupSettings';
 import { DashboardFormProvider } from '@/contexts/DashboardFormContext';
+import { MobileTabBar } from '@/components/restaurant/MobileTabBar';
 
 const RestaurantDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -37,21 +38,36 @@ const RestaurantDashboard = () => {
     <DashboardFormProvider>
       <SidebarProvider>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="min-h-screen flex w-full bg-background">
-          <RestaurantSidebar onTabChange={setActiveTab} activeTab={activeTab} />
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block">
+            <RestaurantSidebar onTabChange={setActiveTab} activeTab={activeTab} />
+          </div>
           
           <div className="flex-1 flex flex-col">
-            <header className="h-14 flex items-center border-b bg-background px-4">
+            {/* Desktop Header */}
+            <header className="hidden md:flex h-14 items-center border-b bg-background px-4">
               <SidebarTrigger />
               <div className="ml-4">
                 <h1 className="text-lg font-semibold">Restaurant Dashboard</h1>
               </div>
             </header>
+
+            {/* Mobile Header */}
+            <header className="md:hidden h-14 flex items-center justify-center border-b bg-background px-4">
+              <h1 className="text-lg font-semibold">Dashboard</h1>
+            </header>
             
-            <main className="flex-1 p-6">
+            {/* Main Content */}
+            <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
               <TabsContent value={activeTab} className="mt-0">
                 {renderTabContent()}
               </TabsContent>
             </main>
+
+            {/* Mobile Bottom Navigation */}
+            <div className="md:hidden">
+              <MobileTabBar onTabChange={setActiveTab} activeTab={activeTab} />
+            </div>
           </div>
         </Tabs>
       </SidebarProvider>

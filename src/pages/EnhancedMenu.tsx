@@ -749,9 +749,10 @@ const EnhancedMenu = () => {
             }
             .search-container-${searchBarId} {
               position: relative !important;
-              max-width: 24rem !important;
-              margin-left: auto !important;
-              margin-right: auto !important;
+              width: 100% !important;
+              max-width: none !important;
+              margin-left: 0 !important;
+              margin-right: 0 !important;
             }
             .search-icon-${searchBarId} {
               position: absolute !important;
@@ -771,10 +772,18 @@ const EnhancedMenu = () => {
           <Input 
             id={searchBarId}
             ref={searchInputRef}
-            placeholder="" 
+            placeholder="search here" 
             value={searchTerm} 
             onChange={handleSearchChange}
             className="w-full" 
+            style={{
+              fontFamily: 'inherit',
+              fontSize: '0.875rem',
+              lineHeight: '1.25rem',
+              color: textColor,
+              backgroundColor: backgroundColor,
+              borderColor: borderColor
+            }}
            />
           {searchTerm && (
             <button

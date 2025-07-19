@@ -32,8 +32,6 @@ interface CompanySettings {
 }
 const Index = () => {
   const navigate = useNavigate();
-
-  // Fetch company settings
   const {
     data: companySettings
   } = useQuery({
@@ -337,11 +335,13 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="border-t border-border pt-6 sm:pt-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              © 2024 {companySettings?.company_name || 'Click Code'}. All rights reserved. Building the future of digital dining.
-            </p>
-          </div>
+          <Button 
+            variant="outline" 
+            className="border-primary text-primary hover:bg-primary/10 self-start"
+            onClick={() => navigate('/contact')}
+          >
+            Contact Us
+          </Button>
         </div>
       </footer>
     </div>;

@@ -32,11 +32,10 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
 
   const normalizedRewards = normalizeRewards(rewards);
   
-  // Calculate segments with proper angles
+  // Calculate segments with equal sizes regardless of chance
   const segments = normalizedRewards.map((reward, index) => {
-    const prevSegments = normalizedRewards.slice(0, index);
-    const startAngle = prevSegments.reduce((sum, r) => sum + (r.chance / 100) * 360, 0);
-    const segmentAngle = (reward.chance / 100) * 360;
+    const segmentAngle = 360 / normalizedRewards.length; // Equal segments
+    const startAngle = index * segmentAngle;
     const endAngle = startAngle + segmentAngle;
     
     return {

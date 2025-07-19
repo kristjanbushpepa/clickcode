@@ -22,7 +22,7 @@ if ('serviceWorker' in navigator) {
 // Check if app is running in PWA mode and redirect accordingly
 function checkPWALaunch() {
   const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                window.navigator.standalone === true;
+                (window.navigator as any).standalone === true;
   
   if (isPWA && window.location.pathname === '/') {
     // Check if user was previously logged in

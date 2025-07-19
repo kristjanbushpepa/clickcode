@@ -703,10 +703,16 @@ const EnhancedMenu = () => {
       <div className="px-3 py-3">
         <style>
           {`
+            :root {
+              --search-bg-color: ${backgroundColor};
+              --search-border-color: ${borderColor};
+              --search-text-color: ${textColor};
+              --search-placeholder-color: ${placeholderColor};
+            }
             #${searchBarId} {
-              background-color: ${backgroundColor} !important;
-              border-color: ${borderColor} !important;
-              color: ${textColor} !important;
+              background-color: var(--search-bg-color) !important;
+              border-color: var(--search-border-color) !important;
+              color: var(--search-text-color) !important;
               box-sizing: border-box !important;
               font-family: inherit !important;
               font-size: 0.875rem !important;
@@ -719,41 +725,43 @@ const EnhancedMenu = () => {
               border-radius: 0.375rem !important;
               backdrop-filter: blur(4px) !important;
               -webkit-backdrop-filter: blur(4px) !important;
-              -webkit-text-fill-color: ${textColor} !important;
+              -webkit-text-fill-color: var(--search-text-color) !important;
               -webkit-opacity: 1 !important;
               text-shadow: none !important;
               -webkit-appearance: none !important;
               appearance: none !important;
+              caret-color: var(--search-text-color) !important;
             }
             #${searchBarId}::placeholder {
-              color: ${placeholderColor} !important;
+              color: var(--search-placeholder-color) !important;
               opacity: 1 !important;
-              -webkit-text-fill-color: ${placeholderColor} !important;
+              -webkit-text-fill-color: var(--search-placeholder-color) !important;
             }
             #${searchBarId}::-webkit-input-placeholder {
-              color: ${placeholderColor} !important;
+              color: var(--search-placeholder-color) !important;
               opacity: 1 !important;
-              -webkit-text-fill-color: ${placeholderColor} !important;
+              -webkit-text-fill-color: var(--search-placeholder-color) !important;
             }
             #${searchBarId}::-moz-placeholder {
-              color: ${placeholderColor} !important;
+              color: var(--search-placeholder-color) !important;
               opacity: 1 !important;
             }
             #${searchBarId}:-ms-input-placeholder {
-              color: ${placeholderColor} !important;
+              color: var(--search-placeholder-color) !important;
               opacity: 1 !important;
             }
             #${searchBarId}:-moz-placeholder {
-              color: ${placeholderColor} !important;
+              color: var(--search-placeholder-color) !important;
               opacity: 1 !important;
             }
             #${searchBarId}:focus {
-              background-color: ${backgroundColor} !important;
-              border-color: ${borderColor} !important;
-              color: ${textColor} !important;
+              background-color: var(--search-bg-color) !important;
+              border-color: var(--search-border-color) !important;
+              color: var(--search-text-color) !important;
               outline: none !important;
               box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
-              -webkit-text-fill-color: ${textColor} !important;
+              -webkit-text-fill-color: var(--search-text-color) !important;
+              caret-color: var(--search-text-color) !important;
             }
             .search-container-${searchBarId} {
               position: relative !important;
@@ -771,7 +779,7 @@ const EnhancedMenu = () => {
               width: 0.75rem !important;
               z-index: 10 !important;
               pointer-events: none !important;
-              color: ${placeholderColor} !important;
+              color: var(--search-placeholder-color) !important;
             }
           `}
         </style>

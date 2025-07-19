@@ -653,22 +653,27 @@ const EnhancedMenu = () => {
   const SearchBar = useMemo(() => (
     <div className="px-3 py-3">
       <div className="max-w-sm mx-auto relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10" style={mutedTextStyles} />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10 pointer-events-none" style={mutedTextStyles} />
         <Input 
           ref={searchInputRef}
           placeholder="Search menu items..." 
           value={searchTerm} 
           onChange={handleSearchChange}
-          className="pl-10 h-10 border backdrop-blur-sm" 
+          className="pl-10 pr-10 h-10 border backdrop-blur-sm text-sm" 
           style={{
-            ...cardStyles,
-            borderColor: customTheme?.borderColor
-          }} 
+            backgroundColor: customTheme?.cardBackground || '#ffffff',
+            borderColor: customTheme?.borderColor || '#e5e7eb',
+            color: customTheme?.textColor || '#1f2937',
+            fontSize: '14px'
+          }}
         />
         {searchTerm && (
           <button
             onClick={clearSearch}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-medium transition-colors z-10"
+            style={{
+              color: customTheme?.mutedTextColor || '#6b7280'
+            }}
             aria-label="Clear search"
           >
             ×
@@ -676,7 +681,7 @@ const EnhancedMenu = () => {
         )}
       </div>
     </div>
-  ), [searchTerm, handleSearchChange, clearSearch, mutedTextStyles, cardStyles, customTheme]);
+  ), [searchTerm, handleSearchChange, clearSearch, mutedTextStyles, customTheme]);
 
   // Loading states
   if (!restaurantName) {

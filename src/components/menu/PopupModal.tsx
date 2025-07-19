@@ -29,6 +29,7 @@ interface PopupSettings {
   reviewOptions?: ReviewOption[];
   wheelSettings: {
     enabled: boolean;
+    disabled?: boolean;
     unlockType: 'free' | 'link';
     unlockText: string;
     unlockButtonText: string;
@@ -337,7 +338,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                     <SpinWheel 
                       rewards={settings.wheelSettings.rewards} 
                       onComplete={handleWheelComplete} 
-                      disabled={settings.wheelSettings.unlockType === 'link' && !showWheel}
+                      disabled={settings.wheelSettings.disabled || (settings.wheelSettings.unlockType === 'link' && !showWheel)}
                     />
                   </div>
                   
@@ -381,7 +382,11 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                     {settings.wheelSettings.unlockType === 'free' ? 'Spin the wheel for your reward!' : 'Thanks for visiting the link! Spin to win your reward:'}
                   </p>
                   <div className="flex justify-center">
-                    <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} />
+                    <SpinWheel 
+                      rewards={settings.wheelSettings.rewards} 
+                      onComplete={handleWheelComplete} 
+                      disabled={settings.wheelSettings.disabled}
+                    />
                   </div>
                 </> : <div className="space-y-3">
                   <div className="text-4xl animate-bounce">🎉</div>

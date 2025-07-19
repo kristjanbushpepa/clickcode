@@ -665,46 +665,68 @@ const EnhancedMenu = () => {
   }, []);
 
   // Memoized SearchBar component to prevent re-renders
-  const SearchBar = useMemo(() => (
-    <div className="px-3 py-3">
-      <div className="max-w-sm mx-auto relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10 pointer-events-none" style={{ color: customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280' }} />
-        <Input 
-          ref={searchInputRef}
-          placeholder="Search menu items..." 
-          value={searchTerm} 
-          onChange={handleSearchChange}
-          className="pl-10 pr-10 h-10 border backdrop-blur-sm text-sm placeholder:opacity-60" 
-          style={{
-            backgroundColor: customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff',
-            borderColor: customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb',
-            color: customTheme?.searchBarText || customTheme?.textColor || '#1f2937',
-            fontSize: '14px',
-            '--placeholder-color': customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'
-          } as React.CSSProperties & { '--placeholder-color': string }}
-        />
+  const SearchBar = useMemo(() => {
+    const searchBarId = `search-bar-${Math.random().toString(36).substr(2, 9)}`;
+    const placeholderColor = customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280';
+    
+    return (
+      <div className="px-3 py-3">
         <style>
           {`
-            input[style*="--placeholder-color"]::placeholder {
-              color: ${customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'} !important;
+            #${searchBarId}::placeholder {
+              color: ${placeholderColor} !important;
+              opacity: 1 !important;
+            }
+            #${searchBarId}::-webkit-input-placeholder {
+              color: ${placeholderColor} !important;
+              opacity: 1 !important;
+            }
+            #${searchBarId}::-moz-placeholder {
+              color: ${placeholderColor} !important;
+              opacity: 1 !important;
+            }
+            #${searchBarId}:-ms-input-placeholder {
+              color: ${placeholderColor} !important;
+              opacity: 1 !important;
+            }
+            #${searchBarId}:-moz-placeholder {
+              color: ${placeholderColor} !important;
+              opacity: 1 !important;
             }
           `}
         </style>
-        {searchTerm && (
-          <button
-            onClick={clearSearch}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-medium transition-colors z-10"
+        <div className="max-w-sm mx-auto relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 z-10 pointer-events-none" style={{ color: placeholderColor }} />
+          <Input 
+            id={searchBarId}
+            ref={searchInputRef}
+            placeholder="Search menu items..." 
+            value={searchTerm} 
+            onChange={handleSearchChange}
+            className="pl-10 pr-10 h-10 border backdrop-blur-sm text-sm" 
             style={{
-              color: customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'
+              backgroundColor: customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff',
+              borderColor: customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb',
+              color: customTheme?.searchBarText || customTheme?.textColor || '#1f2937',
+              fontSize: '14px'
             }}
-            aria-label="Clear search"
-          >
-            ×
-          </button>
-        )}
+          />
+          {searchTerm && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-medium transition-colors z-10"
+              style={{
+                color: placeholderColor
+              }}
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-  ), [searchTerm, handleSearchChange, clearSearch, mutedTextStyles, customTheme]);
+    );
+  }, [searchTerm, handleSearchChange, clearSearch, customTheme]);
 
   // Loading states
   if (!restaurantName) {

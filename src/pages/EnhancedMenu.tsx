@@ -994,7 +994,7 @@ const EnhancedMenu = () => {
               >
                 <TabsTrigger 
                   value="all" 
-                  className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-black/20 data-[state=active]:hover:bg-black/30 data-[state=active]:shadow-none"
+                  className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-black/20 data-[state=active]:hover:bg-black/80 data-[state=active]:shadow-none"
                   style={{
                     color: customTheme?.textColor || '#1f2937',
                     backgroundColor: 'transparent'
@@ -1014,7 +1014,7 @@ const EnhancedMenu = () => {
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id} 
-                      className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-black/20 data-[state=active]:hover:bg-black/30 data-[state=active]:shadow-none"
+                      className="text-xs h-7 px-3 flex-shrink-0 data-[state=active]:bg-black/20 data-[state=active]:hover:bg-black/80 data-[state=active]:shadow-none"
                       style={{
                         color: customTheme?.textColor || '#1f2937',
                         backgroundColor: 'transparent'

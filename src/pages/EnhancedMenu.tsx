@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +20,6 @@ import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSke
 import MenuItemPopup from '@/components/menu/MenuItemPopup';
 import { MenuItemDetailPopup } from '@/components/menu/MenuItemDetailPopup';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
-import { useMenuSearch } from '@/hooks/useMenuSearch';
 
 interface SocialMediaOption {
   platform: string;
@@ -149,7 +148,7 @@ const EnhancedMenu = () => {
   // Add ref for search input to maintain focus
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Restaurant lookup query with improved caching
+  // Restaurant lookup query
   const {
     data: restaurant,
     isLoading: restaurantLoading,
@@ -180,8 +179,7 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantName,
     retry: 1,
-    staleTime: 10 * 60 * 1000, // Increased cache time
-    gcTime: 15 * 60 * 1000 // Keep in cache longer
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
   // Create restaurant supabase client
@@ -192,7 +190,7 @@ const EnhancedMenu = () => {
     }
   }, [restaurant]);
 
-  // Profile query with improved caching
+  // Profile query
   const {
     data: profile,
     isLoading: profileLoading
@@ -209,11 +207,10 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 1,
-    staleTime: 10 * 60 * 1000, // Increased cache time
-    gcTime: 15 * 60 * 1000
+    staleTime: 5 * 60 * 1000
   });
 
-  // Categories query with improved caching
+  // Categories query
   const {
     data: categories = [],
     isLoading: categoriesLoading
@@ -230,8 +227,7 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 1,
-    staleTime: 5 * 60 * 1000, // Increased cache time
-    gcTime: 10 * 60 * 1000
+    staleTime: 2 * 60 * 1000
   });
 
   // Updated swipe gesture handling with improved logic for category navigation
@@ -262,7 +258,7 @@ const EnhancedMenu = () => {
     preventScroll: true
   });
 
-  // Menu items query with improved caching
+  // Menu items query
   const {
     data: menuItems = [],
     isLoading: itemsLoading
@@ -285,11 +281,10 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 1,
-    staleTime: 5 * 60 * 1000, // Increased cache time
-    gcTime: 10 * 60 * 1000
+    staleTime: 2 * 60 * 1000
   });
 
-  // Customization query with improved caching
+  // Customization query
   const {
     data: customization
   } = useQuery({
@@ -307,11 +302,10 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
     retry: 0,
-    staleTime: 2 * 60 * 1000, // Increased cache time
-    gcTime: 5 * 60 * 1000
+    staleTime: 30 * 1000 // Reduced for faster customization updates
   });
 
-  // Language settings query with improved caching
+  // Language settings query - now separate for better control
   const {
     data: languageSettings
   } = useQuery({
@@ -326,11 +320,11 @@ const EnhancedMenu = () => {
       return data;
     },
     enabled: !!restaurantSupabase,
-    staleTime: 5 * 60 * 1000, // Increased cache time
-    refetchInterval: false // Disable auto-refetch for better performance
+    staleTime: 30 * 1000, // Reduced for faster updates
+    refetchInterval: 60 * 1000 // Refetch every minute
   });
 
-  // Currency settings query with improved caching
+  // Currency settings query - now separate for better control
   const {
     data: currencySettings
   } = useQuery({
@@ -345,11 +339,11 @@ const EnhancedMenu = () => {
       return data;
     },
     enabled: !!restaurantSupabase,
-    staleTime: 5 * 60 * 1000, // Increased cache time
-    refetchInterval: false // Disable auto-refetch for better performance
+    staleTime: 30 * 1000, // Reduced for faster updates
+    refetchInterval: 60 * 1000 // Refetch every minute
   });
 
-  // Popup settings query with improved caching
+  // Popup settings query
   const {
     data: popupSettings
   } = useQuery({
@@ -391,8 +385,7 @@ const EnhancedMenu = () => {
       } as PopupSettings;
     },
     enabled: !!restaurantSupabase,
-    staleTime: 10 * 60 * 1000, // Increased cache time
-    gcTime: 15 * 60 * 1000
+    staleTime: 5 * 60 * 1000
   });
 
   // Initialize language and currency from settings
@@ -444,7 +437,7 @@ const EnhancedMenu = () => {
     }
   }, [customization]);
 
-  // Optimized image URL helpers with memoization
+  // Image URL helpers
   const getImageUrl = useCallback((imagePath: string) => {
     if (!imagePath || !restaurantSupabase) return null;
     const {
@@ -452,14 +445,12 @@ const EnhancedMenu = () => {
     } = restaurantSupabase.storage.from('restaurant-images').getPublicUrl(imagePath);
     return data.publicUrl;
   }, [restaurantSupabase]);
-  
   const getDisplayImageUrl = useCallback((imagePath?: string, imageUrl?: string) => {
     if (imagePath) {
       return getImageUrl(imagePath);
     }
     return imageUrl || null;
   }, [getImageUrl]);
-  
   const getMenuItemImageUrl = useCallback((item: MenuItem) => {
     return getDisplayImageUrl(item.image_path, item.image_url);
   }, [getDisplayImageUrl]);
@@ -468,8 +459,39 @@ const EnhancedMenu = () => {
   const bannerImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null, [profile, getDisplayImageUrl]);
   const logoImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null, [profile, getDisplayImageUrl]);
   
-  // Use optimized search hook
-  const filteredMenuItems = useMenuSearch(menuItems, searchTerm, currentLanguage, categories);
+  // Optimized filtered items with better search logic
+  const filteredMenuItems = useMemo(() => {
+    if (!searchTerm.trim()) return menuItems;
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    
+    return menuItems.filter(item => {
+      // Get localized text for current language
+      const itemName = (currentLanguage === 'sq' && item.name_sq) ? item.name_sq : item.name;
+      const itemDescription = (currentLanguage === 'sq' && item.description_sq) ? item.description_sq : item.description;
+      
+      // Search in name
+      if (itemName && itemName.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+      
+      // Search in description
+      if (itemDescription && itemDescription.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+      
+      // Search in category name
+      const category = categories.find(cat => cat.id === item.category_id);
+      if (category) {
+        const categoryName = (currentLanguage === 'sq' && category.name_sq) ? category.name_sq : category.name;
+        if (categoryName && categoryName.toLowerCase().includes(searchLower)) {
+          return true;
+        }
+      }
+      
+      return false;
+    });
+  }, [menuItems, searchTerm, currentLanguage, categories]);
 
   // Filter items by category for tabs
   const getFilteredItemsByCategory = useCallback((categoryId: string | null) => {
@@ -480,7 +502,7 @@ const EnhancedMenu = () => {
     return baseItems.filter(item => item.category_id === categoryId);
   }, [menuItems, filteredMenuItems, searchTerm]);
 
-  // Optimized utility functions with memoization
+  // Utility functions
   const formatPrice = useCallback((price: number, originalCurrency: string) => {
     if (!currencySettings || currentCurrency === originalCurrency) {
       return `${price.toFixed(2)} ${currentCurrency}`;
@@ -516,32 +538,28 @@ const EnhancedMenu = () => {
     return getLocalizedText(category, 'name');
   }, [categories, getLocalizedText]);
 
-  // Memoized theme styles
+  // Theme styles
   const themeStyles = useMemo(() => customTheme ? {
     backgroundColor: customTheme.backgroundColor,
     color: customTheme.textColor
   } : {}, [customTheme]);
-  
   const cardStyles = useMemo(() => customTheme ? {
     backgroundColor: customTheme.cardBackground,
     borderColor: customTheme.borderColor,
     color: customTheme.textColor
   } : {}, [customTheme]);
-  
   const headingStyles = useMemo(() => customTheme ? {
     color: customTheme.headingColor || customTheme.textColor
   } : {}, [customTheme]);
-  
   const categoryNameStyles = useMemo(() => customTheme ? {
     color: customTheme.categoryNameColor || customTheme.textColor
   } : {}, [customTheme]);
-  
   const mutedTextStyles = useMemo(() => customTheme ? {
     color: customTheme.mutedTextColor
   } : {}, [customTheme]);
 
-  // Enhanced category card component with memoization
-  const CategoryCard = memo(({ category, categoryItems, index }: { 
+  // Enhanced category card component
+  const CategoryCard = ({ category, categoryItems, index }: { 
     category: Category; 
     categoryItems: MenuItem[]; 
     index: number;
@@ -616,9 +634,7 @@ const EnhancedMenu = () => {
         </CardContent>
       </Card>
     );
-  });
-
-  CategoryCard.displayName = 'CategoryCard';
+  };
 
   // Memoized search handler to prevent re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -693,18 +709,18 @@ const EnhancedMenu = () => {
     return <MenuLoadingSkeleton layoutStyle={layoutStyle} />;
   }
 
-  // Enhanced MenuHeader component with memoization
-  const MenuHeader = memo(() => <div className="relative">
-      {bannerImageUrl && <div className="absolute inset-0 bg-cover bg-center h-80" style={{
+  // Enhanced MenuHeader component
+  const MenuHeader = () => <div className="relative">
+      {bannerImageUrl && <div className="absolute inset-0 bg-cover bg-center" style={{
       backgroundImage: `url(${bannerImageUrl})`
     }}>
           <div className="absolute inset-0 bg-black/40"></div>
         </div>}
       
-      <div className="relative px-3 py-4 safe-area-top text-white h-80 flex items-center" style={{
+      <div className="relative px-3 py-4 safe-area-top text-white" style={{
       backgroundColor: bannerImageUrl ? 'transparent' : customTheme?.primaryColor
     }}>
-        <div className="max-w-sm mx-auto w-full">
+        <div className="max-w-sm mx-auto">
           <div className="flex justify-between items-start mb-3">
             <div className="flex items-center gap-3">
               {selectedCategory && layoutPreference === 'categories' && <Button variant="ghost" size="sm" onClick={() => setSelectedCategory(null)} className="text-white hover:bg-white/20 p-2 h-8 w-8">
@@ -744,9 +760,7 @@ const EnhancedMenu = () => {
           </div>
         </div>
       </div>
-    </div>);
-
-  MenuHeader.displayName = 'MenuHeader';
+    </div>;
 
   // Categories layout
   if (layoutPreference === 'categories') {

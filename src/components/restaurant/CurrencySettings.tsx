@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,10 +31,11 @@ const CURRENCY_OPTIONS = [
 export function CurrencySettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({});
+  const [localSettings, setLocalSettings] = useState<CurrencySettings | null>(null);
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
+  const [hasChanges, setHasChanges] = useState(false);
 
-  // Fetch currency settings
+  // Fetch currency settings with stale time to avoid frequent refetches
   const { data: currencySettings, isLoading } = useQuery({
     queryKey: ['currency_settings'],
     queryFn: async () => {
@@ -46,96 +47,131 @@ export function CurrencySettings() {
       
       if (error) throw error;
       return data as CurrencySettings | null;
-    }
+    },
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    refetchOnWindowFocus: false // Don't refetch on window focus
   });
 
-  // Update currency settings mutation
+  // Update currency settings mutation with optimistic updates
   const updateSettingsMutation = useMutation({
     mutationFn: async (updates: Partial<CurrencySettings>) => {
       const restaurantSupabase = getRestaurantSupabase();
       
-      // First try to update existing record
-      const { data: updateData, error: updateError } = await restaurantSupabase
-        .from('currency_settings')
-        .update({ ...updates, last_updated: new Date().toISOString() })
-        .eq('id', currencySettings?.id || '00000000-0000-0000-0000-000000000000')
-        .select()
-        .maybeSingle();
-      
-      if (updateData) {
-        return updateData;
+      if (currencySettings?.id) {
+        // Update existing record
+        const { data, error } = await restaurantSupabase
+          .from('currency_settings')
+          .update({ ...updates, last_updated: new Date().toISOString() })
+          .eq('id', currencySettings.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      } else {
+        // Insert new record
+        const { data, error } = await restaurantSupabase
+          .from('currency_settings')
+          .insert([{ ...updates, last_updated: new Date().toISOString() }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
       }
-      
-      // If no existing record, insert new one
-      const { data: insertData, error: insertError } = await restaurantSupabase
-        .from('currency_settings')
-        .insert([{ ...updates, last_updated: new Date().toISOString() }])
-        .select()
-        .maybeSingle();
-      
-      if (insertError) throw insertError;
-      return insertData;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currency_settings'] });
-      toast({ title: 'Cilësimet e monedhës u përditësuan me sukses' });
+    onMutate: async (newSettings) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['currency_settings'] });
+      
+      // Snapshot previous value
+      const previousSettings = queryClient.getQueryData(['currency_settings']);
+      
+      // Optimistically update
+      queryClient.setQueryData(['currency_settings'], (old: CurrencySettings | null) => {
+        return old ? { ...old, ...newSettings, last_updated: new Date().toISOString() } : null;
+      });
+      
+      return { previousSettings };
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context) => {
+      // Rollback on error
+      if (context?.previousSettings) {
+        queryClient.setQueryData(['currency_settings'], context.previousSettings);
+      }
       toast({ 
         title: 'Gabim në përditësimin e cilësimeve', 
         description: error.message, 
         variant: 'destructive' 
       });
+    },
+    onSuccess: () => {
+      setHasChanges(false);
+      toast({ title: 'Cilësimet e monedhës u përditësuan me sukses' });
+    },
+    onSettled: () => {
+      // Always refetch after mutation
+      queryClient.invalidateQueries({ queryKey: ['currency_settings'] });
     }
   });
 
+  // Initialize local state when data loads
   React.useEffect(() => {
-    if (currencySettings?.exchange_rates) {
-      setExchangeRates(currencySettings.exchange_rates);
-      // Initialize input values with the actual exchange rates
+    if (currencySettings && !localSettings) {
+      setLocalSettings(currencySettings);
       const initialInputValues: Record<string, string> = {};
-      Object.entries(currencySettings.exchange_rates).forEach(([currency, rate]) => {
+      Object.entries(currencySettings.exchange_rates || {}).forEach(([currency, rate]) => {
         initialInputValues[currency] = rate.toString();
       });
       setInputValues(initialInputValues);
     }
-  }, [currencySettings]);
+  }, [currencySettings, localSettings]);
 
-  const handleDefaultCurrencyChange = (currency: string) => {
-    updateSettingsMutation.mutate({ 
+  const handleDefaultCurrencyChange = useCallback((currency: string) => {
+    const updates = { 
       default_currency: currency,
-      supported_currencies: currencySettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
-      enabled_currencies: currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
-      exchange_rates: exchangeRates
-    });
-  };
+      supported_currencies: localSettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+      enabled_currencies: localSettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+      exchange_rates: localSettings?.exchange_rates || {}
+    };
+    
+    setLocalSettings(prev => prev ? { ...prev, ...updates } : null);
+    updateSettingsMutation.mutate(updates);
+  }, [localSettings, updateSettingsMutation]);
 
-  const handleCurrencyToggle = (currency: string) => {
-    const currentEnabled = currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'];
+  const handleCurrencyToggle = useCallback((currency: string) => {
+    const currentEnabled = localSettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'];
     const newEnabled = currentEnabled.includes(currency)
       ? currentEnabled.filter(c => c !== currency)
       : [...currentEnabled, currency];
     
-    updateSettingsMutation.mutate({
-      default_currency: currencySettings?.default_currency || 'ALL',
-      supported_currencies: currencySettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+    const updates = {
+      default_currency: localSettings?.default_currency || 'ALL',
+      supported_currencies: localSettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
       enabled_currencies: newEnabled,
-      exchange_rates: exchangeRates
-    });
-  };
+      exchange_rates: localSettings?.exchange_rates || {}
+    };
+    
+    setLocalSettings(prev => prev ? { ...prev, ...updates } : null);
+    updateSettingsMutation.mutate(updates);
+  }, [localSettings, updateSettingsMutation]);
 
-  const handleExchangeRateInputChange = (currency: string, value: string) => {
+  const handleExchangeRateInputChange = useCallback((currency: string, value: string) => {
     // Update the input value immediately for better UX
     setInputValues(prev => ({ ...prev, [currency]: value }));
+    setHasChanges(true);
     
-    // Only update the actual exchange rate if it's a valid number
+    // Update local exchange rates if valid number
     const numericRate = parseFloat(value);
     if (!isNaN(numericRate) && numericRate > 0) {
-      setExchangeRates(prev => ({ ...prev, [currency]: numericRate }));
+      setLocalSettings(prev => prev ? {
+        ...prev,
+        exchange_rates: { ...prev.exchange_rates, [currency]: numericRate }
+      } : null);
     }
-  };
+  }, []);
 
-  const handleSaveRates = () => {
+  const handleSaveRates = useCallback(() => {
     // Validate all input values before saving
     const validatedRates: Record<string, number> = {};
     let hasInvalidRates = false;
@@ -156,13 +192,16 @@ export function CurrencySettings() {
 
     if (hasInvalidRates) return;
 
-    updateSettingsMutation.mutate({
-      default_currency: currencySettings?.default_currency || 'ALL',
-      supported_currencies: currencySettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
-      enabled_currencies: currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+    const updates = {
+      default_currency: localSettings?.default_currency || 'ALL',
+      supported_currencies: localSettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+      enabled_currencies: localSettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
       exchange_rates: validatedRates
-    });
-  };
+    };
+    
+    setLocalSettings(prev => prev ? { ...prev, ...updates } : null);
+    updateSettingsMutation.mutate(updates);
+  }, [inputValues, localSettings, updateSettingsMutation, toast]);
 
   if (isLoading) {
     return <div className="flex justify-center p-8">Duke ngarkuar...</div>;
@@ -191,7 +230,7 @@ export function CurrencySettings() {
             <div className="space-y-2">
               <Label htmlFor="default-currency">Monedha Kryesore</Label>
               <Select
-                value={currencySettings?.default_currency || 'ALL'}
+                value={localSettings?.default_currency || currencySettings?.default_currency || 'ALL'}
                 onValueChange={handleDefaultCurrencyChange}
               >
                 <SelectTrigger>
@@ -208,7 +247,7 @@ export function CurrencySettings() {
             </div>
             
             <div className="text-sm text-muted-foreground">
-              Të gjitha çmimet e menusë ruhen në {currencySettings?.default_currency || 'ALL'} dhe konvertohen automatikisht për monedhat e tjera.
+              Të gjitha çmimet e menusë ruhen në {localSettings?.default_currency || currencySettings?.default_currency || 'ALL'} dhe konvertohen automatikisht për monedhat e tjera.
             </div>
           </CardContent>
         </Card>
@@ -226,8 +265,10 @@ export function CurrencySettings() {
           </CardHeader>
           <CardContent className="space-y-4">
             {CURRENCY_OPTIONS.map((currency) => {
-              const isBaseCurrency = currency.code === (currencySettings?.default_currency || 'ALL');
-              const isEnabled = currencySettings?.enabled_currencies?.includes(currency.code) ?? true;
+              const defaultCurrency = localSettings?.default_currency || currencySettings?.default_currency || 'ALL';
+              const isBaseCurrency = currency.code === defaultCurrency;
+              const enabledCurrencies = localSettings?.enabled_currencies || currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'];
+              const isEnabled = enabledCurrencies.includes(currency.code);
               const inputValue = isBaseCurrency ? '1.000000' : (inputValues[currency.code] || '0');
               
               return (
@@ -245,7 +286,7 @@ export function CurrencySettings() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">1 {currencySettings?.default_currency || 'ALL'} =</span>
+                    <span className="text-sm text-muted-foreground">1 {defaultCurrency} =</span>
                     <Input
                       type="text"
                       step="any"

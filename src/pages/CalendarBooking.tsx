@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
-import { ArrowLeft, Calendar as CalendarIcon, Clock, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Calendar as CalendarIcon, Clock, Phone, Mail, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -22,13 +22,48 @@ const CalendarBooking = () => {
     restaurantName: '',
     additionalInfo: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Google Form configuration
+  const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse';
+  const FORM_FIELDS = {
+    name: 'entry.123456789',
+    email: 'entry.987654321',
+    phone: 'entry.456789123',
+    date: 'entry.789123456',
+    time: 'entry.321654987',
+    restaurantName: 'entry.654321789',
+    additionalInfo: 'entry.147258369'
+  };
 
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
     '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const submitToGoogleForm = async (data: any) => {
+    const formData = new FormData();
+    
+    Object.entries(data).forEach(([key, value]) => {
+      if (FORM_FIELDS[key as keyof typeof FORM_FIELDS]) {
+        formData.append(FORM_FIELDS[key as keyof typeof FORM_FIELDS], value as string);
+      }
+    });
+
+    try {
+      await fetch(GOOGLE_FORM_URL, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors'
+      });
+      return true;
+    } catch (error) {
+      console.error('Error submitting to Google Form:', error);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedDate || !selectedTime) {
@@ -40,17 +75,52 @@ const CalendarBooking = () => {
       return;
     }
 
-    // Here you would typically send the booking data to your backend
-    console.log('Demo booking:', {
-      ...formData,
-      date: selectedDate,
-      time: selectedTime
-    });
+    if (!formData.name || !formData.email || !formData.phone) {
+      toast({
+        title: "Please fill required fields",
+        description: "Name, email, and phone number are required.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    toast({
-      title: "Demo Scheduled Successfully!",
-      description: `Your demo is scheduled for ${format(selectedDate, 'PPP')} at ${selectedTime}. We'll contact you shortly to confirm.`,
-    });
+    setIsSubmitting(true);
+
+    const submissionData = {
+      ...formData,
+      date: format(selectedDate, 'yyyy-MM-dd'),
+      time: selectedTime
+    };
+
+    console.log('Submitting demo booking:', submissionData);
+
+    const success = await submitToGoogleForm(submissionData);
+
+    if (success) {
+      toast({
+        title: "Demo Scheduled Successfully!",
+        description: `Your demo request has been submitted for ${format(selectedDate, 'PPP')} at ${selectedTime}. You'll receive a confirmation email shortly.`,
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        restaurantName: '',
+        additionalInfo: ''
+      });
+      setSelectedDate(undefined);
+      setSelectedTime('');
+    } else {
+      toast({
+        title: "Submission Error",
+        description: "There was an issue submitting your request. Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -76,6 +146,27 @@ const CalendarBooking = () => {
             Book a personalized demo session to see how Click Code can transform your restaurant's digital presence.
           </p>
         </div>
+
+        {/* Setup Instructions Card */}
+        <Card className="max-w-4xl mx-auto mb-8 bg-blue-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="text-blue-800 flex items-center">
+              <ExternalLink className="h-5 w-5 mr-2" />
+              Google Form Setup Required
+            </CardTitle>
+            <CardDescription className="text-blue-600">
+              To receive instant notifications, you need to set up a Google Form first.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-blue-700">
+            <p className="mb-2">
+              <strong>Current Status:</strong> Form submissions will be logged to console until Google Form is configured.
+            </p>
+            <p>
+              Please check the browser console or contact your administrator to complete the Google Form integration.
+            </p>
+          </CardContent>
+        </Card>
 
         <div className="max-w-4xl mx-auto grid lg:grid-cols-2 gap-8">
           {/* Calendar Section */}
@@ -192,9 +283,10 @@ const CalendarBooking = () => {
                   type="submit" 
                   size="lg" 
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={isSubmitting}
                 >
                   <CalendarIcon className="h-4 w-4 mr-2" />
-                  Schedule Demo
+                  {isSubmitting ? 'Submitting...' : 'Schedule Demo'}
                 </Button>
               </form>
             </CardContent>

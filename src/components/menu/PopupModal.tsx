@@ -333,21 +333,16 @@ export const PopupModal: React.FC<PopupModalProps> = ({
               })}
                   </div>
                 </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-3">
-                  {settings.wheelSettings.unlockType === 'free' || showWheel ? (
-                    // Show actual wheel for free unlock or after unlocking via link
-                    <div className="flex justify-center">
-                      <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} />
-                    </div>
-                  ) : (
-                    // Show preview wheel and unlock flow for link unlock
+                  <div className="flex justify-center">
+                    <SpinWheel 
+                      rewards={settings.wheelSettings.rewards} 
+                      onComplete={handleWheelComplete} 
+                      disabled={settings.wheelSettings.unlockType === 'link' && !showWheel}
+                    />
+                  </div>
+                  
+                  {settings.wheelSettings.unlockType === 'link' && !showWheel && (
                     <>
-                      <div className="flex justify-center">
-                        <PreviewWheel rewards={settings.wheelSettings.rewards.map(r => ({
-                          color: r.color,
-                          chance: r.chance
-                        }))} />
-                      </div>
-                      
                       <p className="text-sm font-medium text-center" style={headingStyles}>
                         {settings.wheelSettings.unlockText}
                       </p>

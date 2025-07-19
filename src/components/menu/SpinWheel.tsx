@@ -11,9 +11,10 @@ interface Reward {
 interface SpinWheelProps {
   rewards: Reward[];
   onComplete: (result: string) => void;
+  disabled?: boolean;
 }
 
-export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => {
+export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete, disabled = false }) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<string>('');
@@ -48,7 +49,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
   });
 
   const spin = () => {
-    if (isSpinning) return;
+    if (isSpinning || disabled) return;
     
     setIsSpinning(true);
     setResult('');
@@ -117,7 +118,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
         </div>
         
         {/* Wheel container with golden border */}
-        <div className="relative w-[250px] h-[250px] rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 p-3 shadow-2xl">
+        <div className={`relative w-[250px] h-[250px] rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 p-3 shadow-2xl ${disabled ? 'opacity-60' : ''}`}>
           {/* Inner wheel */}
           <div 
             ref={wheelRef}
@@ -204,11 +205,13 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete }) => 
       
       <Button 
         onClick={spin} 
-        disabled={isSpinning}
+        disabled={isSpinning || disabled}
         size="lg"
         className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none"
       >
-        {isSpinning ? (
+        {disabled ? (
+          'LOCKED'
+        ) : isSpinning ? (
           <span className="flex items-center gap-2">
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             Spinning...

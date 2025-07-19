@@ -668,11 +668,19 @@ const EnhancedMenu = () => {
   const SearchBar = useMemo(() => {
     const searchBarId = `search-bar-${Math.random().toString(36).substr(2, 9)}`;
     const placeholderColor = customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280';
+    const backgroundColor = customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff';
+    const borderColor = customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb';
+    const textColor = customTheme?.searchBarText || customTheme?.textColor || '#1f2937';
     
     return (
       <div className="px-3 py-3">
         <style>
           {`
+            #${searchBarId} {
+              background-color: ${backgroundColor} !important;
+              border-color: ${borderColor} !important;
+              color: ${textColor} !important;
+            }
             #${searchBarId}::placeholder {
               color: ${placeholderColor} !important;
               opacity: 1 !important;
@@ -693,6 +701,11 @@ const EnhancedMenu = () => {
               color: ${placeholderColor} !important;
               opacity: 1 !important;
             }
+            #${searchBarId}:focus {
+              background-color: ${backgroundColor} !important;
+              border-color: ${borderColor} !important;
+              color: ${textColor} !important;
+            }
           `}
         </style>
         <div className="max-w-sm mx-auto relative">
@@ -704,12 +717,6 @@ const EnhancedMenu = () => {
             value={searchTerm} 
             onChange={handleSearchChange}
             className="pl-10 pr-10 h-10 border backdrop-blur-sm text-sm" 
-            style={{
-              backgroundColor: customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff',
-              borderColor: customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb',
-              color: customTheme?.searchBarText || customTheme?.textColor || '#1f2937',
-              fontSize: '14px'
-            }}
           />
           {searchTerm && (
             <button
@@ -1047,25 +1054,31 @@ const EnhancedMenu = () => {
       <div className="px-3 py-3">
         <div className="max-w-sm mx-auto">
           <Tabs defaultValue="all" className="w-full">
+            <style>
+              {`
+                [data-state="active"][data-tab-trigger] {
+                  background-color: ${customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6'} !important;
+                  color: ${customTheme?.tabSwitcherActiveText || '#ffffff'} !important;
+                  border-color: ${customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6'} !important;
+                }
+                [data-tab-list] {
+                  background-color: ${customTheme?.tabSwitcherBackground || customTheme?.cardBackground || '#f8f9fa'} !important;
+                  border-color: ${customTheme?.tabSwitcherBorder || customTheme?.borderColor || '#e5e7eb'} !important;
+                }
+                [data-tab-trigger]:not([data-state="active"]) {
+                  color: ${customTheme?.tabSwitcherText || customTheme?.mutedTextColor || '#6b7280'} !important;
+                }
+              `}
+            </style>
             <ScrollArea className="w-full whitespace-nowrap">
               <TabsList 
+                data-tab-list
                 className="inline-flex h-9 w-max min-w-full gap-1 p-1 backdrop-blur-sm border" 
-                style={{
-                  backgroundColor: customTheme?.tabSwitcherBackground || customTheme?.cardBackground || '#f8f9fa',
-                  borderColor: customTheme?.tabSwitcherBorder || customTheme?.borderColor || '#e5e7eb'
-                }}
               >
                 <TabsTrigger 
+                  data-tab-trigger
                   value="all" 
                   className="text-xs h-7 px-3 flex-shrink-0 rounded-sm transition-all duration-200 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:font-medium"
-                  style={{
-                    color: customTheme?.tabSwitcherText || customTheme?.mutedTextColor || '#6b7280'
-                  }}
-                  data-active-style={{
-                    backgroundColor: customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6',
-                    color: customTheme?.tabSwitcherActiveText || '#ffffff',
-                    borderColor: customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6'
-                  }}
                 >
                   All
                 </TabsTrigger>
@@ -1079,17 +1092,10 @@ const EnhancedMenu = () => {
                   
                   return (
                     <TabsTrigger 
+                      data-tab-trigger
                       key={category.id} 
                       value={category.id} 
                       className="text-xs h-7 px-3 flex-shrink-0 rounded-sm transition-all duration-200 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:font-medium"
-                      style={{
-                        color: customTheme?.tabSwitcherText || customTheme?.mutedTextColor || '#6b7280'
-                      }}
-                      data-active-style={{
-                        backgroundColor: customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6',
-                        color: customTheme?.tabSwitcherActiveText || '#ffffff',
-                        borderColor: customTheme?.tabSwitcherActiveBackground || customTheme?.primaryColor || '#3b82f6'
-                      }}
                     >
                       {getLocalizedText(category, 'name')}
                     </TabsTrigger>

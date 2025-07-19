@@ -39,7 +39,8 @@ const TabsTrigger = React.forwardRef<
       style={props['data-state'] === 'active' ? { 
         ...style, 
         ...activeStyle,
-        color: (isHovered && activeStyle?.backgroundColor) ? activeStyle?.backgroundColor : (activeStyle?.backgroundColor ? '#000000' : style?.color || activeStyle?.color)
+        border: activeStyle?.backgroundColor ? `2px solid ${activeStyle.backgroundColor}` : undefined,
+        color: (isHovered && activeStyle?.backgroundColor) ? activeStyle?.backgroundColor : style?.color || activeStyle?.color
       } : style}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

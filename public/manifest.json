@@ -8,6 +8,7 @@
   "background_color": "#ffffff",
   "theme_color": "#0f172a",
   "orientation": "portrait-primary",
+  "scope": "/",
   "icons": [
     {
       "src": "/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png",
@@ -24,5 +25,8 @@
   ],
   "categories": ["business", "food"],
   "lang": "en",
-  "dir": "ltr"
+  "dir": "ltr",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
 }

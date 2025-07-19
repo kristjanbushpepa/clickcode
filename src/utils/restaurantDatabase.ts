@@ -40,6 +40,22 @@ export const getRestaurantInfo = () => {
   return JSON.parse(restaurantInfo);
 };
 
+// Check if user is logged in and session is valid
+export const isRestaurantUserLoggedIn = async () => {
+  try {
+    const restaurantInfo = getRestaurantInfo();
+    if (!restaurantInfo) return false;
+    
+    const supabase = getRestaurantSupabase();
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    return !!session?.user;
+  } catch (error) {
+    console.error('Error checking login status:', error);
+    return false;
+  }
+};
+
 // Helper function to create restaurant supabase client from restaurant data
 export const createRestaurantSupabase = (supabase_url: string, supabase_anon_key: string) => {
   return createClient(supabase_url, supabase_anon_key, {

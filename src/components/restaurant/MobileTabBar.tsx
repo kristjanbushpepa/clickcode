@@ -17,8 +17,8 @@ const navigationItems = [
 
 export function MobileTabBar({ onTabChange, activeTab }: MobileTabBarProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-      <div className="grid grid-cols-6 h-16">
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50" style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
+      <div className="grid grid-cols-6 h-16 bg-background">
         {navigationItems.map((item) => (
           <button
             key={item.value}

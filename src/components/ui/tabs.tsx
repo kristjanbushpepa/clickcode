@@ -27,6 +27,8 @@ const TabsTrigger = React.forwardRef<
     'data-active-style'?: React.CSSProperties;
   }
 >(({ className, style, 'data-active-style': activeStyle, ...props }, ref) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+  
   return (
     <TabsPrimitive.Trigger
       ref={ref}
@@ -37,8 +39,10 @@ const TabsTrigger = React.forwardRef<
       style={props['data-state'] === 'active' ? { 
         ...style, 
         ...activeStyle,
-        color: activeStyle?.backgroundColor ? '#000000' : style?.color || activeStyle?.color
+        color: (isHovered && activeStyle?.backgroundColor) ? activeStyle?.backgroundColor : (activeStyle?.backgroundColor ? '#000000' : style?.color || activeStyle?.color)
       } : style}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       {...props}
     />
   )

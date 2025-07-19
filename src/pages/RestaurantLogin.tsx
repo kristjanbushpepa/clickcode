@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,63 +25,12 @@ const RestaurantLogin = () => {
                      (window.navigator as any).standalone === true;
     setIsPWA(checkPWA);
 
-    // Handle viewport and PWA-specific styles
+    // Handle viewport for PWA
     if (checkPWA) {
-      // Set viewport to prevent zoom on input focus
       const viewport = document.querySelector('meta[name=viewport]');
       if (viewport) {
         viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
       }
-      
-      // Add comprehensive PWA styles
-      const style = document.createElement('style');
-      style.textContent = `
-        @supports (-webkit-touch-callout: none) {
-          input[type="email"], 
-          input[type="password"], 
-          input[type="text"] {
-            font-size: 16px !important;
-            -webkit-appearance: none;
-            border-radius: 0;
-          }
-        }
-        
-        @media (display-mode: standalone) {
-          * {
-            -webkit-tap-highlight-color: transparent;
-          }
-          
-          input, textarea, select {
-            font-size: 16px !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            border-radius: 6px !important;
-          }
-          
-          body {
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
-          }
-          
-          input, textarea {
-            -webkit-user-select: text !important;
-            user-select: text !important;
-          }
-          
-          .pwa-input-container {
-            position: relative;
-            z-index: 1;
-          }
-        }
-      `;
-      document.head.appendChild(style);
-      
-      return () => {
-        if (document.head.contains(style)) {
-          document.head.removeChild(style);
-        }
-      };
     }
   }, []);
 
@@ -195,7 +143,7 @@ const RestaurantLogin = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
-            <div className={cn("space-y-2", isPWA && "pwa-input-container")}>
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -206,11 +154,10 @@ const RestaurantLogin = () => {
                 required
                 autoComplete="email"
                 inputMode="email"
-                className={isPWA ? "text-base" : ""}
               />
             </div>
 
-            <div className={cn("space-y-2", isPWA && "pwa-input-container")}>  
+            <div className="space-y-2">  
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
@@ -221,7 +168,6 @@ const RestaurantLogin = () => {
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
-                  className={isPWA ? "text-base" : ""}
                 />
                 <Button
                   type="button"

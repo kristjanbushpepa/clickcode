@@ -333,13 +333,13 @@ export const PopupModal: React.FC<PopupModalProps> = ({
               })}
                   </div>
                 </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-3">
-                  {settings.wheelSettings.unlockType === 'free' ? (
-                    // Show actual wheel for free unlock
+                  {settings.wheelSettings.unlockType === 'free' || showWheel ? (
+                    // Show actual wheel for free unlock or after unlocking via link
                     <div className="flex justify-center">
                       <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} />
                     </div>
                   ) : (
-                    // Show preview wheel for link unlock
+                    // Show preview wheel and unlock flow for link unlock
                     <>
                       <div className="flex justify-center">
                         <PreviewWheel rewards={settings.wheelSettings.rewards.map(r => ({
@@ -351,22 +351,31 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                       <p className="text-sm font-medium text-center" style={headingStyles}>
                         {settings.wheelSettings.unlockText}
                       </p>
+                      
+                      {timeLeft > 0 && timeLeft < 5 ? (
+                        <div className="text-center space-y-2">
+                          <p className="text-xs" style={mutedTextStyles}>
+                            Wheel unlocks in {timeLeft} seconds...
+                          </p>
+                          <div className="w-full rounded-full h-1.5 bg-gray-200">
+                            <div className="h-1.5 rounded-full transition-all duration-1000" style={{
+                              width: `${(5 - timeLeft) / 5 * 100}%`,
+                              backgroundColor: customTheme?.accentColor || '#3b82f6'
+                            }} />
+                          </div>
+                        </div>
+                      ) : (
+                        <Button 
+                          onClick={handleCtaClick} 
+                          className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-pulse text-sm" 
+                          disabled={timeLeft > 0 && timeLeft < 5} 
+                          style={accentButtonStyles}
+                        >
+                          {settings.wheelSettings.unlockButtonText}
+                        </Button>
+                      )}
                     </>
                   )}
-                  
-                  {settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5 ? <div className="text-center space-y-2">
-                      <p className="text-xs" style={mutedTextStyles}>
-                        Wheel unlocks in {timeLeft} seconds...
-                      </p>
-                      <div className="w-full rounded-full h-1.5 bg-gray-200">
-                        <div className="h-1.5 rounded-full transition-all duration-1000" style={{
-                  width: `${(5 - timeLeft) / 5 * 100}%`,
-                  backgroundColor: customTheme?.accentColor || '#3b82f6'
-                }} />
-                      </div>
-                    </div> : <Button onClick={handleCtaClick} className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-pulse text-sm" disabled={settings.wheelSettings.unlockType === 'link' && timeLeft > 0 && timeLeft < 5} style={accentButtonStyles}>
-                      {settings.wheelSettings.unlockButtonText}
-                    </Button>}
                 </div> : <Button onClick={handleCtaClick} className="w-full h-10 flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white text-sm" style={primaryButtonStyles}>
                   <span>{settings.buttonText}</span>
                   {settings.link && <ExternalLink className="h-3 w-3" />}

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { getRestaurantSupabase, createRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
-import { MenuSkeleton } from '@/components/menu/MenuSkeleton';
+import { MenuLoadingSkeleton } from '@/components/menu/MenuSkeleton';
 import { PopupModal } from '@/components/menu/PopupModal';
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
 import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
@@ -60,6 +60,8 @@ interface MenuItem {
   is_available: boolean;
   display_order: number;
   allergens?: string[];
+  currency?: string;
+  is_featured?: boolean;
 }
 
 interface PopupSettings {
@@ -71,6 +73,10 @@ interface PopupSettings {
   display_frequency: number;
   created_at: string;
   updated_at: string;
+  enabled?: boolean;
+  type?: string;
+  title?: string;
+  description?: string;
 }
 
 interface CurrencySettings {
@@ -137,6 +143,9 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantSupabase,
   });
+
+  // Add theme customization with proper arguments
+  const { data: customTheme } = useThemeCustomization(restaurantSupabase, slug || '');
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories', slug],
@@ -219,9 +228,6 @@ const EnhancedMenu = () => {
     enabled: !!restaurantSupabase,
   });
 
-  // Add theme customization
-  const { data: customTheme } = useThemeCustomization(restaurantSupabase);
-
   useEffect(() => {
     if (popupSettings && popupSettings.is_active) {
       const lastShown = localStorage.getItem(`popup_${slug}_last_shown`);
@@ -291,7 +297,7 @@ const EnhancedMenu = () => {
   }, [menuItems, selectedCategory, searchTerm, currentLanguage]);
 
   if (restaurantLoading || categoriesLoading || itemsLoading) {
-    return <MenuSkeleton />;
+    return <MenuLoadingSkeleton />;
   }
 
   if (!restaurant) {
@@ -347,6 +353,7 @@ const EnhancedMenu = () => {
                     restaurantSupabase={restaurantSupabase}
                     currentLanguage={currentLanguage}
                     onLanguageChange={setCurrentLanguage}
+                    customTheme={customTheme}
                   />
                 </div>
               )}
@@ -362,6 +369,7 @@ const EnhancedMenu = () => {
                     restaurantSupabase={restaurantSupabase}
                     currentCurrency={currentCurrency}
                     onCurrencyChange={setCurrentCurrency}
+                    customTheme={customTheme}
                   />
                 </div>
               )}
@@ -451,12 +459,10 @@ const EnhancedMenu = () => {
                   value="all" 
                   className="text-xs h-7 px-3 flex-shrink-0"
                   style={{
-                    color: customTheme?.textColor || '#1f2937',
                     '--tab-active-bg': customTheme?.tabActiveBackground || '#1f2937',
                     '--tab-active-text': customTheme?.tabActiveText || '#ffffff',
                     '--tab-hover-bg': customTheme?.tabHoverBackground || '#111827'
-                  } as React.CSSProperties & { [key: string]: string }}
-                  data-active={selectedCategory === 'all'}
+                  } as React.CSSProperties}
                 >
                   All
                 </TabsTrigger>
@@ -466,12 +472,10 @@ const EnhancedMenu = () => {
                     value={category.id} 
                     className="text-xs h-7 px-3 flex-shrink-0"
                     style={{
-                      color: customTheme?.textColor || '#1f2937',
                       '--tab-active-bg': customTheme?.tabActiveBackground || '#1f2937',
                       '--tab-active-text': customTheme?.tabActiveText || '#ffffff',
                       '--tab-hover-bg': customTheme?.tabHoverBackground || '#111827'
-                    } as React.CSSProperties & { [key: string]: string }}
-                    data-active={selectedCategory === category.id}
+                    } as React.CSSProperties}
                   >
                     {getLocalizedText(category, 'name')}
                   </TabsTrigger>
@@ -495,7 +499,11 @@ const EnhancedMenu = () => {
                 {filteredItems.map((item) => (
                   <EnhancedMenuItem
                     key={item.id}
-                    item={item}
+                    item={{
+                      ...item,
+                      currency: item.currency || currentCurrency,
+                      is_featured: item.is_featured || false
+                    }}
                     getLocalizedText={getLocalizedText}
                     formatPrice={formatPrice}
                     customTheme={customTheme}
@@ -508,12 +516,18 @@ const EnhancedMenu = () => {
       </div>
 
       {/* Footer */}
-      <MenuFooter restaurant={restaurant} customTheme={customTheme} />
+      <MenuFooter customTheme={customTheme} />
 
       {/* Popup Modal */}
       {showPopup && popupSettings && (
         <PopupModal
-          settings={popupSettings}
+          settings={{
+            ...popupSettings,
+            enabled: popupSettings.is_active,
+            type: popupSettings.popup_type,
+            title: popupSettings.popup_content?.title || '',
+            description: popupSettings.popup_content?.description || ''
+          }}
           onClose={() => setShowPopup(false)}
           customTheme={customTheme}
         />

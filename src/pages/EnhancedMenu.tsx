@@ -989,7 +989,13 @@ const EnhancedMenu = () => {
                 backgroundColor: customTheme?.accentColor + '20',
                 borderColor: customTheme?.accentColor
               }}>
-                <TabsTrigger value="all" className="text-xs h-7 px-3 flex-shrink-0">
+                <TabsTrigger 
+                  value="all" 
+                  className="text-xs h-7 px-3 flex-shrink-0"
+                  style={{
+                    color: customTheme?.textColor || '#1f2937'
+                  }}
+                >
                   All
                 </TabsTrigger>
                 {categories.map(category => {
@@ -1001,8 +1007,15 @@ const EnhancedMenu = () => {
                   }
                   
                   return (
-                    <TabsTrigger key={category.id} value={category.id} className="text-xs h-7 px-3 flex-shrink-0">
-                      {getLocalizedText(category, 'name')} ({categoryItems.length})
+                    <TabsTrigger 
+                      key={category.id} 
+                      value={category.id} 
+                      className="text-xs h-7 px-3 flex-shrink-0"
+                      style={{
+                        color: customTheme?.textColor || '#1f2937'
+                      }}
+                    >
+                      {getLocalizedText(category, 'name')}
                     </TabsTrigger>
                   );
                 })}

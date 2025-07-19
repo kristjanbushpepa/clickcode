@@ -30,8 +30,33 @@ const RestaurantLogin = () => {
     if (checkPWA) {
       const viewport = document.querySelector('meta[name=viewport]');
       if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content');
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
       }
+      
+      // Add PWA-specific styles to prevent zoom on input focus
+      const style = document.createElement('style');
+      style.textContent = `
+        @media (display-mode: standalone) {
+          input, textarea, select {
+            font-size: 16px !important;
+            transform: translateZ(0);
+          }
+          body {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+          }
+          input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      return () => {
+        document.head.removeChild(style);
+      };
     }
   }, []);
 
@@ -129,7 +154,7 @@ const RestaurantLogin = () => {
   return (
     <div className={cn(
       "min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden",
-      isPWA && "min-h-[100dvh]" // Use dynamic viewport height for PWA
+      isPWA && "min-h-[100dvh] pt-safe-top pb-safe-bottom" // Use safe area insets for PWA
     )}>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"></div>
       <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-md border-border shadow-2xl">
@@ -143,7 +168,7 @@ const RestaurantLogin = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -155,6 +180,7 @@ const RestaurantLogin = () => {
                 required
                 autoComplete="email"
                 inputMode="email"
+                style={{ fontSize: '16px' }} // Prevent zoom on iOS
               />
             </div>
 
@@ -169,6 +195,7 @@ const RestaurantLogin = () => {
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
+                  style={{ fontSize: '16px' }} // Prevent zoom on iOS
                 />
                 <Button
                   type="button"

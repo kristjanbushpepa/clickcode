@@ -693,7 +693,7 @@ const EnhancedMenu = () => {
 
   // Memoized SearchBar component to prevent re-renders
   const SearchBar = useMemo(() => {
-    const searchBarId = `search-bar-${Math.random().toString(36).substr(2, 9)}`;
+    const searchBarId = `search-bar-${restaurant?.id || 'default'}`;
     const placeholderColor = customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280';
     const backgroundColor = customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff';
     const borderColor = customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb';
@@ -816,7 +816,7 @@ const EnhancedMenu = () => {
         </div>
       </div>
     );
-  }, [searchTerm, handleSearchChange, clearSearch, customTheme]);
+  }, [handleSearchChange, clearSearch, customTheme, restaurant?.id]);
 
   // Loading states
   if (!restaurantName) {

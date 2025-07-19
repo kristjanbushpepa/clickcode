@@ -26,36 +26,62 @@ const RestaurantLogin = () => {
                      (window.navigator as any).standalone === true;
     setIsPWA(checkPWA);
 
-    // Handle viewport for PWA
+    // Handle viewport and PWA-specific styles
     if (checkPWA) {
+      // Set viewport to prevent zoom on input focus
       const viewport = document.querySelector('meta[name=viewport]');
       if (viewport) {
         viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
       }
       
-      // Add PWA-specific styles to prevent zoom on input focus
+      // Add comprehensive PWA styles
       const style = document.createElement('style');
       style.textContent = `
+        @supports (-webkit-touch-callout: none) {
+          input[type="email"], 
+          input[type="password"], 
+          input[type="text"] {
+            font-size: 16px !important;
+            -webkit-appearance: none;
+            border-radius: 0;
+          }
+        }
+        
         @media (display-mode: standalone) {
+          * {
+            -webkit-tap-highlight-color: transparent;
+          }
+          
           input, textarea, select {
             font-size: 16px !important;
-            transform: translateZ(0);
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            border-radius: 6px !important;
           }
+          
           body {
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
           }
+          
           input, textarea {
-            -webkit-user-select: text;
-            user-select: text;
+            -webkit-user-select: text !important;
+            user-select: text !important;
+          }
+          
+          .pwa-input-container {
+            position: relative;
+            z-index: 1;
           }
         }
       `;
       document.head.appendChild(style);
       
       return () => {
-        document.head.removeChild(style);
+        if (document.head.contains(style)) {
+          document.head.removeChild(style);
+        }
       };
     }
   }, []);
@@ -154,7 +180,7 @@ const RestaurantLogin = () => {
   return (
     <div className={cn(
       "min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden",
-      isPWA && "min-h-[100dvh] pt-safe-top pb-safe-bottom" // Use safe area insets for PWA
+      isPWA && "min-h-[100dvh] pt-safe-top pb-safe-bottom"
     )}>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"></div>
       <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-md border-border shadow-2xl">
@@ -169,7 +195,7 @@ const RestaurantLogin = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
+            <div className={cn("space-y-2", isPWA && "pwa-input-container")}>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -180,11 +206,11 @@ const RestaurantLogin = () => {
                 required
                 autoComplete="email"
                 inputMode="email"
-                style={{ fontSize: '16px' }} // Prevent zoom on iOS
+                className={isPWA ? "text-base" : ""}
               />
             </div>
 
-            <div className="space-y-2">  
+            <div className={cn("space-y-2", isPWA && "pwa-input-container")}>  
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
@@ -195,7 +221,7 @@ const RestaurantLogin = () => {
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
-                  style={{ fontSize: '16px' }} // Prevent zoom on iOS
+                  className={isPWA ? "text-base" : ""}
                 />
                 <Button
                   type="button"

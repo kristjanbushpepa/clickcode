@@ -5,35 +5,6 @@ import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
-    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-      // Ensure input is visible when keyboard appears in PWA
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        // Add a small delay to ensure the keyboard has time to appear
-        setTimeout(() => {
-          e.target.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center',
-            inline: 'nearest'
-          });
-          // Force focus to ensure keyboard stays open
-          e.target.focus();
-        }, 100);
-      }
-      props.onFocus?.(e);
-    };
-
-    const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
-      // In PWA, ensure click also triggers focus properly
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        const target = e.currentTarget;
-        setTimeout(() => {
-          target.focus();
-          target.click();
-        }, 50);
-      }
-      props.onClick?.(e);
-    };
-
     return (
       <input
         type={type}
@@ -42,8 +13,6 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
-        onFocus={handleFocus}
-        onClick={handleClick}
         {...props}
       />
     )

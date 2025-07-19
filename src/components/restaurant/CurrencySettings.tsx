@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,21 +20,22 @@ interface CurrencySettings {
   last_updated: string;
 }
 
-const CURRENCY_OPTIONS = [
-  { code: 'ALL', name: 'Albanian Lek', symbol: 'L' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
-  { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'GBP', name: 'British Pound', symbol: '£' },
-  { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF' }
-];
-
 export function CurrencySettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({});
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
 
-  // Fetch currency settings
+  // Default currency configuration - this would come from admin database in the future
+  const CURRENCY_OPTIONS = [
+    { code: 'ALL', name: 'Albanian Lek', symbol: 'L', flag: '🇦🇱' },
+    { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺' },
+    { code: 'USD', name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
+    { code: 'GBP', name: 'British Pound', symbol: '£', flag: '🇬🇧' },
+    { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', flag: '🇨🇭' }
+  ];
+
+  // Fetch restaurant's currency settings from individual restaurant database
   const { data: currencySettings, isLoading, error: queryError } = useQuery({
     queryKey: ['currency_settings'],
     queryFn: async () => {

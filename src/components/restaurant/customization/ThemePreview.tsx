@@ -350,17 +350,25 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
       <div className="px-3 py-3" style={themeStyles}>
         {/* Search Bar */}
         <div className="mb-3">
-          <input
-            type="text"
-            placeholder="Search menu items..."
-            style={{
-              ...searchBarStyles,
-              outline: 'none',
-              '--placeholder-color': theme.searchBarPlaceholder || theme.mutedTextColor
-            } as React.CSSProperties}
-            className="placeholder-[var(--placeholder-color)]"
-            readOnly
-          />
+          <div style={{ '--placeholder-color': theme.searchBarPlaceholder || theme.mutedTextColor } as React.CSSProperties}>
+            <style>
+              {`
+                .theme-search-input::placeholder {
+                  color: var(--placeholder-color) !important;
+                }
+              `}
+            </style>
+            <input
+              type="text"
+              placeholder="Search menu items..."
+              className="theme-search-input"
+              style={{
+                ...searchBarStyles,
+                outline: 'none'
+              }}
+              readOnly
+            />
+          </div>
         </div>
 
         {/* Tab Switcher */}

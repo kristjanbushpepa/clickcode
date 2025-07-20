@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -352,8 +353,8 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
         <div className="mb-3">
           <style>
             {`
-              .search-placeholder-${theme.searchBarPlaceholder?.replace('#', '')}::placeholder {
-                color: ${theme.searchBarPlaceholder || theme.mutedTextColor} !important;
+              .theme-preview-search::placeholder {
+                color: var(--placeholder-color) !important;
               }
             `}
           </style>
@@ -361,7 +362,7 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
             key={theme.searchBarPlaceholder}
             type="text"
             placeholder="Search menu items..."
-            className={`search-placeholder-${theme.searchBarPlaceholder?.replace('#', '')}`}
+            className="theme-preview-search"
             style={{
               ...searchBarStyles,
               outline: 'none'

@@ -355,8 +355,9 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
             placeholder="Search menu items..."
             style={{
               ...searchBarStyles,
-              outline: 'none'
-            }}
+              outline: 'none',
+              '--placeholder-color': theme.searchBarPlaceholder || theme.mutedTextColor
+            } as React.CSSProperties}
             className="placeholder-[var(--placeholder-color)]"
             readOnly
           />

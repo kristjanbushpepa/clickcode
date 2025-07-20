@@ -125,8 +125,9 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
     padding: '0.5rem 0.75rem',
     fontSize: '0.75rem',
     color: theme.searchBarText || theme.textColor,
-    width: '100%'
-  };
+    width: '100%',
+    '--placeholder-color': theme.searchBarPlaceholder || theme.mutedTextColor
+  } as React.CSSProperties;
 
   const renderLayoutStyle = () => {
     switch (layoutStyle) {
@@ -349,13 +350,22 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
       <div className="px-3 py-3" style={themeStyles}>
         {/* Search Bar */}
         <div className="mb-3">
+          <style>
+            {`
+              .theme-preview-search::placeholder {
+                color: ${theme.searchBarPlaceholder || theme.mutedTextColor} !important;
+              }
+            `}
+          </style>
           <input
             type="text"
             placeholder="Search menu items..."
+            className="theme-preview-search"
             style={{
               ...searchBarStyles,
               outline: 'none'
             }}
+            readOnly
           />
         </div>
 

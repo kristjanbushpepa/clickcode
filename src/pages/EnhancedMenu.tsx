@@ -746,13 +746,17 @@ const EnhancedMenu = () => {
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    setSearchTerm(e.target.value);
+    const newValue = e.target.value;
+    setSearchTerm(newValue);
+    console.log('Search value:', newValue); // Debug log
   }, []);
 
   // Clear search function
   const clearSearch = useCallback(() => {
+    console.log('Clearing search'); // Debug log
     setSearchTerm('');
     if (searchInputRef.current) {
+      searchInputRef.current.value = '';
       searchInputRef.current.focus();
     }
   }, []);
@@ -779,6 +783,7 @@ const EnhancedMenu = () => {
               height: 2.5rem !important;
               border-radius: 0.375rem !important;
               border-width: 1px !important;
+              border-style: solid !important;
               outline: none !important;
               transition: none !important;
               transform: none !important;
@@ -789,25 +794,30 @@ const EnhancedMenu = () => {
               user-select: text !important;
               -webkit-text-fill-color: ${textColor} !important;
               caret-color: ${textColor} !important;
+              box-shadow: none !important;
+              padding-left: 2.5rem !important;
+              padding-right: 2.5rem !important;
             }
             #${searchBarId}::placeholder {
               color: ${placeholderColor} !important;
-              opacity: 1 !important;
+              opacity: 0.7 !important;
+              -webkit-text-fill-color: ${placeholderColor} !important;
             }
             #${searchBarId}::-webkit-input-placeholder {
               color: ${placeholderColor} !important;
-              opacity: 1 !important;
+              opacity: 0.7 !important;
+              -webkit-text-fill-color: ${placeholderColor} !important;
             }
             #${searchBarId}::-moz-placeholder {
               color: ${placeholderColor} !important;
-              opacity: 1 !important;
+              opacity: 0.7 !important;
             }
             #${searchBarId}:focus {
               background-color: ${backgroundColor} !important;
               border-color: ${borderColor} !important;
               color: ${textColor} !important;
               outline: none !important;
-              box-shadow: none !important;
+              box-shadow: 0 0 0 1px ${borderColor} !important;
               -webkit-text-fill-color: ${textColor} !important;
               caret-color: ${textColor} !important;
             }
@@ -815,25 +825,18 @@ const EnhancedMenu = () => {
         </style>
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: placeholderColor }} />
-          <Input 
+          <input 
             id={searchBarId}
             ref={searchInputRef}
             placeholder="search here" 
             value={searchTerm} 
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-10" 
+            className="w-full pl-10 pr-10 h-10 rounded-md border" 
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck="false"
             inputMode="search"
-            onFocus={(e) => {
-              e.target.style.fontSize = '16px';
-              e.target.style.transform = 'none';
-            }}
-            onBlur={(e) => {
-              e.target.style.fontSize = '16px';
-            }}
             style={{
               fontSize: '16px',
               lineHeight: '1.25rem',
@@ -843,7 +846,11 @@ const EnhancedMenu = () => {
               WebkitAppearance: 'none',
               MozAppearance: 'none',
               transform: 'none',
-              transition: 'none'
+              transition: 'none',
+              WebkitTextFillColor: textColor,
+              caretColor: textColor,
+              outline: 'none',
+              boxShadow: 'none'
             }}
            />
           {searchTerm && (

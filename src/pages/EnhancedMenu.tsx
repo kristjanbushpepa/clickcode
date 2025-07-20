@@ -680,6 +680,7 @@ const EnhancedMenu = () => {
 
   // Memoized search handler to prevent re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     setSearchTerm(e.target.value);
   }, []);
 
@@ -715,7 +716,7 @@ const EnhancedMenu = () => {
               color: var(--search-text-color) !important;
               box-sizing: border-box !important;
               font-family: inherit !important;
-              font-size: 0.875rem !important;
+              font-size: 16px !important;
               line-height: 1.25rem !important;
               padding-left: 3rem !important;
               padding-right: 2.5rem !important;
@@ -792,13 +793,19 @@ const EnhancedMenu = () => {
             value={searchTerm} 
             onChange={handleSearchChange}
             className="w-full" 
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
             style={{
               fontFamily: 'inherit',
-              fontSize: '0.875rem',
+              fontSize: '16px',
               lineHeight: '1.25rem',
               color: textColor,
               backgroundColor: backgroundColor,
-              borderColor: borderColor
+              borderColor: borderColor,
+              WebkitAppearance: 'none',
+              MozAppearance: 'none'
             }}
            />
           {searchTerm && (

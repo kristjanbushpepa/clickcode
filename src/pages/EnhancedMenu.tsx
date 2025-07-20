@@ -285,46 +285,6 @@ const EnhancedMenu = () => {
     preventScroll: true
   });
 
-  // Prevent zoom on mobile devices
-  useEffect(() => {
-    const preventZoom = (e: TouchEvent | WheelEvent) => {
-      if (e.ctrlKey || (e as TouchEvent).touches?.length > 1) {
-        e.preventDefault();
-      }
-    };
-
-    const preventKeyboardZoom = (e: KeyboardEvent) => {
-      if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
-        e.preventDefault();
-      }
-    };
-
-    // Set viewport to prevent zoom
-    let viewport = document.querySelector("meta[name=viewport]") as HTMLMetaElement;
-    if (!viewport) {
-      viewport = document.createElement("meta");
-      viewport.name = "viewport";
-      document.head.appendChild(viewport);
-    }
-    const originalContent = viewport.content;
-    viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
-
-    document.addEventListener('touchstart', preventZoom, { passive: false });
-    document.addEventListener('touchmove', preventZoom, { passive: false });
-    document.addEventListener('wheel', preventZoom, { passive: false });
-    document.addEventListener('keydown', preventKeyboardZoom);
-
-    return () => {
-      document.removeEventListener('touchstart', preventZoom);
-      document.removeEventListener('touchmove', preventZoom);
-      document.removeEventListener('wheel', preventZoom);
-      document.removeEventListener('keydown', preventKeyboardZoom);
-      if (viewport) {
-        viewport.content = originalContent;
-      }
-    };
-  }, []);
-
   // Menu items query
   const {
     data: menuItems = [],
@@ -755,7 +715,7 @@ const EnhancedMenu = () => {
               color: var(--search-text-color) !important;
               box-sizing: border-box !important;
               font-family: inherit !important;
-              font-size: 16px !important;
+              font-size: 0.875rem !important;
               line-height: 1.25rem !important;
               padding-left: 3rem !important;
               padding-right: 2.5rem !important;
@@ -771,10 +731,6 @@ const EnhancedMenu = () => {
               -webkit-appearance: none !important;
               appearance: none !important;
               caret-color: var(--search-text-color) !important;
-              touch-action: manipulation !important;
-              user-select: text !important;
-              -webkit-user-select: text !important;
-              pointer-events: auto !important;
             }
             #${searchBarId}::placeholder {
               color: var(--search-placeholder-color) !important;

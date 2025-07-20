@@ -45,7 +45,8 @@ export function CurrencySettings() {
       const { data, error } = await restaurantSupabase
         .from('currency_settings')
         .select('*')
-        .maybeSingle();
+        .limit(1)
+        .single();
       
       if (error) {
         console.error('Currency settings query error:', error);

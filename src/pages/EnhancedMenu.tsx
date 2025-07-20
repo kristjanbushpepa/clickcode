@@ -14,6 +14,7 @@ import { convertUrlToRestaurantName, generatePossibleNames } from '@/utils/nameC
 import { LanguageSwitch } from '@/components/menu/LanguageSwitch';
 import { CurrencySwitch } from '@/components/menu/CurrencySwitch';
 import { MenuFooter } from '@/components/menu/MenuFooter';
+import { MenuHeader } from '@/components/menu/MenuHeader';
 import { EnhancedMenuItem } from '@/components/menu/EnhancedMenuItem';
 import { MenuLoadingSkeleton, CategorySkeleton } from '@/components/menu/MenuSkeleton';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
@@ -488,7 +489,7 @@ const EnhancedMenu = () => {
     }
   }, [profile, categories, hasAnimated]);
 
-  // Image URL helpers
+  // Optimized image URL helpers - now stable and memoized properly
   const getImageUrl = useCallback((imagePath: string) => {
     if (!imagePath || !restaurantSupabase) return null;
     const {
@@ -496,21 +497,28 @@ const EnhancedMenu = () => {
     } = restaurantSupabase.storage.from('restaurant-images').getPublicUrl(imagePath);
     return data.publicUrl;
   }, [restaurantSupabase]);
+
   const getDisplayImageUrl = useCallback((imagePath?: string, imageUrl?: string) => {
     if (imagePath) {
       return getImageUrl(imagePath);
     }
     return imageUrl || null;
   }, [getImageUrl]);
+
   const getMenuItemImageUrl = useCallback((item: MenuItem) => {
     return getDisplayImageUrl(item.image_path, item.image_url);
   }, [getDisplayImageUrl]);
 
-  // Memoized computed values
-  const bannerImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null, [profile, getDisplayImageUrl]);
-  const logoImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null, [profile, getDisplayImageUrl]);
+  // Stable memoized image URLs that don't depend on search state
+  const bannerImageUrl = useMemo(() => {
+    return profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null;
+  }, [profile, getDisplayImageUrl]);
+
+  const logoImageUrl = useMemo(() => {
+    return profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null;
+  }, [profile, getDisplayImageUrl]);
   
-  // Simplified filtered items with better search logic
+  // Simplified filtered items with better search logic - isolated from header rendering
   const filteredMenuItems = useMemo(() => {
     if (!searchTerm.trim()) return menuItems;
     
@@ -708,24 +716,14 @@ const EnhancedMenu = () => {
     return (
       <div className="px-3 py-3">
         <div className="relative">
-          <Search 
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400" 
-          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400" />
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Search menu items..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full h-10 pl-10 pr-10 text-base border border-gray-200 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            style={{
-              fontSize: '16px', // Prevent zoom on iOS
-              fontFamily: 'inherit',
-              WebkitAppearance: 'none',
-              backgroundColor: customTheme?.searchBarBackground || '#ffffff',
-              color: customTheme?.searchBarText || '#111827',
-              borderColor: customTheme?.searchBarBorder || '#e5e7eb',
-            }}
+            className="w-full h-10 pl-10 pr-10 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 border-gray-200 placeholder-gray-500"
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
@@ -744,7 +742,12 @@ const EnhancedMenu = () => {
         </div>
       </div>
     );
-  }, [searchTerm, handleSearchChange, clearSearch, customTheme]);
+  }, [searchTerm, handleSearchChange, clearSearch]);
+
+  // Header callback handlers
+  const handleBackClick = useCallback(() => {
+    setSelectedCategory(null);
+  }, []);
 
   // Loading states
   if (!restaurantName) {
@@ -777,77 +780,6 @@ const EnhancedMenu = () => {
     return <MenuLoadingSkeleton layoutStyle={layoutStyle} />;
   }
 
-  // Enhanced MenuHeader component - memoized for performance
-  const MenuHeader = React.memo(() => <div className="relative">
-      {bannerImageUrl && <div className="absolute inset-0 bg-cover bg-center" style={{
-      backgroundImage: `url(${bannerImageUrl})`
-    }}>
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>}
-      
-      <div className="relative px-3 py-4 safe-area-top text-white" style={{
-      backgroundColor: bannerImageUrl ? 'transparent' : customTheme?.primaryColor
-    }}>
-        <div className="max-w-sm mx-auto">
-          <div className="flex justify-between items-start mb-3">
-            <div className="flex items-center gap-3">
-              {selectedCategory && layoutPreference === 'categories' && <Button variant="ghost" size="sm" onClick={() => setSelectedCategory(null)} className="text-white hover:bg-white/20 p-2 h-8 w-8">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>}
-              {logoImageUrl && <img src={logoImageUrl} alt={profile?.name} className="h-10 w-10 rounded-full object-cover bg-white/10 backdrop-blur-sm p-1" loading="lazy" />}
-            </div>
-            <div className="flex gap-1">
-              <LanguageSwitch 
-                restaurantSupabase={restaurantSupabase} 
-                currentLanguage={currentLanguage} 
-                onLanguageChange={setCurrentLanguage} 
-                customTheme={customTheme ? {
-                  languageSwitchBackground: customTheme.languageSwitchBackground,
-                  languageSwitchBorder: customTheme.languageSwitchBorder,
-                  languageSwitchText: customTheme.languageSwitchText
-                } : undefined}
-              />
-              <CurrencySwitch 
-                restaurantSupabase={restaurantSupabase} 
-                currentCurrency={currentCurrency} 
-                onCurrencyChange={setCurrentCurrency}
-                customTheme={customTheme ? {
-                  currencySwitchBackground: customTheme.currencySwitchBackground,
-                  currencySwitchBorder: customTheme.currencySwitchBorder,
-                  currencySwitchText: customTheme.currencySwitchText
-                } : undefined}
-              />
-            </div>
-          </div>
-          
-          <div className={`text-center ${!hasAnimated ? 'slide-up' : ''}`}>
-            <h1 className="text-lg font-bold mb-1 uppercase tracking-wide" style={headingStyles}>
-              {selectedCategory && layoutPreference === 'categories' ? getLocalizedText(categories.find(cat => cat.id === selectedCategory), 'name') : profile?.name || 'Restaurant Menu'}
-            </h1>
-            {profile?.address && !selectedCategory && <div className="flex items-center justify-center gap-1 text-xs opacity-80 uppercase tracking-wide mb-2">
-                <MapPin className="h-3 w-3" />
-                {profile.address.split(',')[0] || profile.address}
-              </div>}
-            
-            {!selectedCategory && <div className="flex justify-center gap-3 mb-1">
-                {profile?.social_media_links?.instagram && <a href={profile.social_media_links.instagram} target="_blank" rel="noopener noreferrer" className="hover-lift">
-                    <Instagram className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>}
-                {profile?.phone && <a href={`tel:${profile.phone}`} className="hover-lift">
-                    <Phone className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>}
-                {profile?.social_media_links?.facebook && <a href={profile.social_media_links.facebook} target="_blank" rel="noopener noreferrer" className="hover-lift">
-                    <Facebook className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>}
-                {profile?.website && <a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover-lift">
-                    <Globe className="h-4 w-4 opacity-80 hover:opacity-100" />
-                  </a>}
-              </div>}
-          </div>
-        </div>
-      </div>
-    </div>);
-
   // Categories layout
   if (layoutPreference === 'categories') {
     if (selectedCategory) {
@@ -860,7 +792,23 @@ const EnhancedMenu = () => {
             style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
           />
           
-          <MenuHeader />
+          <MenuHeader
+            profile={profile}
+            bannerImageUrl={bannerImageUrl}
+            logoImageUrl={logoImageUrl}
+            selectedCategory={selectedCategory}
+            layoutPreference={layoutPreference}
+            categories={categories}
+            customTheme={customTheme}
+            currentLanguage={currentLanguage}
+            currentCurrency={currentCurrency}
+            restaurantSupabase={restaurantSupabase}
+            hasAnimated={hasAnimated}
+            onBackClick={handleBackClick}
+            onLanguageChange={setCurrentLanguage}
+            onCurrencyChange={setCurrentCurrency}
+            getLocalizedText={getLocalizedText}
+          />
           {SearchBar}
           <div className="px-3 py-3">
             <div className="max-w-sm mx-auto">
@@ -933,7 +881,23 @@ const EnhancedMenu = () => {
             style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
           />
           
-          <MenuHeader />
+          <MenuHeader
+            profile={profile}
+            bannerImageUrl={bannerImageUrl}
+            logoImageUrl={logoImageUrl}
+            selectedCategory={selectedCategory}
+            layoutPreference={layoutPreference}
+            categories={categories}
+            customTheme={customTheme}
+            currentLanguage={currentLanguage}
+            currentCurrency={currentCurrency}
+            restaurantSupabase={restaurantSupabase}
+            hasAnimated={hasAnimated}
+            onBackClick={handleBackClick}
+            onLanguageChange={setCurrentLanguage}
+            onCurrencyChange={setCurrentCurrency}
+            getLocalizedText={getLocalizedText}
+          />
           {SearchBar}
           <div className="px-3 py-3">
             <div className="max-w-sm mx-auto">
@@ -1005,7 +969,23 @@ const EnhancedMenu = () => {
           style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
         />
         
-        <MenuHeader />
+        <MenuHeader
+          profile={profile}
+          bannerImageUrl={bannerImageUrl}
+          logoImageUrl={logoImageUrl}
+          selectedCategory={selectedCategory}
+          layoutPreference={layoutPreference}
+          categories={categories}
+          customTheme={customTheme}
+          currentLanguage={currentLanguage}
+          currentCurrency={currentCurrency}
+          restaurantSupabase={restaurantSupabase}
+          hasAnimated={hasAnimated}
+          onBackClick={handleBackClick}
+          onLanguageChange={setCurrentLanguage}
+          onCurrencyChange={setCurrentCurrency}
+          getLocalizedText={getLocalizedText}
+        />
         {SearchBar}
         <div className="px-4 pb-6">
           <div className="max-w-2xl mx-auto">
@@ -1060,7 +1040,23 @@ const EnhancedMenu = () => {
         style={{ backgroundColor: customTheme?.backgroundColor || '#ffffff' }}
       />
       
-      <MenuHeader />
+      <MenuHeader
+        profile={profile}
+        bannerImageUrl={bannerImageUrl}
+        logoImageUrl={logoImageUrl}
+        selectedCategory={selectedCategory}
+        layoutPreference={layoutPreference}
+        categories={categories}
+        customTheme={customTheme}
+        currentLanguage={currentLanguage}
+        currentCurrency={currentCurrency}
+        restaurantSupabase={restaurantSupabase}
+        hasAnimated={hasAnimated}
+        onBackClick={handleBackClick}
+        onLanguageChange={setCurrentLanguage}
+        onCurrencyChange={setCurrentCurrency}
+        getLocalizedText={getLocalizedText}
+      />
       {SearchBar}
       <div className="px-3 py-3">
         <div className="max-w-sm mx-auto">

@@ -350,21 +350,14 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
       <div className="px-3 py-3" style={themeStyles}>
         {/* Search Bar */}
         <div className="mb-3">
-          <style>
-            {`
-              .theme-preview-search::placeholder {
-                color: ${theme.searchBarPlaceholder || theme.mutedTextColor} !important;
-              }
-            `}
-          </style>
           <input
             type="text"
             placeholder="Search menu items..."
-            className="theme-preview-search"
             style={{
               ...searchBarStyles,
               outline: 'none'
             }}
+            className="placeholder-[var(--placeholder-color)]"
             readOnly
           />
         </div>

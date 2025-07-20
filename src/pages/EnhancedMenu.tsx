@@ -210,6 +210,70 @@ const EnhancedMenu = () => {
     }
   }, [restaurant]);
 
+  // Prevent zoom and page movement on mobile
+  useEffect(() => {
+    // Prevent zoom on input focus
+    const preventZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    const preventKeyboardZoom = () => {
+      const viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+        viewport.setAttribute('content', 
+          'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
+        );
+      }
+    };
+
+    // Apply strict viewport
+    preventKeyboardZoom();
+    
+    // Prevent multi-touch zoom
+    document.addEventListener('touchstart', preventZoom, { passive: false });
+    document.addEventListener('touchmove', preventZoom, { passive: false });
+    
+    // Prevent page scroll when search is focused
+    const handleSearchFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.id && target.id.includes('search-bar')) {
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        
+        // Scroll to input smoothly
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    };
+
+    const handleSearchBlur = () => {
+      // Re-enable body scroll
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+
+    document.addEventListener('focusin', handleSearchFocus);
+    document.addEventListener('focusout', handleSearchBlur);
+
+    return () => {
+      document.removeEventListener('touchstart', preventZoom);
+      document.removeEventListener('touchmove', preventZoom);
+      document.removeEventListener('focusin', handleSearchFocus);
+      document.removeEventListener('focusout', handleSearchBlur);
+      
+      // Reset body styles
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, []);
+
   // Profile query
   const {
     data: profile,
@@ -680,6 +744,7 @@ const EnhancedMenu = () => {
 
   // Memoized search handler to prevent re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
     e.stopPropagation();
     setSearchTerm(e.target.value);
   }, []);
@@ -704,118 +769,94 @@ const EnhancedMenu = () => {
       <div className="px-3 py-3">
         <style>
           {`
-            :root {
-              --search-bg-color: ${backgroundColor};
-              --search-border-color: ${borderColor};
-              --search-text-color: ${textColor};
-              --search-placeholder-color: ${placeholderColor};
-            }
             #${searchBarId} {
-              background-color: var(--search-bg-color) !important;
-              border-color: var(--search-border-color) !important;
-              color: var(--search-text-color) !important;
-              box-sizing: border-box !important;
-              font-family: inherit !important;
+              background-color: ${backgroundColor} !important;
+              border-color: ${borderColor} !important;
+              color: ${textColor} !important;
               font-size: 16px !important;
               line-height: 1.25rem !important;
-              padding-left: 3rem !important;
-              padding-right: 2.5rem !important;
+              width: 100% !important;
               height: 2.5rem !important;
-              border-width: 1px !important;
-              border-style: solid !important;
               border-radius: 0.375rem !important;
-              backdrop-filter: blur(4px) !important;
-              -webkit-backdrop-filter: blur(4px) !important;
-              -webkit-text-fill-color: var(--search-text-color) !important;
-              -webkit-opacity: 1 !important;
-              text-shadow: none !important;
+              border-width: 1px !important;
+              outline: none !important;
+              transition: none !important;
+              transform: none !important;
               -webkit-appearance: none !important;
+              -moz-appearance: none !important;
               appearance: none !important;
-              caret-color: var(--search-text-color) !important;
+              -webkit-user-select: text !important;
+              user-select: text !important;
+              -webkit-text-fill-color: ${textColor} !important;
+              caret-color: ${textColor} !important;
             }
             #${searchBarId}::placeholder {
-              color: var(--search-placeholder-color) !important;
+              color: ${placeholderColor} !important;
               opacity: 1 !important;
-              -webkit-text-fill-color: var(--search-placeholder-color) !important;
             }
             #${searchBarId}::-webkit-input-placeholder {
-              color: var(--search-placeholder-color) !important;
+              color: ${placeholderColor} !important;
               opacity: 1 !important;
-              -webkit-text-fill-color: var(--search-placeholder-color) !important;
             }
             #${searchBarId}::-moz-placeholder {
-              color: var(--search-placeholder-color) !important;
-              opacity: 1 !important;
-            }
-            #${searchBarId}:-ms-input-placeholder {
-              color: var(--search-placeholder-color) !important;
-              opacity: 1 !important;
-            }
-            #${searchBarId}:-moz-placeholder {
-              color: var(--search-placeholder-color) !important;
+              color: ${placeholderColor} !important;
               opacity: 1 !important;
             }
             #${searchBarId}:focus {
-              background-color: var(--search-bg-color) !important;
-              border-color: var(--search-border-color) !important;
-              color: var(--search-text-color) !important;
+              background-color: ${backgroundColor} !important;
+              border-color: ${borderColor} !important;
+              color: ${textColor} !important;
               outline: none !important;
-              box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
-              -webkit-text-fill-color: var(--search-text-color) !important;
-              caret-color: var(--search-text-color) !important;
-            }
-            .search-container-${searchBarId} {
-              position: relative !important;
-              width: 100% !important;
-              max-width: none !important;
-              margin-left: 0 !important;
-              margin-right: 0 !important;
-            }
-            .search-icon-${searchBarId} {
-              position: absolute !important;
-              left: 0.75rem !important;
-              top: 50% !important;
-              transform: translateY(-50%) !important;
-              height: 0.75rem !important;
-              width: 0.75rem !important;
-              z-index: 10 !important;
-              pointer-events: none !important;
-              color: var(--search-placeholder-color) !important;
+              box-shadow: none !important;
+              -webkit-text-fill-color: ${textColor} !important;
+              caret-color: ${textColor} !important;
             }
           `}
         </style>
-        <div className={`search-container-${searchBarId}`}>
-          <Search className={`search-icon-${searchBarId}`} />
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: placeholderColor }} />
           <Input 
             id={searchBarId}
             ref={searchInputRef}
             placeholder="search here" 
             value={searchTerm} 
             onChange={handleSearchChange}
-            className="w-full" 
+            className="w-full pl-10 pr-10" 
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck="false"
+            inputMode="search"
+            onFocus={(e) => {
+              e.target.style.fontSize = '16px';
+              e.target.style.transform = 'none';
+            }}
+            onBlur={(e) => {
+              e.target.style.fontSize = '16px';
+            }}
             style={{
-              fontFamily: 'inherit',
               fontSize: '16px',
               lineHeight: '1.25rem',
               color: textColor,
               backgroundColor: backgroundColor,
               borderColor: borderColor,
               WebkitAppearance: 'none',
-              MozAppearance: 'none'
+              MozAppearance: 'none',
+              transform: 'none',
+              transition: 'none'
             }}
            />
           {searchTerm && (
             <button
-              onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-medium transition-colors z-10"
-              style={{
-                color: placeholderColor
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                clearSearch();
               }}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-medium z-10"
+              style={{ color: placeholderColor }}
               aria-label="Clear search"
+              type="button"
             >
               ×
             </button>

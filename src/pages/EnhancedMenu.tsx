@@ -210,67 +210,30 @@ const EnhancedMenu = () => {
     }
   }, [restaurant]);
 
-  // Prevent zoom and page movement on mobile
+  // Simple mobile optimization without aggressive viewport manipulation
   useEffect(() => {
-    // Prevent zoom on input focus
-    const preventZoom = (e: TouchEvent) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    };
+    // Set a stable viewport
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+      viewport.setAttribute('content', 
+        'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'
+      );
+    }
 
-    const preventKeyboardZoom = () => {
-      const viewport = document.querySelector('meta[name=viewport]');
-      if (viewport) {
-        viewport.setAttribute('content', 
-          'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
-        );
-      }
-    };
-
-    // Apply strict viewport
-    preventKeyboardZoom();
-    
-    // Prevent multi-touch zoom
-    document.addEventListener('touchstart', preventZoom, { passive: false });
-    document.addEventListener('touchmove', preventZoom, { passive: false });
-    
-    // Prevent page scroll when search is focused
-    const handleSearchFocus = (e: FocusEvent) => {
+    // Simple zoom prevention for search only
+    const preventSearchZoom = (e: TouchEvent) => {
       const target = e.target as HTMLElement;
-      if (target.id && target.id.includes('search-bar')) {
-        // Prevent body scroll
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        
-        // Scroll to input smoothly
-        setTimeout(() => {
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
+      if (target.tagName === 'INPUT' && target.id.includes('search-bar')) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
       }
     };
 
-    const handleSearchBlur = () => {
-      // Re-enable body scroll
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-    };
-
-    document.addEventListener('focusin', handleSearchFocus);
-    document.addEventListener('focusout', handleSearchBlur);
+    document.addEventListener('touchstart', preventSearchZoom, { passive: false });
 
     return () => {
-      document.removeEventListener('touchstart', preventZoom);
-      document.removeEventListener('touchmove', preventZoom);
-      document.removeEventListener('focusin', handleSearchFocus);
-      document.removeEventListener('focusout', handleSearchBlur);
-      
-      // Reset body styles
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
+      document.removeEventListener('touchstart', preventSearchZoom);
     };
   }, []);
 
@@ -744,21 +707,15 @@ const EnhancedMenu = () => {
 
   // Memoized search handler to prevent re-renders
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const newValue = e.target.value;
-    setSearchTerm(newValue);
-    console.log('Search value:', newValue); // Debug log
+    const value = e.target.value;
+    setSearchTerm(value);
+    console.log('Search changed:', value);
   }, []);
 
   // Clear search function
   const clearSearch = useCallback(() => {
-    console.log('Clearing search'); // Debug log
     setSearchTerm('');
-    if (searchInputRef.current) {
-      searchInputRef.current.value = '';
-      searchInputRef.current.focus();
-    }
+    console.log('Search cleared');
   }, []);
 
   // Memoized SearchBar component to prevent re-renders
@@ -775,92 +732,73 @@ const EnhancedMenu = () => {
           {`
             #${searchBarId} {
               background-color: ${backgroundColor} !important;
-              border-color: ${borderColor} !important;
+              border: 1px solid ${borderColor} !important;
               color: ${textColor} !important;
               font-size: 16px !important;
-              line-height: 1.25rem !important;
+              font-family: system-ui, -apple-system, sans-serif !important;
+              line-height: 1.5 !important;
+              padding: 8px 40px 8px 40px !important;
               width: 100% !important;
-              height: 2.5rem !important;
-              border-radius: 0.375rem !important;
-              border-width: 1px !important;
-              border-style: solid !important;
+              height: 40px !important;
+              border-radius: 6px !important;
               outline: none !important;
-              transition: none !important;
-              transform: none !important;
+              box-shadow: none !important;
               -webkit-appearance: none !important;
               -moz-appearance: none !important;
               appearance: none !important;
-              -webkit-user-select: text !important;
-              user-select: text !important;
               -webkit-text-fill-color: ${textColor} !important;
               caret-color: ${textColor} !important;
-              box-shadow: none !important;
-              padding-left: 2.5rem !important;
-              padding-right: 2.5rem !important;
+              opacity: 1 !important;
             }
             #${searchBarId}::placeholder {
               color: ${placeholderColor} !important;
-              opacity: 0.7 !important;
-              -webkit-text-fill-color: ${placeholderColor} !important;
-            }
-            #${searchBarId}::-webkit-input-placeholder {
-              color: ${placeholderColor} !important;
-              opacity: 0.7 !important;
-              -webkit-text-fill-color: ${placeholderColor} !important;
-            }
-            #${searchBarId}::-moz-placeholder {
-              color: ${placeholderColor} !important;
-              opacity: 0.7 !important;
+              opacity: 0.6 !important;
             }
             #${searchBarId}:focus {
-              background-color: ${backgroundColor} !important;
-              border-color: ${borderColor} !important;
-              color: ${textColor} !important;
-              outline: none !important;
-              box-shadow: 0 0 0 1px ${borderColor} !important;
-              -webkit-text-fill-color: ${textColor} !important;
-              caret-color: ${textColor} !important;
+              border-color: #3b82f6 !important;
+              box-shadow: 0 0 0 1px #3b82f6 !important;
             }
           `}
         </style>
-        <div className="relative w-full">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: placeholderColor }} />
           <input 
             id={searchBarId}
             ref={searchInputRef}
+            type="text"
             placeholder="search here" 
             value={searchTerm} 
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-10 h-10 rounded-md border" 
+            onKeyDown={(e) => {
+              if (e.key === 'Backspace' || e.key === 'Delete') {
+                e.stopPropagation();
+              }
+            }}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
-            spellCheck="false"
-            inputMode="search"
+            spellCheck={false}
             style={{
               fontSize: '16px',
-              lineHeight: '1.25rem',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
               color: textColor,
               backgroundColor: backgroundColor,
-              borderColor: borderColor,
+              border: `1px solid ${borderColor}`,
+              borderRadius: '6px',
+              padding: '8px 40px',
+              width: '100%',
+              height: '40px',
+              outline: 'none',
               WebkitAppearance: 'none',
               MozAppearance: 'none',
-              transform: 'none',
-              transition: 'none',
               WebkitTextFillColor: textColor,
-              caretColor: textColor,
-              outline: 'none',
-              boxShadow: 'none'
+              caretColor: textColor
             }}
            />
           {searchTerm && (
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                clearSearch();
-              }}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-medium z-10"
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-bold cursor-pointer"
               style={{ color: placeholderColor }}
               aria-label="Clear search"
               type="button"

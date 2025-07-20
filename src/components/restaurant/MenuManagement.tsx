@@ -12,11 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { Plus, Edit, Trash2, EyeOff, Tag, Utensils, DollarSign, Languages, X } from 'lucide-react';
+import { Plus, Edit, Trash2, EyeOff, Tag, Utensils, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { CurrencySettings } from './CurrencySettings';
-import { LanguageSettings } from './LanguageSettings';
-import { TranslationManager } from './TranslationManager';
 
 interface Category {
   id: string;
@@ -363,7 +360,7 @@ export function MenuManagement() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Menaxhimi i Menusë</h1>
-          <p className="text-muted-foreground">Menaxho menunë, kategoritë, monedhën dhe gjuhët</p>
+          <p className="text-muted-foreground">Menaxho kategoritë dhe artikujt e menusë së restorantit tuaj</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
@@ -398,7 +395,7 @@ export function MenuManagement() {
       </div>
 
       <Tabs defaultValue="menu" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 h-auto p-1 bg-muted/50 rounded-lg gap-1">
+        <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50 rounded-lg gap-1">
           <TabsTrigger 
             value="menu" 
             className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
@@ -414,30 +411,6 @@ export function MenuManagement() {
             <Tag className="h-4 w-4" />
             <span className="hidden sm:inline">Kategoritë</span>
             <span className="sm:hidden">Categories</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="currency" 
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
-          >
-            <DollarSign className="h-4 w-4" />
-            <span className="hidden sm:inline">Monedha</span>
-            <span className="sm:hidden">Currency</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="language" 
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
-          >
-            <Languages className="h-4 w-4" />
-            <span className="hidden sm:inline">Gjuha</span>
-            <span className="sm:hidden">Language</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="translations" 
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
-          >
-            <Languages className="h-4 w-4" />
-            <span className="hidden sm:inline">Përkthimet</span>
-            <span className="sm:hidden">Translate</span>
           </TabsTrigger>
         </TabsList>
 
@@ -608,17 +581,6 @@ export function MenuManagement() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="currency">
-          <CurrencySettings />
-        </TabsContent>
-
-        <TabsContent value="language">
-          <LanguageSettings />
-        </TabsContent>
-
-        <TabsContent value="translations">
-          <TranslationManager />
-        </TabsContent>
       </Tabs>
     </div>
   );

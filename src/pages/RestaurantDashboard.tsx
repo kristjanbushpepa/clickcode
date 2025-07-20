@@ -9,6 +9,7 @@ import { QRCodeGenerator } from '@/components/restaurant/QRCodeGenerator';
 import CustomizationSettings from '@/components/restaurant/CustomizationSettings';
 import { TranslationManager } from '@/components/restaurant/TranslationManager';
 import { PopupSettings } from '@/components/restaurant/PopupSettings';
+import { CurrencySettings } from '@/components/restaurant/CurrencySettings';
 import { DashboardFormProvider } from '@/contexts/DashboardFormContext';
 import { MobileTabBar } from '@/components/restaurant/MobileTabBar';
 
@@ -29,6 +30,8 @@ const RestaurantDashboard = () => {
         return <PopupSettings />;
       case 'customization':
         return <CustomizationSettings />;
+      case 'currency':
+        return <CurrencySettings />;
       default:
         return <ProfileManagement />;
     }

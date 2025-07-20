@@ -1,5 +1,5 @@
 
-import { Building2, Menu as MenuIcon, Palette, QrCode, Zap, LogOut, Languages } from 'lucide-react';
+import { Building2, Menu as MenuIcon, Palette, QrCode, Zap, LogOut, Languages, DollarSign } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { clearRestaurantLogin } from '@/utils/restaurantDatabase';
 import {
@@ -22,6 +22,7 @@ interface RestaurantSidebarProps {
 const navigationItems = [
   { title: 'Profile', value: 'profile', icon: Building2 },
   { title: 'Menu Management', value: 'menu', icon: MenuIcon },
+  { title: 'Currency Settings', value: 'currency', icon: DollarSign },
   { title: 'Translations', value: 'translations', icon: Languages },
   { title: 'QR Code Generator', value: 'qr-generator', icon: QrCode },
   { title: 'Popup & Wheel', value: 'popup', icon: Zap },

@@ -210,31 +210,13 @@ const EnhancedMenu = () => {
     }
   }, [restaurant]);
 
-  // Simple mobile optimization without aggressive viewport manipulation
+  // Simplified mobile optimization - remove aggressive viewport manipulation
   useEffect(() => {
-    // Set a stable viewport
+    // Only set basic mobile-friendly viewport
     const viewport = document.querySelector('meta[name=viewport]');
     if (viewport) {
-      viewport.setAttribute('content', 
-        'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'
-      );
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes');
     }
-
-    // Simple zoom prevention for search only
-    const preventSearchZoom = (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' && target.id.includes('search-bar')) {
-        if (e.touches.length > 1) {
-          e.preventDefault();
-        }
-      }
-    };
-
-    document.addEventListener('touchstart', preventSearchZoom, { passive: false });
-
-    return () => {
-      document.removeEventListener('touchstart', preventSearchZoom);
-    };
   }, []);
 
   // Profile query
@@ -528,7 +510,7 @@ const EnhancedMenu = () => {
   const bannerImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.banner_path, profile.banner_url) : null, [profile, getDisplayImageUrl]);
   const logoImageUrl = useMemo(() => profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null, [profile, getDisplayImageUrl]);
   
-  // Optimized filtered items with better search logic
+  // Simplified filtered items with better search logic
   const filteredMenuItems = useMemo(() => {
     if (!searchTerm.trim()) return menuItems;
     
@@ -705,101 +687,54 @@ const EnhancedMenu = () => {
     );
   });
 
-  // Memoized search handler to prevent re-renders
+  // Simplified search handler - clean implementation
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    console.log('Search changed:', value);
+    console.log('Search term updated:', value);
   }, []);
 
   // Clear search function
   const clearSearch = useCallback(() => {
     setSearchTerm('');
+    if (searchInputRef.current) {
+      searchInputRef.current.value = '';
+    }
     console.log('Search cleared');
   }, []);
 
-  // Memoized SearchBar component to prevent re-renders
+  // Simplified SearchBar component - clean implementation
   const SearchBar = useMemo(() => {
-    const searchBarId = `search-bar-${restaurant?.id || 'default'}`;
-    const placeholderColor = customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280';
-    const backgroundColor = customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff';
-    const borderColor = customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb';
-    const textColor = customTheme?.searchBarText || customTheme?.textColor || '#1f2937';
-    
     return (
       <div className="px-3 py-3">
-        <style>
-          {`
-            #${searchBarId} {
-              background-color: ${backgroundColor} !important;
-              border: 1px solid ${borderColor} !important;
-              color: ${textColor} !important;
-              font-size: 16px !important;
-              font-family: system-ui, -apple-system, sans-serif !important;
-              line-height: 1.5 !important;
-              padding: 8px 40px 8px 40px !important;
-              width: 100% !important;
-              height: 40px !important;
-              border-radius: 6px !important;
-              outline: none !important;
-              box-shadow: none !important;
-              -webkit-appearance: none !important;
-              -moz-appearance: none !important;
-              appearance: none !important;
-              -webkit-text-fill-color: ${textColor} !important;
-              caret-color: ${textColor} !important;
-              opacity: 1 !important;
-            }
-            #${searchBarId}::placeholder {
-              color: ${placeholderColor} !important;
-              opacity: 0.6 !important;
-            }
-            #${searchBarId}:focus {
-              border-color: #3b82f6 !important;
-              box-shadow: 0 0 0 1px #3b82f6 !important;
-            }
-          `}
-        </style>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: placeholderColor }} />
-          <input 
-            id={searchBarId}
+          <Search 
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400" 
+          />
+          <input
             ref={searchInputRef}
             type="text"
-            placeholder="search here" 
-            value={searchTerm} 
+            placeholder="Search menu items..."
+            value={searchTerm}
             onChange={handleSearchChange}
-            onKeyDown={(e) => {
-              if (e.key === 'Backspace' || e.key === 'Delete') {
-                e.stopPropagation();
-              }
+            className="w-full h-10 pl-10 pr-10 text-base border border-gray-200 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            style={{
+              fontSize: '16px', // Prevent zoom on iOS
+              fontFamily: 'inherit',
+              WebkitAppearance: 'none',
+              backgroundColor: customTheme?.searchBarBackground || '#ffffff',
+              color: customTheme?.searchBarText || '#111827',
+              borderColor: customTheme?.searchBarBorder || '#e5e7eb',
             }}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
-            style={{
-              fontSize: '16px',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              color: textColor,
-              backgroundColor: backgroundColor,
-              border: `1px solid ${borderColor}`,
-              borderRadius: '6px',
-              padding: '8px 40px',
-              width: '100%',
-              height: '40px',
-              outline: 'none',
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              WebkitTextFillColor: textColor,
-              caretColor: textColor
-            }}
-           />
+          />
           {searchTerm && (
             <button
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-lg font-bold cursor-pointer"
-              style={{ color: placeholderColor }}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer"
               aria-label="Clear search"
               type="button"
             >
@@ -809,7 +744,7 @@ const EnhancedMenu = () => {
         </div>
       </div>
     );
-  }, [handleSearchChange, clearSearch, customTheme, restaurant?.id]);
+  }, [searchTerm, handleSearchChange, clearSearch, customTheme]);
 
   // Loading states
   if (!restaurantName) {

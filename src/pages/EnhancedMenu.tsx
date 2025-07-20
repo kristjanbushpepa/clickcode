@@ -711,28 +711,54 @@ const EnhancedMenu = () => {
     console.log('Search cleared');
   }, []);
 
-  // Simplified SearchBar component - clean implementation
+  // Updated SearchBar component with custom theme support
   const SearchBar = useMemo(() => {
+    const searchBarStyles = {
+      backgroundColor: customTheme?.searchBarBackground || customTheme?.cardBackground || '#ffffff',
+      borderColor: customTheme?.searchBarBorder || customTheme?.borderColor || '#e5e7eb',
+      color: customTheme?.searchBarText || customTheme?.textColor || '#1f2937',
+      '--placeholder-color': customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'
+    } as React.CSSProperties;
+
+    const iconColor = customTheme?.searchBarText || customTheme?.mutedTextColor || '#6b7280';
+
     return (
       <div className="px-3 py-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none text-gray-400" />
+          <Search 
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none" 
+            style={{ color: iconColor }}
+          />
           <input
             ref={searchInputRef}
             type="text"
             placeholder="Search menu items..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full h-10 pl-10 pr-10 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 border-gray-200 placeholder-gray-500"
+            className="w-full h-10 pl-10 pr-10 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            style={{
+              ...searchBarStyles,
+              '::placeholder': {
+                color: 'var(--placeholder-color)'
+              }
+            } as React.CSSProperties}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
           />
+          <style>
+            {`
+              input[type="text"]::placeholder {
+                color: ${customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'};
+              }
+            `}
+          </style>
           {searchTerm && (
             <button
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center hover:opacity-60 cursor-pointer"
+              style={{ color: iconColor }}
               aria-label="Clear search"
               type="button"
             >
@@ -742,7 +768,7 @@ const EnhancedMenu = () => {
         </div>
       </div>
     );
-  }, [searchTerm, handleSearchChange, clearSearch]);
+  }, [searchTerm, handleSearchChange, clearSearch, customTheme]);
 
   // Header callback handlers
   const handleBackClick = useCallback(() => {

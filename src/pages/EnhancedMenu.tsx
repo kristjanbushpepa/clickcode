@@ -330,12 +330,9 @@ const EnhancedMenu = () => {
   }, [layoutPreference, selectedCategory, categories]);
 
   const handleSwipeLeft = useCallback(() => {
-    // Handle swipe left - only switch from categories to items layout when not viewing a specific category
-    if (layoutPreference === 'categories' && !selectedCategory) {
-      // Only switch to items layout if we're in the main categories view (not viewing specific category items)
-      setLayoutPreference('items');
-    }
-  }, [layoutPreference, selectedCategory]);
+    // Disabled: Don't switch to items layout on swipe left
+    // This prevents accidental layout changes when swiping on the menu page
+  }, []);
 
   const swipeRef = useSwipeGestures({
     onSwipeLeft: handleSwipeLeft,

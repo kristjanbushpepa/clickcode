@@ -253,9 +253,10 @@ export function MenuManagement() {
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) throw new Error('Menu item not found');
       return data;
     },
     onSuccess: () => {

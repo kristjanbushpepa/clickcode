@@ -363,9 +363,8 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                       ) : (
                         <Button 
                           onClick={handleCtaClick} 
-                          className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-pulse text-sm" 
-                          disabled={timeLeft > 0 && timeLeft < 5} 
-                          style={accentButtonStyles}
+                          className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-[pulse_3s_ease-in-out_infinite] text-sm bg-blue-600 hover:bg-blue-700" 
+                          disabled={timeLeft > 0 && timeLeft < 5}
                         >
                           {settings.wheelSettings.unlockButtonText}
                         </Button>

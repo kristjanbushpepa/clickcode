@@ -3,19 +3,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { SpinWheel } from './SpinWheel';
 import { ExternalLink, Instagram, Facebook, MessageCircle, Youtube, Star, MapPin, Camera, X } from 'lucide-react';
-
 interface SocialMediaOption {
   platform: string;
   url: string;
   enabled: boolean;
 }
-
 interface ReviewOption {
   platform: string;
   url: string;
   enabled: boolean;
 }
-
 interface PopupSettings {
   enabled: boolean;
   type: 'review' | 'wheel' | 'social';
@@ -41,7 +38,6 @@ interface PopupSettings {
     }>;
   };
 }
-
 interface MenuTheme {
   mode: 'light' | 'dark';
   primaryColor: string;
@@ -53,13 +49,11 @@ interface MenuTheme {
   borderColor: string;
   headingColor?: string;
 }
-
 interface PopupModalProps {
   settings: PopupSettings;
   restaurantName: string;
   customTheme?: MenuTheme | null;
 }
-
 const socialPlatforms = [{
   name: 'instagram',
   label: 'Instagram',
@@ -81,7 +75,6 @@ const socialPlatforms = [{
   icon: Youtube,
   color: '#FF0000'
 }];
-
 const reviewPlatforms = [{
   name: 'google',
   label: 'Google Maps',
@@ -161,7 +154,6 @@ const PreviewWheel: React.FC<{
       <p className="text-xs text-gray-600 text-center">Spin to win prizes!</p>
     </div>;
 };
-
 export const PopupModal: React.FC<PopupModalProps> = ({
   settings,
   restaurantName,
@@ -172,7 +164,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({
   const [hasSpun, setHasSpun] = useState(false);
   const [wonReward, setWonReward] = useState<string>('');
   const [timeLeft, setTimeLeft] = useState(5);
-
   useEffect(() => {
     if (!settings.enabled) return;
 
@@ -194,7 +185,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({
     }, settings.showAfterSeconds * 1000);
     return () => clearTimeout(timer);
   }, [settings.enabled, settings.showAfterSeconds, settings.dailyLimit, restaurantName]);
-
   const handleCtaClick = () => {
     if (settings.type === 'wheel' && settings.wheelSettings.enabled) {
       if (settings.wheelSettings.unlockType === 'free') {
@@ -220,17 +210,14 @@ export const PopupModal: React.FC<PopupModalProps> = ({
       setIsOpen(false);
     }
   };
-
   const handleSocialClick = (url: string) => {
     const linkUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(linkUrl, '_blank');
   };
-
   const handleReviewClick = (url: string) => {
     const linkUrl = url.startsWith('http') ? url : `https://${url}`;
     window.open(linkUrl, '_blank');
   };
-
   const handleWheelComplete = (result: string) => {
     setWonReward(result);
     setHasSpun(true);
@@ -241,9 +228,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
       setWonReward('');
     }, 5000);
   };
-
   if (!settings.enabled) return null;
-
   const enabledSocialMedia = settings.socialMedia?.filter(social => social.enabled && social.url) || [];
   const enabledReviewOptions = settings.reviewOptions?.filter(review => review.enabled && review.url) || [];
 
@@ -269,7 +254,6 @@ export const PopupModal: React.FC<PopupModalProps> = ({
     borderColor: customTheme?.accentColor || '#3b82f6',
     color: '#ffffff'
   };
-
   return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent style={dialogStyles} className="max-w-[90vw] w-full sm:max-w-sm mx-auto p-0 gap-0 border-2 shadow-2xl rounded-sm bg-slate-50">
         {/* Close button */}
@@ -282,7 +266,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
         {/* Content */}
         <div className="p-4 space-y-4 bg-white">
           {!showWheel ? <>
-              <p className="text-xs text-center leading-relaxed" style={mutedTextStyles}>
+              <p style={mutedTextStyles} className="text-center leading-relaxed text-3xl font-medium text-blue-600">
                 {settings.description}
               </p>
 
@@ -335,42 +319,28 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                   </div>
                 </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-3">
                   <div className="flex justify-center">
-                    <SpinWheel 
-                      rewards={settings.wheelSettings.rewards} 
-                      onComplete={handleWheelComplete} 
-                      disabled={settings.wheelSettings.disabled || (settings.wheelSettings.unlockType === 'link' && !showWheel)}
-                    />
+                    <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled || settings.wheelSettings.unlockType === 'link' && !showWheel} />
                   </div>
                   
-                  {settings.wheelSettings.unlockType === 'link' && !showWheel && (
-                    <>
+                  {settings.wheelSettings.unlockType === 'link' && !showWheel && <>
                       <p className="text-sm font-medium text-center" style={headingStyles}>
                         {settings.wheelSettings.unlockText}
                       </p>
                       
-                      {timeLeft > 0 && timeLeft < 5 ? (
-                        <div className="text-center space-y-2">
+                      {timeLeft > 0 && timeLeft < 5 ? <div className="text-center space-y-2">
                           <p className="text-xs" style={mutedTextStyles}>
                             Wheel unlocks in {timeLeft} seconds...
                           </p>
                           <div className="w-full rounded-full h-1.5 bg-gray-200">
                             <div className="h-1.5 rounded-full transition-all duration-1000" style={{
-                              width: `${(5 - timeLeft) / 5 * 100}%`,
-                              backgroundColor: customTheme?.accentColor || '#3b82f6'
-                            }} />
+                    width: `${(5 - timeLeft) / 5 * 100}%`,
+                    backgroundColor: customTheme?.accentColor || '#3b82f6'
+                  }} />
                           </div>
-                        </div>
-                      ) : (
-                        <Button 
-                          onClick={handleCtaClick} 
-                          className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-[pulse_3s_ease-in-out_infinite] text-sm bg-blue-600 hover:bg-blue-700" 
-                          disabled={timeLeft > 0 && timeLeft < 5}
-                        >
+                        </div> : <Button onClick={handleCtaClick} className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-[pulse_3s_ease-in-out_infinite] text-sm bg-blue-600 hover:bg-blue-700" disabled={timeLeft > 0 && timeLeft < 5}>
                           {settings.wheelSettings.unlockButtonText}
-                        </Button>
-                      )}
-                    </>
-                  )}
+                        </Button>}
+                    </>}
                 </div> : <Button onClick={handleCtaClick} className="w-full h-10 flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white text-sm" style={primaryButtonStyles}>
                   <span>{settings.buttonText}</span>
                   {settings.link && <ExternalLink className="h-3 w-3" />}
@@ -381,11 +351,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                     {settings.wheelSettings.unlockType === 'free' ? 'Spin the wheel for your reward!' : 'Thanks for visiting the link! Spin to win your reward:'}
                   </p>
                   <div className="flex justify-center">
-                    <SpinWheel 
-                      rewards={settings.wheelSettings.rewards} 
-                      onComplete={handleWheelComplete} 
-                      disabled={settings.wheelSettings.disabled}
-                    />
+                    <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled} />
                   </div>
                 </> : <div className="space-y-3">
                   <div className="text-4xl animate-bounce">🎉</div>

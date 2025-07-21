@@ -349,7 +349,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
             </> : <div className="text-center space-y-4 bg-white">
               {!hasSpun ? <>
                   <p className="text-xs" style={mutedTextStyles}>
-                    {settings.wheelSettings.unlockType === 'free' ? 'Spin the wheel for your reward!' : 'Thanks for visiting the link! Spin to win your reward:'}
+                    {settings.wheelSettings.unlockText}
                   </p>
                   <div className="flex justify-center">
                     <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled} />

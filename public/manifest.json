@@ -1,7 +1,7 @@
 
 {
-  "name": "Click Code - Digital Menu Platform",
-  "short_name": "Click Code",
+  "name": "ClickCode - Digital Menu Platform",
+  "short_name": "ClickCode",
   "description": "Transform your restaurant with our cutting-edge digital menu platform",
   "start_url": "/",
   "display": "standalone",

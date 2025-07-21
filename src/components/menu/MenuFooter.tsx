@@ -288,7 +288,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
 
           {/* Footer Text */}
           <div className="text-center pt-3 space-y-2">
-            {/* CodeClick.cc Branding */}
+            {/* ClickCode Branding */}
             <div className="pt-2 border-t border-border/10">
               <a 
                 href="/" 
@@ -296,7 +296,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 style={{ color: customTheme?.footerBrandingColor || '#3b82f6' }}
               >
                 <span>Powered by</span>
-                <span className="font-semibold group-hover:text-primary/80">CodeClick.cc</span>
+                <span className="font-semibold group-hover:text-primary/80">ClickCode</span>
                 <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
               </a>
               <p 

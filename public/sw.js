@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'click-code-v1';
+const CACHE_NAME = 'clickcode-v1';
 const urlsToCache = [
   '/',
   '/restaurant/login',

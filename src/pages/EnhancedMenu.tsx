@@ -198,9 +198,10 @@ const EnhancedMenu = () => {
     },
     enabled: !!restaurantName,
     retry: 1,
-    staleTime: 10 * 60 * 1000, // 10 minutes - longer cache for Cloudflare
-    refetchOnWindowFocus: false, // Prevent unnecessary refetches
-    refetchOnMount: false // Rely on cache when possible
+    staleTime: 30 * 60 * 1000, // 30 minutes - longer cache
+    gcTime: 60 * 60 * 1000, // 1 hour cache
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
   });
 
   // Create restaurant supabase client
@@ -220,52 +221,81 @@ const EnhancedMenu = () => {
     }
   }, []);
 
-  // Profile query
+  // Combined data query for better performance
   const {
-    data: profile,
-    isLoading: profileLoading
+    data: restaurantData,
+    isLoading: dataLoading,
+    error: dataError
   } = useQuery({
-    queryKey: ['restaurant-profile', restaurant?.supabase_url],
+    queryKey: ['restaurant-data', restaurant?.supabase_url],
     queryFn: async () => {
       if (!restaurantSupabase) throw new Error('Restaurant database not available');
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('restaurant_profile').select('*').single();
-      if (error) throw error;
-      return data as RestaurantProfile;
-    },
-    enabled: !!restaurantSupabase,
-    retry: 1,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
-    select: (data) => data, // Enable structural sharing
-    notifyOnChangeProps: ['data', 'error'] // Only re-render on data/error changes
-  });
+      
+      // Fetch all data in parallel
+      const [profileRes, categoriesRes, menuItemsRes, customizationRes, languageRes, currencyRes, popupRes] = await Promise.allSettled([
+        restaurantSupabase.from('restaurant_profile').select('*').single(),
+        restaurantSupabase.from('categories').select('*').eq('is_active', true).order('display_order'),
+        restaurantSupabase.from('menu_items').select('*').eq('is_available', true).order('is_featured', { ascending: false }).order('display_order'),
+        restaurantSupabase.from('restaurant_customization').select('*').order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+        restaurantSupabase.from('language_settings').select('*').maybeSingle(),
+        restaurantSupabase.from('currency_settings').select('*').maybeSingle(),
+        restaurantSupabase.from('popup_settings').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
+      ]);
 
-  // Categories query
-  const {
-    data: categories = [],
-    isLoading: categoriesLoading
-  } = useQuery({
-    queryKey: ['categories', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return [];
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('categories').select('*').eq('is_active', true).order('display_order');
-      if (error) return [];
-      return data as Category[];
+      return {
+        profile: profileRes.status === 'fulfilled' ? profileRes.value.data : null,
+        categories: categoriesRes.status === 'fulfilled' ? (categoriesRes.value.data || []).filter(cat => cat.is_active) : [],
+        menuItems: menuItemsRes.status === 'fulfilled' ? (menuItemsRes.value.data || []).filter(item => item.is_available) : [],
+        customization: customizationRes.status === 'fulfilled' ? customizationRes.value.data : null,
+        languageSettings: languageRes.status === 'fulfilled' ? languageRes.value.data : null,
+        currencySettings: currencyRes.status === 'fulfilled' ? currencyRes.value.data : null,
+        popupSettings: popupRes.status === 'fulfilled' ? popupRes.value.data : null
+      };
     },
     enabled: !!restaurantSupabase,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 5 * 60 * 1000, // 5 minutes - categories change less frequently
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
     refetchOnWindowFocus: false,
-    select: (data) => data?.filter(cat => cat.is_active) || [], // Filter in selector
+    refetchInterval: false,
+    select: (data) => data,
     notifyOnChangeProps: ['data', 'error']
   });
+
+  // Extract individual data from combined query
+  const profile = restaurantData?.profile as RestaurantProfile;
+  const categories = restaurantData?.categories as Category[] || [];
+  const menuItems = restaurantData?.menuItems as MenuItem[] || [];
+  const customization = restaurantData?.customization;
+  const languageSettings = restaurantData?.languageSettings;
+  const currencySettings = restaurantData?.currencySettings;
+  const rawPopupSettings = restaurantData?.popupSettings;
+
+  // Process popup settings
+  const popupSettings = useMemo(() => {
+    if (!rawPopupSettings) return null;
+    
+    return {
+      enabled: rawPopupSettings.enabled,
+      type: rawPopupSettings.type,
+      title: rawPopupSettings.title,
+      description: rawPopupSettings.description,
+      link: rawPopupSettings.link || '',
+      buttonText: rawPopupSettings.button_text,
+      showAfterSeconds: rawPopupSettings.show_after_seconds || 3,
+      dailyLimit: rawPopupSettings.daily_limit || 1,
+      socialMedia: rawPopupSettings.social_media || [],
+      reviewOptions: rawPopupSettings.review_options || [],
+      wheelSettings: {
+        enabled: rawPopupSettings.wheel_enabled,
+        unlockType: rawPopupSettings.wheel_unlock_type || 'free',
+        unlockText: rawPopupSettings.wheel_unlock_text,
+        unlockButtonText: rawPopupSettings.wheel_unlock_button_text,
+        unlockLink: rawPopupSettings.wheel_unlock_link || '',
+        rewards: rawPopupSettings.wheel_rewards || []
+      }
+    } as PopupSettings;
+  }, [rawPopupSettings]);
 
   // Updated swipe gesture handling with improved logic for category navigation
   const handleSwipeRight = useCallback(() => {
@@ -295,143 +325,12 @@ const EnhancedMenu = () => {
     preventScroll: true
   });
 
-  // Menu items query
-  const {
-    data: menuItems = [],
-    isLoading: itemsLoading
-  } = useQuery({
-    queryKey: ['menu-items', restaurant?.supabase_url, selectedCategory],
-    queryFn: async () => {
-      if (!restaurantSupabase) return [];
-      let query = restaurantSupabase.from('menu_items').select('*').eq('is_available', true).order('is_featured', {
-        ascending: false
-      }).order('display_order');
-      if (selectedCategory) {
-        query = query.eq('category_id', selectedCategory);
-      }
-      const {
-        data,
-        error
-      } = await query;
-      if (error) return [];
-      return data as MenuItem[];
-    },
-    enabled: !!restaurantSupabase,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 3 * 60 * 1000, // 3 minutes - menu items change more frequently
-    refetchOnWindowFocus: false,
-    select: (data) => data?.filter(item => item.is_available) || [],
-    notifyOnChangeProps: ['data', 'error']
-  });
+  // Filter menu items by category when needed
+  const filteredMenuItemsByCategory = useMemo(() => {
+    if (!selectedCategory) return menuItems;
+    return menuItems.filter(item => item.category_id === selectedCategory);
+  }, [menuItems, selectedCategory]);
 
-  // Customization query
-  const {
-    data: customization
-  } = useQuery({
-    queryKey: ['customization', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return null;
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('restaurant_customization').select('*').order('updated_at', {
-        ascending: false
-      }).limit(1).maybeSingle();
-      if (error) return null;
-      return data;
-    },
-    enabled: !!restaurantSupabase,
-    retry: 0,
-    staleTime: 2 * 60 * 1000, // 2 minutes for customization
-    refetchOnWindowFocus: false,
-    notifyOnChangeProps: ['data']
-  });
-
-  // Language settings query - now separate for better control
-  const {
-    data: languageSettings
-  } = useQuery({
-    queryKey: ['language_settings_menu', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return null;
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('language_settings').select('*').maybeSingle();
-      if (error) return null;
-      return data;
-    },
-    enabled: !!restaurantSupabase,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes instead of 1
-    refetchOnWindowFocus: false
-  });
-
-  // Currency settings query - now separate for better control
-  const {
-    data: currencySettings
-  } = useQuery({
-    queryKey: ['currency_settings_menu', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return null;
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('currency_settings').select('*').maybeSingle();
-      if (error) return null;
-      return data;
-    },
-    enabled: !!restaurantSupabase,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes instead of 1
-    refetchOnWindowFocus: false
-  });
-
-  // Popup settings query
-  const {
-    data: popupSettings
-  } = useQuery({
-    queryKey: ['popup_settings_menu', restaurant?.supabase_url],
-    queryFn: async () => {
-      if (!restaurantSupabase) return null;
-      const {
-        data,
-        error
-      } = await restaurantSupabase.from('popup_settings').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle();
-      
-      if (error) {
-        console.error('Error loading popup settings:', error);
-        return null;
-      }
-      
-      if (!data) return null;
-      
-      // Map database fields to component interface
-      return {
-        enabled: data.enabled,
-        type: data.type,
-        title: data.title,
-        description: data.description,
-        link: data.link || '',
-        buttonText: data.button_text,
-        showAfterSeconds: data.show_after_seconds || 3,
-        dailyLimit: data.daily_limit || 1,
-        socialMedia: data.social_media || [],
-        reviewOptions: data.review_options || [],
-        wheelSettings: {
-          enabled: data.wheel_enabled,
-          unlockType: data.wheel_unlock_type || 'free',
-          unlockText: data.wheel_unlock_text,
-          unlockButtonText: data.wheel_unlock_button_text,
-          unlockLink: data.wheel_unlock_link || '',
-          rewards: data.wheel_rewards || []
-        }
-      } as PopupSettings;
-    },
-    enabled: !!restaurantSupabase,
-    staleTime: 10 * 60 * 1000 // 10 minutes - popup settings rarely change
-  });
 
   // Initialize language and currency from settings
   useEffect(() => {
@@ -518,11 +417,22 @@ const EnhancedMenu = () => {
     return profile ? getDisplayImageUrl(profile.logo_path, profile.logo_url) : null;
   }, [profile, getDisplayImageUrl]);
   
+  // Optimized search with debouncing
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Simplified filtered items with better search logic - isolated from header rendering
   const filteredMenuItems = useMemo(() => {
-    if (!searchTerm.trim()) return menuItems;
+    if (!debouncedSearchTerm.trim()) return menuItems;
     
-    const searchLower = searchTerm.toLowerCase().trim();
+    const searchLower = debouncedSearchTerm.toLowerCase().trim();
     
     return menuItems.filter(item => {
       // Get localized text for current language
@@ -550,16 +460,16 @@ const EnhancedMenu = () => {
       
       return false;
     });
-  }, [menuItems, searchTerm, currentLanguage, categories]);
+  }, [menuItems, debouncedSearchTerm, currentLanguage, categories]);
 
   // Filter items by category for tabs
   const getFilteredItemsByCategory = useCallback((categoryId: string | null) => {
-    const baseItems = searchTerm ? filteredMenuItems : menuItems;
+    const baseItems = debouncedSearchTerm ? filteredMenuItems : menuItems;
     
     if (!categoryId) return baseItems;
     
     return baseItems.filter(item => item.category_id === categoryId);
-  }, [menuItems, filteredMenuItems, searchTerm]);
+  }, [menuItems, filteredMenuItems, debouncedSearchTerm]);
 
   // Utility functions
   const formatPrice = useCallback((price: number, originalCurrency: string) => {
@@ -802,7 +712,7 @@ const EnhancedMenu = () => {
         </div>
       </div>;
   }
-  if (profileLoading || categoriesLoading) {
+  if (dataLoading) {
     return <MenuLoadingSkeleton layoutStyle={layoutStyle} />;
   }
 
@@ -842,9 +752,9 @@ const EnhancedMenu = () => {
                 <div className="text-center py-8 fade-in">
                   <Utensils className="h-10 w-10 mx-auto mb-3" style={mutedTextStyles} />
                   <p className="text-sm" style={mutedTextStyles}>
-                    {searchTerm ? 'No items found matching your search in this category.' : 'No items found in this category.'}
+                    {debouncedSearchTerm ? 'No items found matching your search in this category.' : 'No items found in this category.'}
                   </p>
-                  {searchTerm && (
+                  {debouncedSearchTerm && (
                     <Button variant="outline" onClick={clearSearch} className="mt-3">
                       Clear search
                     </Button>

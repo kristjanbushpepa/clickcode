@@ -356,9 +356,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                   </div>
                 </> : <div className="space-y-3">
                   <div className="text-4xl animate-bounce">🎉</div>
-                  <h3 className="text-lg font-bold" style={{
-              color: customTheme?.accentColor || '#3b82f6'
-            }}>
+                  <h3 className="text-lg font-bold text-blue-800">
                     Congratulations!
                   </h3>
                   <div className="p-3 rounded-lg border-2 bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500">

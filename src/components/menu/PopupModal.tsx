@@ -315,15 +315,18 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                         </Button>;
               })}
                   </div>
-                </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-3">
+                </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-4">
+                  {settings.wheelSettings.unlockType === 'link' && !showWheel && (
+                    <p className="text-lg font-bold text-center text-blue-600">
+                      {settings.wheelSettings.unlockText}
+                    </p>
+                  )}
+                  
                   <div className="flex justify-center">
                     <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled || settings.wheelSettings.unlockType === 'link' && !showWheel} />
                   </div>
                   
                   {settings.wheelSettings.unlockType === 'link' && !showWheel && <>
-                      <p className="text-sm font-medium text-center" style={headingStyles}>
-                        {settings.wheelSettings.unlockText}
-                      </p>
                       
                       {timeLeft > 0 && timeLeft < 5 ? <div className="text-center space-y-2">
                           <p className="text-xs" style={mutedTextStyles}>
@@ -335,7 +338,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                     backgroundColor: customTheme?.accentColor || '#3b82f6'
                   }} />
                           </div>
-                        </div> : <Button onClick={handleCtaClick} className="w-full h-12 font-bold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-[pulse_3s_ease-in-out_infinite] text-lg bg-blue-600 hover:bg-blue-700 shadow-lg" disabled={timeLeft > 0 && timeLeft < 5}>
+                        </div> : <Button onClick={handleCtaClick} className="w-full h-12 font-bold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-bounce text-lg bg-blue-600 hover:bg-blue-700 shadow-lg" disabled={timeLeft > 0 && timeLeft < 5}>
                           {settings.wheelSettings.unlockButtonText}
                         </Button>}
                     </>}

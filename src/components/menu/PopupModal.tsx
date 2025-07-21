@@ -267,6 +267,9 @@ export const PopupModal: React.FC<PopupModalProps> = ({
               </p>
 
               {settings.type === 'review' && enabledReviewOptions.length > 0 ? <div className="space-y-3">
+                  <h2 className="text-xl font-bold text-center text-gray-800 mb-2">
+                    {settings.title}
+                  </h2>
                   {/* 5 Yellow Stars */}
                   <div className="flex justify-center items-center space-x-1 mb-3">
                     {[...Array(5)].map((_, index) => <Star key={index} className="h-6 w-6 fill-yellow-400 text-yellow-400 animate-pulse" style={{

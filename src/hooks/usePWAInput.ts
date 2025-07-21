@@ -28,14 +28,30 @@ export const usePWAInput = () => {
         );
       }
 
-      // Prevent zoom on orientation change and tab switching
-      const preventZoom = (e: Event) => {
-        e.preventDefault();
+      // Enhanced viewport control with immediate fixes
+      const updateViewport = () => {
         const viewport = document.querySelector('meta[name=viewport]');
         if (viewport) {
           viewport.setAttribute('content', 
-            'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no'
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no, interactive-widget=resizes-content'
           );
+        }
+        
+        // Force layout recalculation
+        document.body.style.transform = 'translateZ(0)';
+        setTimeout(() => {
+          document.body.style.transform = '';
+        }, 50);
+      };
+
+      const preventZoom = (e: Event) => {
+        updateViewport();
+        
+        // Additional fixes for orientation changes
+        if (e.type === 'orientationchange') {
+          setTimeout(updateViewport, 100);
+          setTimeout(updateViewport, 500);
+          setTimeout(updateViewport, 1000);
         }
       };
 
@@ -190,6 +206,72 @@ export const usePWAInput = () => {
         * {
           -webkit-text-size-adjust: 100% !important;
           text-size-adjust: 100% !important;
+        }
+        
+        /* Fix mobile tab and content scaling */
+        @media screen and (max-width: 768px) {
+          .fixed.bottom-0 {
+            transform: translateZ(0) !important;
+            -webkit-transform: translateZ(0) !important;
+          }
+          
+          /* Ensure content fits screen properly */
+          [role="tabpanel"], .translate-content, .menu-content {
+            max-width: 100vw !important;
+            overflow-x: auto !important;
+            transform: translateZ(0) !important;
+            -webkit-transform: translateZ(0) !important;
+          }
+          
+          /* Fix for small text in mobile tabs */
+          .grid.grid-cols-8 button {
+            min-height: 64px !important;
+            padding: 2px !important;
+          }
+          
+          .grid.grid-cols-8 button span {
+            font-size: 10px !important;
+            line-height: 1.2 !important;
+            max-width: 100% !important;
+            word-break: break-word !important;
+          }
+          
+          /* Orientation-specific fixes */
+          @media (orientation: landscape) {
+            body {
+              height: 100vh !important;
+              max-height: 100vh !important;
+              overflow: hidden !important;
+            }
+            
+            main {
+              height: calc(100vh - 120px) !important;
+              overflow-y: auto !important;
+            }
+            
+            .fixed.bottom-0 {
+              height: 56px !important;
+            }
+            
+            .grid.grid-cols-8 {
+              height: 56px !important;
+            }
+            
+            .grid.grid-cols-8 button {
+              min-height: 56px !important;
+              padding: 1px !important;
+            }
+            
+            .grid.grid-cols-8 button span {
+              font-size: 9px !important;
+            }
+            
+            .grid.grid-cols-8 button svg {
+              width: 14px !important;
+              height: 14px !important;
+              margin-bottom: 1px !important;
+            }
+          }
         }
       `;
       

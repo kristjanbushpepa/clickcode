@@ -12,9 +12,13 @@ import { PopupSettings } from '@/components/restaurant/PopupSettings';
 import { CurrencySettings } from '@/components/restaurant/CurrencySettings';
 import { DashboardFormProvider } from '@/contexts/DashboardFormContext';
 import { MobileTabBar } from '@/components/restaurant/MobileTabBar';
+import { usePWAInput } from '@/hooks/usePWAInput';
 
 const RestaurantDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  
+  // Apply PWA fixes for mobile
+  usePWAInput();
 
   const renderTabContent = () => {
     switch (activeTab) {

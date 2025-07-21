@@ -318,16 +318,13 @@ const EnhancedMenu = () => {
 
   // Updated swipe gesture handling with improved logic for category navigation
   const handleSwipeRight = useCallback(() => {
-    // Handle swipe right based on current state
+    // Handle swipe right - only go back from category to categories view
     if (layoutPreference === 'categories' && selectedCategory) {
       // If we're viewing items in a category, go back to categories view
       setSelectedCategory(null);
-    } else if (layoutPreference === 'items' && categories.length > 0) {
-      // If we're in items layout, switch to categories layout
-      setLayoutPreference('categories');
-      setSelectedCategory(null);
     }
-  }, [layoutPreference, selectedCategory, categories]);
+    // Removed: Don't switch from items layout to categories layout on swipe right
+  }, [layoutPreference, selectedCategory]);
 
   const handleSwipeLeft = useCallback(() => {
     // Disabled: Don't switch to items layout on swipe left

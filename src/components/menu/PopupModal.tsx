@@ -318,14 +318,15 @@ export const PopupModal: React.FC<PopupModalProps> = ({
               })}
                   </div>
                 </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-3">
+                  <p className="text-xl font-bold text-center mb-4" style={headingStyles}>
+                    {settings.wheelSettings.unlockText}
+                  </p>
+                  
                   <div className="flex justify-center">
                     <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled || settings.wheelSettings.unlockType === 'link' && !showWheel} />
                   </div>
                   
                   {settings.wheelSettings.unlockType === 'link' && !showWheel && <>
-                      <p className="text-sm font-medium text-center" style={headingStyles}>
-                        {settings.wheelSettings.unlockText}
-                      </p>
                       
                       {timeLeft > 0 && timeLeft < 5 ? <div className="text-center space-y-2">
                           <p className="text-xs" style={mutedTextStyles}>

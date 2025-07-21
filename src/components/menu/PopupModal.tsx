@@ -277,9 +277,8 @@ export const PopupModal: React.FC<PopupModalProps> = ({
               }} />)}
                   </div>
                   
-                  <p className="text-sm font-medium text-center" style={headingStyles}>
-                    Leave us a review!
-                  </p>
+                  <div className="h-4"></div>
+                  
                   
                   <div className="flex justify-center items-center space-x-4">
                     {enabledReviewOptions.map((review, index) => {

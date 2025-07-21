@@ -129,6 +129,21 @@ const Contact = () => {
           </p>
         </div>
 
+        {/* Contact Information */}
+        <div className="text-center mb-8">
+          <div className="bg-card/80 backdrop-blur-md border border-border rounded-lg p-6 max-w-md mx-auto shadow-lg">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Get in Touch</h2>
+            <div className="space-y-2">
+              <p className="text-muted-foreground">
+                <span className="font-medium">Email:</span> clickcodemenu@gmail.com
+              </p>
+              <p className="text-muted-foreground">
+                <span className="font-medium">Phone:</span> +355 68 587 0595
+              </p>
+            </div>
+          </div>
+        </div>
+
         <Card className="max-w-4xl mx-auto bg-card/80 backdrop-blur-md border border-border shadow-2xl">
           <CardHeader>
             <CardTitle className="text-2xl text-center">Restaurant Information Questionnaire</CardTitle>

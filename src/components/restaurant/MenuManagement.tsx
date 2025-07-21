@@ -205,16 +205,27 @@ export function MenuManagement() {
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
       const restaurantSupabase = getRestaurantSupabase();
-      const { error } = await restaurantSupabase
+      
+      // First, update all menu items to remove this category (set category_id to null)
+      const { error: updateError } = await restaurantSupabase
+        .from('menu_items')
+        .update({ category_id: null })
+        .eq('category_id', id);
+      
+      if (updateError) throw updateError;
+      
+      // Then delete the category
+      const { error: deleteError } = await restaurantSupabase
         .from('categories')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (deleteError) throw deleteError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast({ title: 'Kategoria u fshi me sukses' });
+      queryClient.invalidateQueries({ queryKey: ['menu_items'] });
+      toast({ title: 'Kategoria u fshi me sukses. Artikujt duhet të riassignohen.' });
     },
     onError: (error: any) => {
       toast({ title: 'Gabim në fshirjen e kategorisë', description: error.message, variant: 'destructive' });
@@ -386,6 +397,7 @@ export function MenuManagement() {
               </Button>
             </DialogTrigger>
             <MenuItemDialog
+              key={editingItem?.id || 'new-item'}
               item={editingItem}
               categories={categories}
               onSubmit={handleItemSubmit}

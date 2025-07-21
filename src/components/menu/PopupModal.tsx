@@ -296,7 +296,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
               })}
                   </div>
                 </div> : settings.type === 'social' && enabledSocialMedia.length > 0 ? <div className="space-y-3">
-                  <p className="text-sm font-medium text-center" style={headingStyles}>
+                  <p className="text-lg font-medium text-center -mt-1" style={headingStyles}>
                     Follow us on social media!
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

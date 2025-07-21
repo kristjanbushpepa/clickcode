@@ -335,8 +335,8 @@ const EnhancedMenu = () => {
   }, []);
 
   const swipeRef = useSwipeGestures({
-    onSwipeLeft: handleSwipeLeft,
     onSwipeRight: handleSwipeRight,
+    // onSwipeLeft: removed to prevent any layout switching on right-to-left swipe
     threshold: 80,
     preventScroll: true
   });

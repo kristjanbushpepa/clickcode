@@ -114,7 +114,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {hasContactInfo && (
                   <Collapsible open={isContactOpen} onOpenChange={setIsContactOpen}>
                     <CollapsibleTrigger 
-                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium rounded-lg transition-colors"
                       style={{ color: customTheme?.contactSectionTitleColor }}
                     >
                       <span>Contact Information</span>
@@ -178,7 +178,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {hasWorkingHours && (
                   <Collapsible open={isHoursOpen} onOpenChange={setIsHoursOpen}>
                     <CollapsibleTrigger 
-                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium rounded-lg transition-colors"
                       style={{ color: customTheme?.openingHoursSectionTitleColor }}
                     >
                       <span>Opening Hours</span>
@@ -216,7 +216,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {hasSocialLinks && (
                   <Collapsible open={isSocialOpen} onOpenChange={setIsSocialOpen}>
                     <CollapsibleTrigger 
-                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium rounded-lg transition-colors"
                       style={{ color: customTheme?.socialMediaSectionTitleColor }}
                     >
                       <span>Follow Us</span>

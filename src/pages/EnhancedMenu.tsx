@@ -163,9 +163,28 @@ const EnhancedMenu = () => {
   const [layoutStyle, setLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine'>('compact');
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [userHasChangedLanguage, setUserHasChangedLanguage] = useState(false);
   
   // Add ref for search input to maintain focus
   const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  // Simple debounce utility function
+  const debounce = useCallback((func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(null, args), delay);
+    };
+  }, []);
+  
+  // Debounced language change handler
+  const debouncedLanguageChange = useCallback(
+    debounce((newLanguage: string) => {
+      setCurrentLanguage(newLanguage);
+      setUserHasChangedLanguage(true);
+    }, 150),
+    [debounce]
+  );
 
   // Restaurant lookup query
   const {
@@ -332,13 +351,14 @@ const EnhancedMenu = () => {
   }, [menuItems, selectedCategory]);
 
 
-  // Initialize language and currency from settings
+  // Initialize language and currency from settings (only if user hasn't manually changed it)
   useEffect(() => {
-    if (languageSettings?.main_ui_language && 
+    if (!userHasChangedLanguage && 
+        languageSettings?.main_ui_language && 
         languageSettings.supported_ui_languages?.includes(languageSettings.main_ui_language)) {
       setCurrentLanguage(languageSettings.main_ui_language);
     }
-  }, [languageSettings]);
+  }, [languageSettings, userHasChangedLanguage]);
 
   useEffect(() => {
     if (currencySettings?.default_currency && 
@@ -741,7 +761,7 @@ const EnhancedMenu = () => {
             restaurantSupabase={restaurantSupabase}
             hasAnimated={hasAnimated}
             onBackClick={handleBackClick}
-            onLanguageChange={setCurrentLanguage}
+            onLanguageChange={debouncedLanguageChange}
             onCurrencyChange={setCurrentCurrency}
             getLocalizedText={getLocalizedText}
           />
@@ -830,7 +850,7 @@ const EnhancedMenu = () => {
             restaurantSupabase={restaurantSupabase}
             hasAnimated={hasAnimated}
             onBackClick={handleBackClick}
-            onLanguageChange={setCurrentLanguage}
+            onLanguageChange={debouncedLanguageChange}
             onCurrencyChange={setCurrentCurrency}
             getLocalizedText={getLocalizedText}
           />
@@ -918,7 +938,7 @@ const EnhancedMenu = () => {
           restaurantSupabase={restaurantSupabase}
           hasAnimated={hasAnimated}
           onBackClick={handleBackClick}
-          onLanguageChange={setCurrentLanguage}
+            onLanguageChange={debouncedLanguageChange}
           onCurrencyChange={setCurrentCurrency}
           getLocalizedText={getLocalizedText}
         />
@@ -989,7 +1009,7 @@ const EnhancedMenu = () => {
         restaurantSupabase={restaurantSupabase}
         hasAnimated={hasAnimated}
         onBackClick={handleBackClick}
-        onLanguageChange={setCurrentLanguage}
+        onLanguageChange={debouncedLanguageChange}
         onCurrencyChange={setCurrentCurrency}
         getLocalizedText={getLocalizedText}
       />

@@ -81,12 +81,16 @@ export function LanguageSwitch({
   const supportedLanguages = languageSettings?.supported_ui_languages || ['sq', 'en'];
   const currentLangData = LANGUAGE_OPTIONS.find(lang => lang.code === currentLanguage);
 
-  // Auto-switch to main language if current language is not supported
+  // Auto-switch to main language if current language is not supported (with debounce)
   useEffect(() => {
-    if (languageSettings?.main_ui_language && 
-        !supportedLanguages.includes(currentLanguage)) {
-      onLanguageChange(languageSettings.main_ui_language);
-    }
+    const timer = setTimeout(() => {
+      if (languageSettings?.main_ui_language && 
+          !supportedLanguages.includes(currentLanguage)) {
+        onLanguageChange(languageSettings.main_ui_language);
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [languageSettings, supportedLanguages, currentLanguage, onLanguageChange]);
 
   return (

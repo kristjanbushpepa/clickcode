@@ -277,25 +277,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-accent"></div>
-        <div className="container mx-auto px-4 text-center relative">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-foreground mb-4 sm:mb-6">
-              Ready to Transform Your Restaurant?
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 text-primary-foreground/90">
-              Join hundreds of restaurants already using Click Code to create amazing digital dining experiences
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center bg-slate-50 rounded-none">
-              
-              <Button variant="outline" size="lg" onClick={handleScheduleDemo} className="border-primary-foreground/30 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg hover:scale-105 transition-all duration-300 text-gray-950 bg-slate-50">
-                Schedule Demo
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Footer */}
       <footer className="bg-card/50 border-t border-border py-8 sm:py-12">
@@ -326,20 +308,16 @@ const Index = () => {
             <div className="text-center sm:text-left">
               <h3 className="font-semibold mb-3 sm:mb-4 text-foreground">Support</h3>
               <ul className="space-y-1 sm:space-y-2 text-sm text-muted-foreground">
-                <li>Help Center</li>
+                
                 <li>Contact Support</li>
-                <li>Documentation</li>
-                <li>Video Tutorials</li>
-                <li>Community Forum</li>
+                
+                
+                
               </ul>
             </div>
           </div>
           
-          <Button 
-            variant="outline" 
-            className="border-primary text-primary hover:bg-primary/10 self-start"
-            onClick={() => navigate('/contact')}
-          >
+          <Button variant="outline" className="border-primary text-primary hover:bg-primary/10 self-start" onClick={() => navigate('/contact')}>
             Contact Us
           </Button>
         </div>

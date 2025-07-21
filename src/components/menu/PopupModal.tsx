@@ -361,13 +361,8 @@ export const PopupModal: React.FC<PopupModalProps> = ({
             }}>
                     Congratulations!
                   </h3>
-                  <div className="p-3 rounded-lg border-2" style={{
-              backgroundColor: customTheme?.accentColor ? `${customTheme.accentColor}20` : '#3b82f620',
-              borderColor: customTheme?.accentColor || '#3b82f6'
-            }}>
-                    <p className="text-base font-bold" style={{
-                color: customTheme?.accentColor || '#3b82f6'
-              }}>
+                  <div className="p-3 rounded-lg border-2 bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500">
+                    <p className="text-base font-bold text-red-600">
                       {wonReward}
                     </p>
                   </div>

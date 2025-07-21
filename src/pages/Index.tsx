@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Globe, RefreshCw, Sparkles, Settings, Users, BarChart3, Palette, Bell, Star, MessageCircle, Smartphone, QrCode, Zap, User, MessageSquare } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitch from '@/components/LanguageSwitch';
 interface Restaurant {
   id: string;
   name: string;
@@ -32,6 +34,7 @@ interface CompanySettings {
 }
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const {
     data: companySettings
   } = useQuery({
@@ -97,14 +100,15 @@ const Index = () => {
               <img src={companySettings?.logo_url || "/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png"} alt={`${companySettings?.company_name || 'Click Code'} Logo`} className="h-8 w-8 sm:h-10 sm:w-10" />
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
+              <LanguageSwitch />
               <Button variant="ghost" className="text-foreground hover:text-primary text-sm sm:text-base" onClick={scrollToFeatures}>
-                Features
+                {t('nav.features')}
               </Button>
               <Button variant="ghost" className="text-foreground hover:text-primary text-sm sm:text-base" onClick={handlePricingClick}>
-                Pricing
+                {t('nav.pricing')}
               </Button>
               <Button variant="outline" className="border-primary text-primary hover:bg-primary/10 text-sm sm:text-base px-3 sm:px-4" onClick={() => navigate('/contact')}>
-                Contact Us
+                {t('nav.contact')}
               </Button>
             </div>
           </div>
@@ -122,16 +126,15 @@ const Index = () => {
             }} />
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-4 sm:mb-6">
-              Welcome to <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{companySettings?.company_name || 'Click Code'}</span>
+              {t('hero.welcome')} <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{companySettings?.company_name || 'Click Code'}</span>
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
-              Transform your restaurant with our cutting-edge digital menu platform. Create stunning QR code menus, 
-              manage your profile with ease, and boost your online presence with our powerful admin panel.
+              {t('hero.description')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 sm:mb-12">
               
               <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg hover:scale-105 transition-all duration-300" onClick={() => navigate('/restaurant/login')}>
-                Restaurant Login
+                {t('hero.restaurant_login')}
               </Button>
             </div>
           </div>
@@ -143,10 +146,10 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Powerful Features for Modern Restaurants
+              {t('features.title')}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to create, customize, and manage your digital presence
+              {t('features.subtitle')}
             </p>
           </div>
           
@@ -155,9 +158,9 @@ const Index = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg mb-4">
                 <Settings className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Admin Panel</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">{t('features.admin_panel')}</h3>
               <p className="text-muted-foreground">
-                Comprehensive dashboard to manage all your restaurants, analytics, and system settings in one place.
+                {t('features.admin_panel_desc')}
               </p>
             </Card>
 
@@ -165,9 +168,9 @@ const Index = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-accent/20 rounded-lg mb-4">
                 <Palette className="h-6 w-6 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Customization</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">{t('features.customization')}</h3>
               <p className="text-muted-foreground">
-                Personalize your menu's appearance with custom themes, colors, and layouts that match your brand.
+                {t('features.customization_desc')}
               </p>
             </Card>
 
@@ -175,9 +178,9 @@ const Index = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg mb-4">
                 <User className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Profile Management</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">{t('features.profile_management')}</h3>
               <p className="text-muted-foreground">
-                Easily update restaurant information, hours, contact details, and social media links.
+                {t('features.profile_management_desc')}
               </p>
             </Card>
 
@@ -185,9 +188,9 @@ const Index = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-accent/20 rounded-lg mb-4">
                 <MessageSquare className="h-6 w-6 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Review Popups</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">{t('features.review_popups')}</h3>
               <p className="text-muted-foreground">
-                Smart popup system to encourage customer reviews and increase your online ratings automatically.
+                {t('features.review_popups_desc')}
               </p>
             </Card>
 
@@ -195,9 +198,9 @@ const Index = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg mb-4">
                 <Users className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Social Growth</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">{t('features.social_growth')}</h3>
               <p className="text-muted-foreground">
-                Boost your social media followers with integrated campaigns and engagement tools.
+                {t('features.social_growth_desc')}
               </p>
             </Card>
 
@@ -205,9 +208,9 @@ const Index = () => {
               <div className="flex items-center justify-center w-12 h-12 bg-accent/20 rounded-lg mb-4">
                 <QrCode className="h-6 w-6 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">QR Code Menus</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3">{t('features.qr_code_menus')}</h3>
               <p className="text-muted-foreground">
-                Generate beautiful QR codes for contactless menu access with real-time updates and analytics.
+                {t('features.qr_code_menus_desc')}
               </p>
             </Card>
           </div>

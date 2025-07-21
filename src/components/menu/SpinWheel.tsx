@@ -207,10 +207,10 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete, disab
       <Button 
         onClick={spin} 
         disabled={isSpinning || disabled}
-        size="lg"
-        className={`px-6 py-2 text-lg font-bold text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none rounded-xl ${
+        size={disabled ? "default" : "lg"}
+        className={`${disabled ? 'px-4 py-2 text-sm' : 'px-6 py-2 text-lg'} font-bold text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-70 disabled:transform-none rounded-xl ${
           disabled 
-            ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' 
+            ? 'bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-400 hover:to-gray-500 cursor-not-allowed' 
             : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
         }`}
       >

@@ -651,47 +651,49 @@ const EnhancedMenu = () => {
 
     return (
       <div className="px-3 py-3">
-        <div className="relative">
-          <Search 
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none" 
-            style={{ color: iconColor }}
-          />
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Search menu items..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="w-full h-10 pl-10 pr-10 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            style={{
-              ...searchBarStyles,
-              '::placeholder': {
-                color: 'var(--placeholder-color)'
-              }
-            } as React.CSSProperties}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-          />
-          <style>
-            {`
-              input[type="text"]::placeholder {
-                color: ${customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'};
-              }
-            `}
-          </style>
-          {searchTerm && (
-            <button
-              onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center hover:opacity-60 cursor-pointer"
+        <div className="max-w-sm mx-auto">
+          <div className="relative">
+            <Search 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 pointer-events-none" 
               style={{ color: iconColor }}
-              aria-label="Clear search"
-              type="button"
-            >
-              ×
-            </button>
-          )}
+            />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search menu items..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full h-10 pl-10 pr-10 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={{
+                ...searchBarStyles,
+                '::placeholder': {
+                  color: 'var(--placeholder-color)'
+                }
+              } as React.CSSProperties}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+            />
+            <style>
+              {`
+                input[type="text"]::placeholder {
+                  color: ${customTheme?.searchBarPlaceholder || customTheme?.mutedTextColor || '#6b7280'};
+                }
+              `}
+            </style>
+            {searchTerm && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center hover:opacity-60 cursor-pointer"
+                style={{ color: iconColor }}
+                aria-label="Clear search"
+                type="button"
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -940,7 +942,7 @@ const EnhancedMenu = () => {
           getLocalizedText={getLocalizedText}
         />
         {SearchBar}
-        <div className="px-4 pb-6">
+        <div className="px-3 py-3">
           <div className="max-w-2xl mx-auto">
             {categories.length === 0 ? (
               <div className="text-center py-12 fade-in">

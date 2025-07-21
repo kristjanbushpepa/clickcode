@@ -257,11 +257,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
   return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent style={dialogStyles} className="max-w-[90vw] w-full sm:max-w-sm mx-auto p-0 gap-0 border-2 shadow-2xl rounded-sm bg-slate-50">
         {/* Close button */}
-        <button onClick={() => setIsOpen(false)} className="absolute right-2 top-2 z-10 p-1 rounded-full transition-colors hover:bg-gray-100" style={{
-        color: '#6b7280'
-      }}>
-          <X className="h-4 w-4" />
-        </button>
+        
 
         {/* Content */}
         <div className="p-4 space-y-4 bg-white">
@@ -318,15 +314,14 @@ export const PopupModal: React.FC<PopupModalProps> = ({
               })}
                   </div>
                 </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-3">
-                  <p className="text-xl font-bold text-center mb-4" style={headingStyles}>
-                    {settings.wheelSettings.unlockText}
-                  </p>
-                  
                   <div className="flex justify-center">
                     <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled || settings.wheelSettings.unlockType === 'link' && !showWheel} />
                   </div>
                   
                   {settings.wheelSettings.unlockType === 'link' && !showWheel && <>
+                      <p className="text-sm font-medium text-center" style={headingStyles}>
+                        {settings.wheelSettings.unlockText}
+                      </p>
                       
                       {timeLeft > 0 && timeLeft < 5 ? <div className="text-center space-y-2">
                           <p className="text-xs" style={mutedTextStyles}>
@@ -338,7 +333,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                     backgroundColor: customTheme?.accentColor || '#3b82f6'
                   }} />
                           </div>
-                        </div> : <Button onClick={handleCtaClick} className="w-full px-8 py-3 text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none" disabled={timeLeft > 0 && timeLeft < 5}>
+                        </div> : <Button onClick={handleCtaClick} className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-[pulse_3s_ease-in-out_infinite] text-sm bg-blue-600 hover:bg-blue-700" disabled={timeLeft > 0 && timeLeft < 5}>
                           {settings.wheelSettings.unlockButtonText}
                         </Button>}
                     </>}
@@ -348,19 +343,26 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                 </Button>}
             </> : <div className="text-center space-y-4 bg-white">
               {!hasSpun ? <>
-                  <p className="text-lg font-bold text-center" style={headingStyles}>
-                    {settings.wheelSettings.unlockText}
+                  <p className="text-xs" style={mutedTextStyles}>
+                    {settings.wheelSettings.unlockType === 'free' ? 'Spin the wheel for your reward!' : 'Thanks for visiting the link! Spin to win your reward:'}
                   </p>
                   <div className="flex justify-center">
                     <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled} />
                   </div>
                 </> : <div className="space-y-3">
                   <div className="text-4xl animate-bounce">🎉</div>
-                  <h3 className="text-lg font-bold text-blue-800">
+                  <h3 className="text-lg font-bold" style={{
+              color: customTheme?.accentColor || '#3b82f6'
+            }}>
                     Congratulations!
                   </h3>
-                  <div className="p-3 rounded-lg border-2 bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500">
-                    <p className="text-base font-bold text-red-600">
+                  <div className="p-3 rounded-lg border-2" style={{
+              backgroundColor: customTheme?.accentColor ? `${customTheme.accentColor}20` : '#3b82f620',
+              borderColor: customTheme?.accentColor || '#3b82f6'
+            }}>
+                    <p className="text-base font-bold" style={{
+                color: customTheme?.accentColor || '#3b82f6'
+              }}>
                       {wonReward}
                     </p>
                   </div>

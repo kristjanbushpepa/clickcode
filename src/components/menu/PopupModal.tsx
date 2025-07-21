@@ -333,7 +333,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                     backgroundColor: customTheme?.accentColor || '#3b82f6'
                   }} />
                           </div>
-                        </div> : <Button onClick={handleCtaClick} className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-[pulse_3s_ease-in-out_infinite] text-sm bg-blue-600 hover:bg-blue-700" disabled={timeLeft > 0 && timeLeft < 5}>
+                        </div> : <Button onClick={handleCtaClick} className="w-full h-12 font-bold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-[pulse_3s_ease-in-out_infinite] text-lg bg-blue-600 hover:bg-blue-700 shadow-lg" disabled={timeLeft > 0 && timeLeft < 5}>
                           {settings.wheelSettings.unlockButtonText}
                         </Button>}
                     </>}
@@ -343,30 +343,23 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                 </Button>}
             </> : <div className="text-center space-y-4 bg-white">
               {!hasSpun ? <>
-                  <p className="text-xs" style={mutedTextStyles}>
+                  <p className="text-sm text-gray-600 font-medium">
                     {settings.wheelSettings.unlockType === 'free' ? 'Spin the wheel for your reward!' : 'Thanks for visiting the link! Spin to win your reward:'}
                   </p>
                   <div className="flex justify-center">
                     <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled} />
                   </div>
-                </> : <div className="space-y-3">
-                  <div className="text-4xl animate-bounce">🎉</div>
-                  <h3 className="text-lg font-bold" style={{
-              color: customTheme?.accentColor || '#3b82f6'
-            }}>
+                </> : <div className="space-y-4 bg-white p-4 rounded-xl">
+                  <div className="text-6xl animate-bounce">🎉</div>
+                  <h3 className="text-2xl font-bold text-blue-600">
                     Congratulations!
                   </h3>
-                  <div className="p-3 rounded-lg border-2" style={{
-              backgroundColor: customTheme?.accentColor ? `${customTheme.accentColor}20` : '#3b82f620',
-              borderColor: customTheme?.accentColor || '#3b82f6'
-            }}>
-                    <p className="text-base font-bold" style={{
-                color: customTheme?.accentColor || '#3b82f6'
-              }}>
+                  <div className="p-4 rounded-xl border-2 bg-blue-50 border-blue-200">
+                    <p className="text-xl font-bold text-blue-700">
                       {wonReward}
                     </p>
                   </div>
-                  <p className="text-xs" style={mutedTextStyles}>
+                  <p className="text-sm text-gray-600 font-medium">
                     Show this screen to claim your reward!
                   </p>
                 </div>}

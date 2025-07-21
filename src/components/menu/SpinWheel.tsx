@@ -118,8 +118,8 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete, disab
           <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[24px] border-transparent border-b-red-500 drop-shadow-lg"></div>
         </div>
         
-        {/* Wheel container with golden border */}
-        <div className={`relative w-[250px] h-[250px] rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 p-3 shadow-2xl ${disabled ? 'opacity-60' : ''}`}>
+        {/* Wheel container with blue border */}
+        <div className={`relative w-[250px] h-[250px] rounded-full bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 p-3 shadow-2xl ${disabled ? 'opacity-60' : ''}`}>
           {/* Inner wheel */}
           <div 
             ref={wheelRef}
@@ -132,8 +132,8 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete, disab
             <svg className="w-full h-full" viewBox="0 0 200 200">
               <defs>
                 <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#fbbf24" />
-                  <stop offset="100%" stopColor="#f59e0b" />
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#2563eb" />
                 </radialGradient>
               </defs>
               
@@ -195,7 +195,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete, disab
                 cy="100"
                 r="15"
                 fill="url(#centerGradient)"
-                stroke="#fbbf24"
+                stroke="#3b82f6"
                 strokeWidth="3"
                 className="drop-shadow-lg"
               />
@@ -208,34 +208,34 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete, disab
         onClick={spin} 
         disabled={isSpinning || disabled}
         size="lg"
-        className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none"
+        className="px-10 py-4 text-xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none rounded-xl"
       >
         {disabled ? (
-          <span className="flex items-center gap-2">
-            <Lock size={20} />
+          <span className="flex items-center gap-3">
+            <Lock size={24} />
             LOCKED
           </span>
         ) : isSpinning ? (
-          <span className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <span className="flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             Spinning...
           </span>
         ) : (
-          <span className="flex items-center gap-2">
-            <Unlock size={20} />
+          <span className="flex items-center gap-3">
+            <Unlock size={24} />
             SPIN THE WHEEL!
           </span>
         )}
       </Button>
       
       {result && !isSpinning && (
-        <div className="text-center animate-fade-in">
-          <div className="text-6xl mb-2 animate-bounce">🎉</div>
-          <p className="text-lg font-bold text-gray-700 mb-2">Congratulations!</p>
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-6 py-3 rounded-full shadow-lg">
-            <p className="text-xl font-bold">{result}</p>
+        <div className="text-center animate-fade-in bg-white p-6 rounded-xl shadow-lg">
+          <div className="text-6xl mb-4 animate-bounce">🎉</div>
+          <p className="text-2xl font-bold text-blue-600 mb-4">Congratulations!</p>
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl shadow-lg">
+            <p className="text-2xl font-bold">{result}</p>
           </div>
-          <p className="text-sm text-gray-600 mt-2">Show this screen to claim your reward!</p>
+          <p className="text-sm text-gray-600 mt-4 font-medium">Show this screen to claim your reward!</p>
         </div>
       )}
     </div>

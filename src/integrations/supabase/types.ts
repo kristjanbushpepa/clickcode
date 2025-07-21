@@ -128,6 +128,51 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_submissions: {
+        Row: {
+          additional_info: string | null
+          budget: string
+          created_at: string
+          current_menu_type: string
+          email: string
+          features: string[] | null
+          id: string
+          name: string
+          number_of_tables: string
+          phone: string | null
+          restaurant_name: string
+          updated_at: string
+        }
+        Insert: {
+          additional_info?: string | null
+          budget: string
+          created_at?: string
+          current_menu_type: string
+          email: string
+          features?: string[] | null
+          id?: string
+          name: string
+          number_of_tables: string
+          phone?: string | null
+          restaurant_name: string
+          updated_at?: string
+        }
+        Update: {
+          additional_info?: string | null
+          budget?: string
+          created_at?: string
+          current_menu_type?: string
+          email?: string
+          features?: string[] | null
+          id?: string
+          name?: string
+          number_of_tables?: string
+          phone?: string | null
+          restaurant_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       languages: {
         Row: {
           code: string

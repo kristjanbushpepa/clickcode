@@ -316,11 +316,9 @@ export const PopupModal: React.FC<PopupModalProps> = ({
               })}
                   </div>
                 </div> : settings.type === 'wheel' && settings.wheelSettings.enabled ? <div className="space-y-4">
-                  {settings.wheelSettings.unlockType === 'link' && !showWheel && (
-                    <p className="text-lg font-bold text-center text-blue-600">
+                  {settings.wheelSettings.unlockType === 'link' && !showWheel && <p className="text-lg font-bold text-center text-blue-600">
                       {settings.wheelSettings.unlockText}
-                    </p>
-                  )}
+                    </p>}
                   
                   <div className="flex justify-center">
                     <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled || settings.wheelSettings.unlockType === 'link' && !showWheel} />
@@ -348,9 +346,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                 </Button>}
             </> : <div className="text-center space-y-4 bg-white">
               {!hasSpun ? <>
-                  <p className="text-sm text-gray-600 font-medium">
-                    {settings.wheelSettings.unlockType === 'free' ? 'Spin the wheel for your reward!' : 'Thanks for visiting the link! Spin to win your reward:'}
-                  </p>
+                  
                   <div className="flex justify-center">
                     <SpinWheel rewards={settings.wheelSettings.rewards} onComplete={handleWheelComplete} disabled={settings.wheelSettings.disabled} />
                   </div>

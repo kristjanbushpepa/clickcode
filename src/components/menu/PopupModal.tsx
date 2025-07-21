@@ -348,7 +348,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                 </Button>}
             </> : <div className="text-center space-y-4 bg-white">
               {!hasSpun ? <>
-                  <p className="text-xs" style={mutedTextStyles}>
+                  <p className="text-lg font-bold text-center" style={headingStyles}>
                     {settings.wheelSettings.unlockText}
                   </p>
                   <div className="flex justify-center">

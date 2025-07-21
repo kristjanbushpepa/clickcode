@@ -228,10 +228,15 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                           if (!url) return null;
                           const IconComponent = getSocialIcon(platform);
                           
+                          // Format WhatsApp URL to send message directly
+                          const linkUrl = platform === 'whatsapp' 
+                            ? `https://wa.me/${url.replace(/[^\d]/g, '')}` 
+                            : url;
+                          
                           return (
                             <a
                               key={platform}
-                              href={url}
+                              href={linkUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 text-xs hover:text-foreground transition-colors"

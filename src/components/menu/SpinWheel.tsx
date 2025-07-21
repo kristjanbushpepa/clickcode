@@ -1,6 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { Lock, Unlock } from 'lucide-react';
 
 interface Reward {
   text: string;
@@ -210,14 +211,20 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({ rewards, onComplete, disab
         className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none"
       >
         {disabled ? (
-          'LOCKED'
+          <span className="flex items-center gap-2">
+            <Lock size={20} />
+            LOCKED
+          </span>
         ) : isSpinning ? (
           <span className="flex items-center gap-2">
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             Spinning...
           </span>
         ) : (
-          'SPIN THE WHEEL!'
+          <span className="flex items-center gap-2">
+            <Unlock size={20} />
+            SPIN THE WHEEL!
+          </span>
         )}
       </Button>
       

@@ -88,7 +88,7 @@ export function CurrencySettings() {
           supported_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           enabled_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           exchange_rates: {
-            'ALL': 100.0,
+            'ALL': 1.0,
             'EUR': 0.0092,
             'USD': 0.010,
             'GBP': 0.0082,

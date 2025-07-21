@@ -47,19 +47,7 @@ function checkPWALaunch() {
     window.addEventListener('resize', preventZoom);
     document.addEventListener('visibilitychange', preventZoom);
 
-    if (window.location.pathname === '/') {
-      // Check if user was previously logged in (check both storages)
-      const restaurantInfo = sessionStorage.getItem('restaurant_info') || 
-                            localStorage.getItem('restaurant_info');
-      
-      if (restaurantInfo) {
-        // User was logged in before, redirect to dashboard
-        window.location.href = '/restaurant/dashboard';
-      } else {
-        // New user or logged out, redirect to login
-        window.location.href = '/restaurant/login';
-      }
-    }
+    // Remove automatic redirect from main page - allow users to access landing page
   }
 }
 

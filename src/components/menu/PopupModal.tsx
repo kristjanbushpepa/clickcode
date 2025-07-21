@@ -338,7 +338,7 @@ export const PopupModal: React.FC<PopupModalProps> = ({
                     backgroundColor: customTheme?.accentColor || '#3b82f6'
                   }} />
                           </div>
-                        </div> : <Button onClick={handleCtaClick} className="w-full h-10 font-medium rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-white animate-[pulse_3s_ease-in-out_infinite] text-sm bg-blue-600 hover:bg-blue-700" disabled={timeLeft > 0 && timeLeft < 5}>
+                        </div> : <Button onClick={handleCtaClick} className="w-full px-8 py-3 text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0 shadow-xl transform transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:transform-none" disabled={timeLeft > 0 && timeLeft < 5}>
                           {settings.wheelSettings.unlockButtonText}
                         </Button>}
                     </>}

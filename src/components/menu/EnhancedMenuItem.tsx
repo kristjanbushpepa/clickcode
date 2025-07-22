@@ -243,7 +243,21 @@ export const EnhancedMenuItem = ({
                   <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
                 )}
               </div>
-              <div className="mb-2">
+              {getLocalizedText(item, 'description') && (
+                <p className="text-xs mb-2 line-clamp-2 leading-relaxed" style={descriptionStyles}>
+                  {getLocalizedText(item, 'description')}
+                </p>
+              )}
+              
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  {item.preparation_time && (
+                    <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                      <Clock className="h-3 w-3" />
+                      {item.preparation_time}min
+                    </div>
+                  )}
+                </div>
                 <Badge 
                   variant="secondary" 
                   className="text-xs font-medium"
@@ -254,20 +268,6 @@ export const EnhancedMenuItem = ({
                 >
                   {formatPrice(displayPrice, item.currency)}
                 </Badge>
-              </div>
-              {getLocalizedText(item, 'description') && (
-                <p className="text-xs mb-2 line-clamp-2 leading-relaxed" style={descriptionStyles}>
-                  {getLocalizedText(item, 'description')}
-                </p>
-              )}
-              
-              <div className="flex items-center gap-2">
-                {item.preparation_time && (
-                  <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
-                    <Clock className="h-3 w-3" />
-                    {item.preparation_time}min
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>

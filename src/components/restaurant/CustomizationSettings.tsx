@@ -340,11 +340,44 @@ const redBlackTheme: Theme = {
   searchBarPlaceholder: '#a1a1aa'
 };
 
+const steakhouseTheme: Theme = {
+  mode: 'dark',
+  primaryColor: '#d4af37',
+  accentColor: '#ffd700',
+  backgroundColor: '#1a1a1a',
+  cardBackground: '#2d2418',
+  textColor: '#f5f5dc',
+  mutedTextColor: '#c9b037',
+  borderColor: '#3d3527',
+  headingColor: '#d4af37',
+  categoryNameColor: '#d4af37',
+  itemNameColor: '#f5f5dc',
+  descriptionColor: '#c9b037',
+  priceColor: '#ffd700',
+  languageSwitchBackground: '#2d2418',
+  languageSwitchBorder: '#3d3527',
+  languageSwitchText: '#d4af37',
+  currencySwitchBackground: '#2d2418',
+  currencySwitchBorder: '#3d3527',
+  currencySwitchText: '#d4af37',
+  badgeBackgroundColor: '#3d3527',
+  badgeTextColor: '#ffd700',
+  tabSwitcherBackground: '#2d2418',
+  tabSwitcherBorder: '#3d3527',
+  tabSwitcherText: '#c9b037',
+  tabSwitcherActiveBackground: '#d4af37',
+  tabSwitcherActiveText: '#1a1a1a',
+  searchBarBackground: '#2d2418',
+  searchBarBorder: '#3d3527',
+  searchBarText: '#f5f5dc',
+  searchBarPlaceholder: '#c9b037'
+};
+
 const CustomizationSettings = () => {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('items');
   const [selectedLayoutStyle, setSelectedLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus'>('compact');
   const [theme, setTheme] = useState<Theme>(modernMinimalTheme);
-  const [selectedPreset, setSelectedPreset] = useState<'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack' | 'custom'>('minimal');
+  const [selectedPreset, setSelectedPreset] = useState<'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack' | 'steakhouse' | 'custom'>('minimal');
 
   const presetThemes: { [key: string]: Theme } = {
     minimal: modernMinimalTheme,
@@ -356,6 +389,7 @@ const CustomizationSettings = () => {
     rose: rosePinkTheme,
     vintage: vintageGoldTheme,
     redblack: redBlackTheme,
+    steakhouse: steakhouseTheme,
   };
 
   const handleLayoutChange = async (layout: 'categories' | 'items') => {
@@ -460,7 +494,7 @@ const CustomizationSettings = () => {
     loadData();
   }, []);
 
-  const handlePresetChange = (preset: 'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack') => {
+  const handlePresetChange = (preset: 'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack' | 'steakhouse') => {
     setSelectedPreset(preset);
     setTheme(presetThemes[preset]);
   };
@@ -671,6 +705,14 @@ const CustomizationSettings = () => {
               >
                 <div className="w-full h-4 bg-gradient-to-r from-red-600 to-black border rounded mb-1"></div>
                 <span className="text-xs font-medium">Red & Black</span>
+              </Button>
+              <Button 
+                variant={selectedPreset === 'steakhouse' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('steakhouse')}
+                className="flex flex-col h-20 p-2"
+              >
+                <div className="w-full h-4 bg-gradient-to-r from-yellow-600 to-amber-700 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Steakhouse</span>
               </Button>
               {selectedPreset === 'custom' && (
                 <div className="flex items-center justify-center border border-dashed rounded h-16">

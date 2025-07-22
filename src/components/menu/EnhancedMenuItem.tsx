@@ -250,14 +250,6 @@ export const EnhancedMenuItem = ({
               )}
               
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2">
-                  {item.preparation_time && (
-                    <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
-                      <Clock className="h-3 w-3" />
-                      {item.preparation_time}min
-                    </div>
-                  )}
-                </div>
                 <Badge 
                   variant="secondary" 
                   className="text-xs font-medium"
@@ -268,6 +260,12 @@ export const EnhancedMenuItem = ({
                 >
                   {formatPrice(displayPrice, item.currency)}
                 </Badge>
+                {item.preparation_time && (
+                  <div className="flex items-center gap-1 text-xs" style={mutedTextStyles}>
+                    <Clock className="h-3 w-3" />
+                    {item.preparation_time}min
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

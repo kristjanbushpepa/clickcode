@@ -235,18 +235,18 @@ export const EnhancedMenuItem = ({
               </div>
             )}
             <CardContent className="p-3">
-              <div className="flex items-center justify-between mb-1 gap-2">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm leading-tight line-clamp-1" style={itemNameStyles}>
-                    {getLocalizedText(item, 'name')}
-                  </h3>
-                  {item.is_featured && !itemImageUrl && (
-                    <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
-                  )}
-                </div>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-sm leading-tight" style={itemNameStyles}>
+                  {getLocalizedText(item, 'name')}
+                </h3>
+                {item.is_featured && !itemImageUrl && (
+                  <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
+                )}
+              </div>
+              <div className="mb-2">
                 <Badge 
                   variant="secondary" 
-                  className="text-xs font-medium flex-shrink-0"
+                  className="text-xs font-medium"
                   style={{ 
                     backgroundColor: customTheme?.accentColor + '20',
                     color: priceStyles.color 

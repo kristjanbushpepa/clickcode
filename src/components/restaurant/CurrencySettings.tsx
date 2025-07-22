@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DollarSign, RefreshCw } from 'lucide-react';
 
 interface CurrencySettings {
@@ -287,10 +288,9 @@ export function CurrencySettings() {
               return (
                 <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={isEnabled}
-                      onChange={() => handleCurrencyToggle(currency.code)}
+                      onCheckedChange={() => handleCurrencyToggle(currency.code)}
                       disabled={isBaseCurrency}
                       className="w-4 h-4"
                     />

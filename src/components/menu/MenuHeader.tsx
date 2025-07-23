@@ -121,7 +121,7 @@ export const MenuHeader = React.memo<MenuHeaderProps>(({
       )}
       
       <div 
-        className="relative px-3 py-9 safe-area-top text-white" 
+        className="relative px-3 py-15 safe-area-top text-white" 
         style={{
           backgroundColor: bannerImageUrl ? 'transparent' : customTheme?.primaryColor
         }}

@@ -475,6 +475,17 @@ const CustomizationSettings = () => {
         
         if (data.theme) {
           setTheme(data.theme);
+          
+          // Find matching preset theme
+          const matchingPreset = Object.entries(presetThemes).find(([_, presetTheme]) => 
+            JSON.stringify(presetTheme) === JSON.stringify(data.theme)
+          );
+          
+          if (matchingPreset) {
+            setSelectedPreset(matchingPreset[0] as any);
+          } else {
+            setSelectedPreset('custom');
+          }
         }
         
         if (data.layout) {

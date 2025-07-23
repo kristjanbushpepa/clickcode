@@ -10,12 +10,37 @@ if ('serviceWorker' in navigator) {
       .then((registration) => {
         console.log('SW registered: ', registration);
         
+        // Check for updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version available, notify user
+                console.log('New version available! Refreshing...');
+                
+                // Auto-refresh after a short delay
+                setTimeout(() => {
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  window.location.reload();
+                }, 1000);
+              }
+            });
+          }
+        });
+        
         // Check if app is launched as PWA and handle redirect
         checkPWALaunch();
       })
       .catch((registrationError) => {
         console.log('SW registration failed: ', registrationError);
       });
+      
+    // Listen for service worker updates
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      console.log('Service worker updated, reloading...');
+      window.location.reload();
+    });
   });
 }
 

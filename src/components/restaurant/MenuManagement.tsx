@@ -428,63 +428,63 @@ export function MenuManagement() {
         </TabsList>
 
         <TabsContent value="menu" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Categories Sidebar */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5" />
-              Kategoritë
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 p-4">
-            <Button
-              variant={selectedCategory === null ? "default" : "ghost"}
-              className="w-full justify-start h-10"
-              onClick={() => setSelectedCategory(null)}
-            >
-              Të gjitha artikujt
-            </Button>
-            {categories.map((category) => (
-              <div key={category.id} className="flex items-center gap-2">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Categories Sidebar */}
+            <Card className="w-full lg:w-80 flex-shrink-0">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Tag className="h-5 w-5" />
+                  Kategoritë
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 p-4">
                 <Button
-                  variant={selectedCategory === category.id ? "default" : "ghost"}
-                  className="flex-1 justify-start h-10 min-w-0"
-                  onClick={() => setSelectedCategory(category.id)}
+                  variant={selectedCategory === null ? "default" : "ghost"}
+                  className="w-full justify-start h-10"
+                  onClick={() => setSelectedCategory(null)}
                 >
-                  <span className="truncate">
-                    {category.name_sq || category.name}
-                  </span>
-                  {!category.is_active && <EyeOff className="h-4 w-4 ml-2 flex-shrink-0" />}
+                  Të gjitha artikujt
                 </Button>
-                <div className="flex gap-1 flex-shrink-0">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 p-0"
-                    onClick={() => {
-                      setEditingCategory(category);
-                      setShowCategoryDialog(true);
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 p-0"
-                    onClick={() => deleteCategoryMutation.mutate(category.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+                {categories.map((category) => (
+                  <div key={category.id} className="flex items-center gap-2">
+                    <Button
+                      variant={selectedCategory === category.id ? "default" : "ghost"}
+                      className="flex-1 justify-start h-10 min-w-0"
+                      onClick={() => setSelectedCategory(category.id)}
+                    >
+                      <span className="truncate">
+                        {category.name_sq || category.name}
+                      </span>
+                      {!category.is_active && <EyeOff className="h-4 w-4 ml-2 flex-shrink-0" />}
+                    </Button>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        onClick={() => {
+                          setEditingCategory(category);
+                          setShowCategoryDialog(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        onClick={() => deleteCategoryMutation.mutate(category.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
 
-        {/* Menu Items */}
-        <div className="lg:col-span-3 space-y-4">
+            {/* Menu Items */}
+            <div className="flex-1 min-w-0 space-y-4">
           {itemsLoading ? (
             <div className="flex justify-center p-8">Duke ngarkuar artikujt e menusë...</div>
           ) : menuItems.length === 0 ? (

@@ -373,11 +373,45 @@ const steakhouseTheme: Theme = {
   searchBarPlaceholder: '#c9b037'
 };
 
+// Oliveta Greek Restaurant Theme
+const olivetaTheme: Theme = {
+  mode: 'light',
+  primaryColor: '#1a1a1a',
+  accentColor: '#6B8E23',
+  backgroundColor: '#fefef9',
+  cardBackground: '#ffffff',
+  textColor: '#2c2c2c',
+  mutedTextColor: '#666666',
+  borderColor: '#e8e8e3',
+  headingColor: '#1a1a1a',
+  categoryNameColor: '#6B8E23',
+  itemNameColor: '#2c2c2c',
+  descriptionColor: '#666666',
+  priceColor: '#1a1a1a',
+  languageSwitchBackground: '#f8f8f5',
+  languageSwitchBorder: '#6B8E23',
+  languageSwitchText: '#2c2c2c',
+  currencySwitchBackground: '#f8f8f5',
+  currencySwitchBorder: '#6B8E23',
+  currencySwitchText: '#2c2c2c',
+  badgeBackgroundColor: '#6B8E23',
+  badgeTextColor: '#ffffff',
+  tabSwitcherBackground: '#f8f8f5',
+  tabSwitcherBorder: '#e8e8e3',
+  tabSwitcherText: '#666666',
+  tabSwitcherActiveBackground: '#6B8E23',
+  tabSwitcherActiveText: '#ffffff',
+  searchBarBackground: '#ffffff',
+  searchBarBorder: '#e8e8e3',
+  searchBarText: '#2c2c2c',
+  searchBarPlaceholder: '#999999'
+};
+
 const CustomizationSettings = () => {
   const [selectedLayout, setSelectedLayout] = useState<'categories' | 'items'>('items');
   const [selectedLayoutStyle, setSelectedLayoutStyle] = useState<'compact' | 'card-grid' | 'image-focus' | 'minimal' | 'magazine' | 'modern-card' | 'elegant-list' | 'photo-focus'>('compact');
   const [theme, setTheme] = useState<Theme>(modernMinimalTheme);
-  const [selectedPreset, setSelectedPreset] = useState<'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack' | 'steakhouse' | 'custom'>('minimal');
+  const [selectedPreset, setSelectedPreset] = useState<'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack' | 'steakhouse' | 'oliveta' | 'custom'>('minimal');
 
   const presetThemes: { [key: string]: Theme } = {
     minimal: modernMinimalTheme,
@@ -390,6 +424,7 @@ const CustomizationSettings = () => {
     vintage: vintageGoldTheme,
     redblack: redBlackTheme,
     steakhouse: steakhouseTheme,
+    oliveta: olivetaTheme,
   };
 
   const handleLayoutChange = async (layout: 'categories' | 'items') => {
@@ -505,7 +540,7 @@ const CustomizationSettings = () => {
     loadData();
   }, []);
 
-  const handlePresetChange = (preset: 'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack' | 'steakhouse') => {
+  const handlePresetChange = (preset: 'minimal' | 'ocean' | 'sunset' | 'forest' | 'royal' | 'dark' | 'rose' | 'vintage' | 'redblack' | 'steakhouse' | 'oliveta') => {
     setSelectedPreset(preset);
     setTheme(presetThemes[preset]);
   };
@@ -724,6 +759,14 @@ const CustomizationSettings = () => {
               >
                 <div className="w-full h-4 bg-gradient-to-r from-yellow-600 to-amber-700 border rounded mb-1"></div>
                 <span className="text-xs font-medium">Steakhouse</span>
+              </Button>
+              <Button 
+                variant={selectedPreset === 'oliveta' ? 'default' : 'outline'}
+                onClick={() => handlePresetChange('oliveta')}
+                className="flex flex-col h-20 p-2"
+              >
+                <div className="w-full h-4 bg-gradient-to-r from-green-700 to-green-500 border rounded mb-1"></div>
+                <span className="text-xs font-medium">Oliveta</span>
               </Button>
               {selectedPreset === 'custom' && (
                 <div className="flex items-center justify-center border border-dashed rounded h-16">

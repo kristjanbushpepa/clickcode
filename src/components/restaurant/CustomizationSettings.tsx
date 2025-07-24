@@ -20,6 +20,8 @@ interface Theme {
   borderColor: string;
   headingColor?: string;
   categoryNameColor?: string;
+  categoryBackgroundColor?: string;
+  categoryBorderColor?: string;
   itemNameColor?: string;
   descriptionColor?: string;
   priceColor?: string;
@@ -54,6 +56,8 @@ const modernMinimalTheme: Theme = {
   borderColor: '#e5e5e5',
   headingColor: '#ffffff',
   categoryNameColor: '#0c0c0c',
+  categoryBackgroundColor: '#fafafa',
+  categoryBorderColor: '#e5e5e5',
   itemNameColor: '#0c0c0c',
   descriptionColor: '#666666',
   priceColor: '#2563eb',
@@ -87,6 +91,8 @@ const oceanBreezTheme: Theme = {
   borderColor: '#bae6fd',
   headingColor: '#ffffff',
   categoryNameColor: '#0369a1',
+  categoryBackgroundColor: '#dbeafe',
+  categoryBorderColor: '#bae6fd',
   itemNameColor: '#0c4a6e',
   descriptionColor: '#64748b',
   priceColor: '#0ea5e9',
@@ -120,6 +126,8 @@ const sunsetTheme: Theme = {
   borderColor: '#fed7aa',
   headingColor: '#ffffff',
   categoryNameColor: '#ea580c',
+  categoryBackgroundColor: '#fed7aa',
+  categoryBorderColor: '#fed7aa',
   itemNameColor: '#c2410c',
   descriptionColor: '#78716c',
   priceColor: '#f97316',
@@ -153,6 +161,8 @@ const forestGreenTheme: Theme = {
   borderColor: '#3d5a4d',
   headingColor: '#f2e7c7',
   categoryNameColor: '#f2e7c7',
+  categoryBackgroundColor: '#3d5a4d',
+  categoryBorderColor: '#3d5a4d',
   itemNameColor: '#f2e7c7',
   descriptionColor: '#c7b899',
   priceColor: '#f2e7c7',
@@ -186,6 +196,8 @@ const royalPurpleTheme: Theme = {
   borderColor: '#e9d5ff',
   headingColor: '#ffffff',
   categoryNameColor: '#6b21a8',
+  categoryBackgroundColor: '#e9d5ff',
+  categoryBorderColor: '#e9d5ff',
   itemNameColor: '#581c87',
   descriptionColor: '#6b7280',
   priceColor: '#8b5cf6',
@@ -219,6 +231,8 @@ const elegantDarkTheme: Theme = {
   borderColor: '#334155',
   headingColor: '#f1f5f9',
   categoryNameColor: '#f1f5f9',
+  categoryBackgroundColor: '#334155',
+  categoryBorderColor: '#334155',
   itemNameColor: '#f1f5f9',
   descriptionColor: '#94a3b8',
   priceColor: '#3b82f6',
@@ -252,6 +266,8 @@ const rosePinkTheme: Theme = {
   borderColor: '#f9a8d4',
   headingColor: '#ffffff',
   categoryNameColor: '#be185d',
+  categoryBackgroundColor: '#fce7f3',
+  categoryBorderColor: '#f9a8d4',
   itemNameColor: '#9f1239',
   descriptionColor: '#6b7280',
   priceColor: '#ec4899',
@@ -285,6 +301,8 @@ const vintageGoldTheme: Theme = {
   borderColor: '#fde68a',
   headingColor: '#ffffff',
   categoryNameColor: '#a16207',
+  categoryBackgroundColor: '#fef3c7',
+  categoryBorderColor: '#fde68a',
   itemNameColor: '#92400e',
   descriptionColor: '#78716c',
   priceColor: '#ca8a04',
@@ -318,6 +336,8 @@ const redBlackTheme: Theme = {
   borderColor: '#27272a',
   headingColor: '#ffffff',
   categoryNameColor: '#dc2626',
+  categoryBackgroundColor: '#1c1c1c',
+  categoryBorderColor: '#27272a',
   itemNameColor: '#fafafa',
   descriptionColor: '#a1a1aa',
   priceColor: '#dc2626',
@@ -351,6 +371,8 @@ const steakhouseTheme: Theme = {
   borderColor: '#3d3527',
   headingColor: '#d4af37',
   categoryNameColor: '#d4af37',
+  categoryBackgroundColor: '#3d3527',
+  categoryBorderColor: '#3d3527',
   itemNameColor: '#f5f5dc',
   descriptionColor: '#c9b037',
   priceColor: '#ffd700',
@@ -385,6 +407,8 @@ const olivetaTheme: Theme = {
   borderColor: '#e8e8e3',
   headingColor: '#1a1a1a',
   categoryNameColor: '#6B8E23',
+  categoryBackgroundColor: '#f8f8f5',
+  categoryBorderColor: '#e8e8e3',
   itemNameColor: '#2c2c2c',
   descriptionColor: '#666666',
   priceColor: '#1a1a1a',
@@ -865,28 +889,50 @@ const CustomizationSettings = () => {
                   }}
                 />
               </div>
-              <div>
-                <Label htmlFor="categoryNameColor">Category Name Color</Label>
-                <ColorPicker
-                  id="categoryNameColor"
-                  color={theme.categoryNameColor || theme.textColor}
-                  onColorChange={(color: string) => {
-                    setTheme({ ...theme, categoryNameColor: color });
-                    setSelectedPreset('custom');
-                  }}
-                />
-              </div>
-              <div>
-                <Label htmlFor="itemNameColor">Item Name Color</Label>
-                <ColorPicker
-                  id="itemNameColor"
-                  color={theme.itemNameColor || theme.textColor}
-                  onColorChange={(color: string) => {
-                    setTheme({ ...theme, itemNameColor: color });
-                    setSelectedPreset('custom');
-                  }}
-                />
-              </div>
+               <div>
+                 <Label htmlFor="categoryNameColor">Category Name Color</Label>
+                 <ColorPicker
+                   id="categoryNameColor"
+                   color={theme.categoryNameColor || theme.textColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, categoryNameColor: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="categoryBackgroundColor">Category Background Color</Label>
+                 <ColorPicker
+                   id="categoryBackgroundColor"
+                   color={theme.categoryBackgroundColor || theme.cardBackground}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, categoryBackgroundColor: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="categoryBorderColor">Category Border Color</Label>
+                 <ColorPicker
+                   id="categoryBorderColor"
+                   color={theme.categoryBorderColor || theme.borderColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, categoryBorderColor: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="itemNameColor">Item Name Color</Label>
+                 <ColorPicker
+                   id="itemNameColor"
+                   color={theme.itemNameColor || theme.textColor}
+                   onColorChange={(color: string) => {
+                     setTheme({ ...theme, itemNameColor: color });
+                     setSelectedPreset('custom');
+                   }}
+                 />
+               </div>
               <div>
                 <Label htmlFor="descriptionColor">Description Color</Label>
                 <ColorPicker

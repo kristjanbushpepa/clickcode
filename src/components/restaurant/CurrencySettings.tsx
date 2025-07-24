@@ -89,11 +89,11 @@ export function CurrencySettings() {
           supported_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           enabled_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           exchange_rates: {
-            'ALL': 0.01,
-            'EUR': 1.053, // 1 EUR = 95 ALL, so 100 ALL = 1.053 EUR
-            'USD': 1.111, // 1 USD = 90 ALL, so 100 ALL = 1.111 USD
-            'GBP': 0.870, // 1 GBP = 115 ALL, so 100 ALL = 0.870 GBP
-            'CHF': 1.000  // 1 CHF = 100 ALL, so 100 ALL = 1.000 CHF
+            'ALL': 1,
+            'EUR': 95,   // 1 EUR = 95 ALL
+            'USD': 90,   // 1 USD = 90 ALL  
+            'GBP': 115,  // 1 GBP = 115 ALL
+            'CHF': 100   // 1 CHF = 100 ALL
           },
           ...updates
         };
@@ -263,7 +263,7 @@ export function CurrencySettings() {
             </div>
             
             <div className="text-sm text-muted-foreground">
-              Të gjitha çmimet e menusë ruhen në {currencySettings?.default_currency || 'ALL'} dhe konvertohen automatikisht për monedhat e tjera.
+              Të gjitha çmimet e menusë ruhen në {currencySettings?.default_currency || 'ALL'} dhe shfaqen në monedhat e tjera sipas kurseve të këmbimit.
             </div>
           </CardContent>
         </Card>
@@ -276,14 +276,14 @@ export function CurrencySettings() {
               Kurset e Këmbimit
             </CardTitle>
             <CardDescription>
-              Vendosni kurset manuale të këmbimit për monedhat e mbështetura
+              Vendosni sa lek albanë vlen 1 njësi e secilit monedhë (p.sh. 1 EUR = 95 ALL)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {CURRENCY_OPTIONS.map((currency) => {
               const isBaseCurrency = currency.code === (currencySettings?.default_currency || 'ALL');
               const isEnabled = currencySettings?.enabled_currencies?.includes(currency.code) ?? true;
-              const inputValue = isBaseCurrency ? '0.01' : (inputValues[currency.code] || '0');
+              const inputValue = isBaseCurrency ? '1' : (inputValues[currency.code] || '0');
               
               return (
                 <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">
@@ -301,7 +301,7 @@ export function CurrencySettings() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">0.01 {currencySettings?.default_currency || 'ALL'} =</span>
+                    <span className="text-sm text-muted-foreground">1 {currency.code} =</span>
                     <Input
                       type="text"
                       step="any"
@@ -309,9 +309,9 @@ export function CurrencySettings() {
                       value={inputValue}
                       onChange={(e) => handleExchangeRateInputChange(currency.code, e.target.value)}
                       disabled={isBaseCurrency || !isEnabled}
-                      placeholder="0.000000"
+                      placeholder="1"
                     />
-                    <span className="text-sm font-medium">{currency.code}</span>
+                    <span className="text-sm font-medium">{currencySettings?.default_currency || 'ALL'}</span>
                   </div>
                 </div>
               );

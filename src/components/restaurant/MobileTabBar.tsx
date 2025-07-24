@@ -63,12 +63,12 @@ export function MobileTabBar({ onTabChange, activeTab }: MobileTabBarProps) {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 safe-area-bottom">
-      <div className="flex h-16 overflow-x-auto scrollbar-hide px-1">
+      <div className="grid grid-cols-8 h-16 overflow-x-auto scrollbar-hide">
         {navigationItems.map((item) => (
           <button
             key={item.value}
             onClick={() => handleItemClick(item)}
-            className={`flex flex-col items-center justify-center p-2 min-w-[60px] flex-shrink-0 transition-colors rounded-lg mx-0.5 ${
+            className={`flex flex-col items-center justify-center p-1 min-w-0 flex-shrink-0 transition-colors ${
               activeTab === item.value && !item.isSpecial
                 ? 'text-primary bg-accent/20'
                 : item.isSpecial 
@@ -77,7 +77,7 @@ export function MobileTabBar({ onTabChange, activeTab }: MobileTabBarProps) {
             }`}
           >
             <item.icon className="h-4 w-4 mb-0.5" />
-            <span className="text-[10px] font-medium text-center leading-tight">{item.title}</span>
+            <span className="text-[10px] font-medium truncate leading-tight">{item.title}</span>
           </button>
         ))}
       </div>

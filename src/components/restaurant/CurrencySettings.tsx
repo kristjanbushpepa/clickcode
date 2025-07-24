@@ -89,11 +89,11 @@ export function CurrencySettings() {
           supported_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           enabled_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           exchange_rates: {
-            'ALL': 1.0,
-            'EUR': 0.0092,
-            'USD': 0.010,
-            'GBP': 0.0082,
-            'CHF': 0.0093
+            'ALL': 100.0,
+            'EUR': 0.92,
+            'USD': 1.0,
+            'GBP': 0.82,
+            'CHF': 0.93
           },
           ...updates
         };
@@ -283,7 +283,7 @@ export function CurrencySettings() {
             {CURRENCY_OPTIONS.map((currency) => {
               const isBaseCurrency = currency.code === (currencySettings?.default_currency || 'ALL');
               const isEnabled = currencySettings?.enabled_currencies?.includes(currency.code) ?? true;
-              const inputValue = isBaseCurrency ? '1.000000' : (inputValues[currency.code] || '0');
+              const inputValue = isBaseCurrency ? '100.000000' : (inputValues[currency.code] || '0');
               
               return (
                 <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">
@@ -301,7 +301,7 @@ export function CurrencySettings() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">1 {currencySettings?.default_currency || 'ALL'} =</span>
+                    <span className="text-sm text-muted-foreground">100 {currencySettings?.default_currency || 'ALL'} =</span>
                     <Input
                       type="text"
                       step="any"

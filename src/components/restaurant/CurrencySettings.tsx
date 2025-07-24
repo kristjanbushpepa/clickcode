@@ -89,7 +89,7 @@ export function CurrencySettings() {
           supported_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           enabled_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           exchange_rates: {
-            'ALL': 100.0,
+            'ALL': 0.01,
             'EUR': 1.053, // 1 EUR = 95 ALL, so 100 ALL = 1.053 EUR
             'USD': 1.111, // 1 USD = 90 ALL, so 100 ALL = 1.111 USD
             'GBP': 0.870, // 1 GBP = 115 ALL, so 100 ALL = 0.870 GBP
@@ -283,7 +283,7 @@ export function CurrencySettings() {
             {CURRENCY_OPTIONS.map((currency) => {
               const isBaseCurrency = currency.code === (currencySettings?.default_currency || 'ALL');
               const isEnabled = currencySettings?.enabled_currencies?.includes(currency.code) ?? true;
-              const inputValue = isBaseCurrency ? '100.000000' : (inputValues[currency.code] || '0');
+              const inputValue = isBaseCurrency ? 0.01' : (inputValues[currency.code] || '0');
               
               return (
                 <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">
@@ -301,7 +301,7 @@ export function CurrencySettings() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">100 {currencySettings?.default_currency || 'ALL'} =</span>
+                    <span className="text-sm text-muted-foreground">0.01 {currencySettings?.default_currency || 'ALL'} =</span>
                     <Input
                       type="text"
                       step="any"

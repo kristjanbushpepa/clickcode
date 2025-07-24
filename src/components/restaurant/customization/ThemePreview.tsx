@@ -15,6 +15,8 @@ interface Theme {
   borderColor: string;
   headingColor?: string;
   categoryNameColor?: string;
+  categoryBackgroundColor?: string;
+  categoryBorderColor?: string;
   itemNameColor?: string;
   descriptionColor?: string;
   priceColor?: string;
@@ -59,6 +61,12 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
   };
 
   const categoryNameStyles = {
+    color: theme.categoryNameColor || theme.textColor
+  };
+
+  const categoryStyles = {
+    backgroundColor: theme.categoryBackgroundColor || theme.cardBackground,
+    borderColor: theme.categoryBorderColor || theme.borderColor,
     color: theme.categoryNameColor || theme.textColor
   };
 
@@ -385,9 +393,11 @@ const ThemePreview = ({ theme, layoutStyle = 'compact' }: ThemePreviewProps) => 
         </div>
 
         {/* Category Name */}
-        <h3 className="text-base font-semibold mb-3" style={categoryNameStyles}>
-          Popular Items
-        </h3>
+        <div className="p-2 rounded-lg border mb-3" style={categoryStyles}>
+          <h3 className="text-base font-semibold">
+            Popular Items
+          </h3>
+        </div>
 
         {/* Menu Items - Using selected layout style */}
         {renderLayoutStyle()}

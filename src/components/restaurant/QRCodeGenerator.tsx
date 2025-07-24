@@ -25,7 +25,7 @@ export const QRCodeGenerator = () => {
       setRestaurantInfo(info);
       // Use restaurant name for the URL, convert spaces to hyphens and make lowercase
       const restaurantNameForUrl = info.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const url = `${window.location.origin}/menu/${restaurantNameForUrl}`;
+      const url = `${window.location.origin}/${restaurantNameForUrl}`;
       setMenuUrl(url);
     }
   }, []);

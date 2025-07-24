@@ -283,7 +283,7 @@ export function CurrencySettings() {
             {CURRENCY_OPTIONS.map((currency) => {
               const isBaseCurrency = currency.code === (currencySettings?.default_currency || 'ALL');
               const isEnabled = currencySettings?.enabled_currencies?.includes(currency.code) ?? true;
-              const inputValue = isBaseCurrency ? 0.01' : (inputValues[currency.code] || '0');
+              const inputValue = isBaseCurrency ? '0.01' : (inputValues[currency.code] || '0');
               
               return (
                 <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">

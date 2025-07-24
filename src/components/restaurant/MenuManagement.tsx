@@ -428,54 +428,54 @@ export function MenuManagement() {
         </TabsList>
 
         <TabsContent value="menu" className="space-y-6">
-          <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex flex-col space-y-6 lg:flex-row lg:space-y-0 lg:gap-6">
             {/* Categories Sidebar */}
-            <Card className="w-full lg:w-80 flex-shrink-0">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Tag className="h-5 w-5" />
+            <Card className="w-full lg:w-80 lg:flex-shrink-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Tag className="h-4 w-4" />
                   Kategoritë
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 p-4">
+              <CardContent className="space-y-2 p-3 lg:p-4">
                 <Button
                   variant={selectedCategory === null ? "default" : "ghost"}
-                  className="w-full justify-start h-10"
+                  className="w-full justify-start h-9 text-sm"
                   onClick={() => setSelectedCategory(null)}
                 >
                   Të gjitha artikujt
                 </Button>
                 {categories.map((category) => (
-                  <div key={category.id} className="flex items-center gap-2">
+                  <div key={category.id} className="flex items-center gap-1">
                     <Button
                       variant={selectedCategory === category.id ? "default" : "ghost"}
-                      className="flex-1 justify-start h-10 min-w-0"
+                      className="flex-1 justify-start h-9 min-w-0 text-sm"
                       onClick={() => setSelectedCategory(category.id)}
                     >
                       <span className="truncate">
                         {category.name_sq || category.name}
                       </span>
-                      {!category.is_active && <EyeOff className="h-4 w-4 ml-2 flex-shrink-0" />}
+                      {!category.is_active && <EyeOff className="h-3 w-3 ml-1 flex-shrink-0" />}
                     </Button>
-                    <div className="flex gap-1 flex-shrink-0">
+                    <div className="flex gap-0.5 flex-shrink-0">
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-8 w-8 p-0"
+                        className="h-7 w-7 p-0"
                         onClick={() => {
                           setEditingCategory(category);
                           setShowCategoryDialog(true);
                         }}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-8 w-8 p-0"
+                        className="h-7 w-7 p-0"
                         onClick={() => deleteCategoryMutation.mutate(category.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { ImageUpload } from '@/components/ui/image-upload';
@@ -74,6 +75,7 @@ export function MenuManagement() {
   const [showItemDialog, setShowItemDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
   // Fetch categories with proper error handling
   const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
@@ -512,7 +514,10 @@ export function MenuManagement() {
                     setEditingItem(item);
                     setShowItemDialog(true);
                   }}
-                  onDelete={(id) => deleteItemMutation.mutate(id)}
+                  onDelete={(id) => {
+                    const item = menuItems.find(item => item.id === id);
+                    if (item) setItemToDelete(item);
+                  }}
                 />
               ))}
             </div>
@@ -595,6 +600,32 @@ export function MenuManagement() {
         </TabsContent>
 
       </Tabs>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!itemToDelete} onOpenChange={() => setItemToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Jeni i sigurt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kjo veprim nuk mund të zhbëhet. Artikulli "{itemToDelete?.name_sq || itemToDelete?.name}" do të fshihet përgjithmonë.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Anulo</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (itemToDelete) {
+                  deleteItemMutation.mutate(itemToDelete.id);
+                  setItemToDelete(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Fshi Artikullin
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

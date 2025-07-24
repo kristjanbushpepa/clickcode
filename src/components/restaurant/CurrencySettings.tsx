@@ -90,10 +90,10 @@ export function CurrencySettings() {
           enabled_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
           exchange_rates: {
             'ALL': 100.0,
-            'EUR': 0.92,
-            'USD': 1.0,
-            'GBP': 0.82,
-            'CHF': 0.93
+            'EUR': 1.053, // 1 EUR = 95 ALL, so 100 ALL = 1.053 EUR
+            'USD': 1.111, // 1 USD = 90 ALL, so 100 ALL = 1.111 USD
+            'GBP': 0.870, // 1 GBP = 115 ALL, so 100 ALL = 0.870 GBP
+            'CHF': 1.000  // 1 CHF = 100 ALL, so 100 ALL = 1.000 CHF
           },
           ...updates
         };

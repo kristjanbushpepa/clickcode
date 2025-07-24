@@ -491,9 +491,29 @@ const EnhancedMenu = () => {
       return `${price.toFixed(2)} ${currentCurrency}`;
     }
     const exchangeRates = currencySettings.exchange_rates || {};
-    const originalRate = exchangeRates[originalCurrency] || 1;
-    const targetRate = exchangeRates[currentCurrency] || 1;
-    const convertedPrice = price / originalRate * targetRate;
+    const baseCurrency = currencySettings.default_currency || 'ALL';
+    
+    let convertedPrice: number;
+    
+    if (originalCurrency === baseCurrency && currentCurrency !== baseCurrency) {
+      // Converting FROM base currency (ALL) TO another currency
+      // Example: 100 ALL to EUR where 1 EUR = 95 ALL: 100 / 95 = 1.05 EUR
+      const targetRate = exchangeRates[currentCurrency] || 1;
+      convertedPrice = price / targetRate;
+    } else if (originalCurrency !== baseCurrency && currentCurrency === baseCurrency) {
+      // Converting FROM another currency TO base currency (ALL)  
+      // Example: 1 EUR to ALL where 1 EUR = 95 ALL: 1 * 95 = 95 ALL
+      const originalRate = exchangeRates[originalCurrency] || 1;
+      convertedPrice = price * originalRate;
+    } else if (originalCurrency !== baseCurrency && currentCurrency !== baseCurrency) {
+      // Converting between two non-base currencies: convert through base currency
+      const originalRate = exchangeRates[originalCurrency] || 1;
+      const targetRate = exchangeRates[currentCurrency] || 1;
+      const priceInBase = price * originalRate;
+      convertedPrice = priceInBase / targetRate;
+    } else {
+      convertedPrice = price;
+    }
     const symbols: Record<string, string> = {
       'ALL': 'L',
       'EUR': '€',

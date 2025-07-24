@@ -424,7 +424,7 @@ const CustomizationSettings = () => {
     vintage: vintageGoldTheme,
     redblack: redBlackTheme,
     steakhouse: steakhouseTheme,
-    greek: olivetaTheme,
+    oliveta: olivetaTheme,
   };
 
   const handleLayoutChange = async (layout: 'categories' | 'items') => {

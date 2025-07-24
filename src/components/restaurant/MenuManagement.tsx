@@ -408,20 +408,20 @@ export function MenuManagement() {
       </div>
 
       <Tabs defaultValue="menu" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50 rounded-lg gap-1">
+        <TabsList className="flex w-full h-auto p-1 bg-muted/50 rounded-lg gap-1 overflow-x-auto">
           <TabsTrigger 
             value="menu" 
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+            className="flex items-center justify-center gap-2 px-3 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium min-w-0 flex-1 whitespace-nowrap"
           >
-            <Utensils className="h-4 w-4" />
+            <Utensils className="h-4 w-4 flex-shrink-0" />
             <span className="hidden sm:inline">Artikujt e Menusë</span>
             <span className="sm:hidden">Menu</span>
           </TabsTrigger>
           <TabsTrigger 
             value="categories" 
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+            className="flex items-center justify-center gap-2 px-3 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium min-w-0 flex-1 whitespace-nowrap"
           >
-            <Tag className="h-4 w-4" />
+            <Tag className="h-4 w-4 flex-shrink-0" />
             <span className="hidden sm:inline">Kategoritë</span>
             <span className="sm:hidden">Categories</span>
           </TabsTrigger>

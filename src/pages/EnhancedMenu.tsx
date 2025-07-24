@@ -122,6 +122,8 @@ interface MenuTheme {
   borderColor: string;
   headingColor?: string;
   categoryNameColor?: string;
+  categoryBackgroundColor?: string;
+  categoryBorderColor?: string;
   itemNameColor?: string;
   descriptionColor?: string;
   priceColor?: string;
@@ -573,10 +575,10 @@ const EnhancedMenu = () => {
       <Card 
         className="group relative h-40 border overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
         style={{
-          borderColor: customTheme?.accentColor + '40',
+          borderColor: customTheme?.categoryBorderColor || customTheme?.accentColor + '40',
           background: categoryImageUrl 
             ? 'transparent' 
-            : customTheme?.cardBackground
+            : customTheme?.categoryBackgroundColor || customTheme?.cardBackground
         }}
         onClick={() => setSelectedCategory(category.id)}
       >
@@ -595,7 +597,7 @@ const EnhancedMenu = () => {
         }}>
           <div>
             <h3 className="font-bold text-lg mb-2 line-clamp-2" style={{
-              color: categoryImageUrl ? '#ffffff' : customTheme?.headingColor
+              color: categoryImageUrl ? '#ffffff' : customTheme?.categoryNameColor || customTheme?.headingColor
             }}>
               {getLocalizedText(category, 'name')}
             </h3>

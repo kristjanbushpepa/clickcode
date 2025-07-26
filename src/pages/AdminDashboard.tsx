@@ -1,6 +1,4 @@
-
 import React, { useState } from 'react';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminSetup from '@/components/admin/AdminSetup';
@@ -11,10 +9,12 @@ import { DatabaseMonitoring } from '@/components/admin/DatabaseMonitoring';
 import { Button } from '@/components/ui/button';
 import { Plus, LogOut, Users, Building2, Activity, Settings, Database } from 'lucide-react';
 
+type TabType = 'dashboard' | 'database-monitoring' | 'company-settings';
+
 const AdminDashboard = () => {
   const { user, isAdmin, hasAdminUsers, signOut, loading } = useAuth();
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const location = useLocation();
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
 
   console.log('AdminDashboard - Auth state:', { user: user?.email, isAdmin, hasAdminUsers, loading });
 
@@ -40,6 +40,70 @@ const AdminDashboard = () => {
   if (!isAdmin) {
     return <AdminLogin />;
   }
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return (
+          <>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-center">
+                  <Building2 className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Total Restaurants</p>
+                    <p className="text-2xl font-bold text-foreground">0</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-center">
+                  <Users className="h-8 w-8 text-accent-foreground" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--accent) / 0.3))' }} />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Active Connections</p>
+                    <p className="text-2xl font-bold text-foreground">0</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-center">
+                  <Activity className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Recent Activity</p>
+                    <p className="text-2xl font-bold text-foreground">0</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Restaurant Management Section */}
+            <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl border border-border">
+              <div className="px-6 py-4 border-b border-border">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-medium text-foreground">Restaurants</h2>
+                  <Button 
+                    onClick={() => setShowAddDialog(true)} 
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+                    style={{ boxShadow: 'var(--glow-primary)' }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Restaurant
+                  </Button>
+                </div>
+              </div>
+              <RestaurantList />
+            </div>
+          </>
+        );
+      case 'database-monitoring':
+        return <DatabaseMonitoring />;
+      case 'company-settings':
+        return <CompanySettings />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -69,98 +133,43 @@ const AdminDashboard = () => {
       <nav className="bg-card/50 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
-            <Link 
-              to="/admin" 
-              className={`border-b-2 py-4 px-1 text-sm font-medium ${
-                location.pathname === '/admin' 
+            <button 
+              onClick={() => setActiveTab('dashboard')}
+              className={`border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
+                activeTab === 'dashboard'
                   ? 'border-primary text-primary' 
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
               }`}
             >
               Dashboard
-            </Link>
-            <Link 
-              to="/admin/database-monitoring" 
-              className={`border-b-2 py-4 px-1 text-sm font-medium ${
-                location.pathname === '/admin/database-monitoring' 
+            </button>
+            <button 
+              onClick={() => setActiveTab('database-monitoring')}
+              className={`border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
+                activeTab === 'database-monitoring'
                   ? 'border-primary text-primary' 
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
               }`}
             >
               Database Monitoring
-            </Link>
-            <Link 
-              to="/admin/company-settings" 
-              className={`border-b-2 py-4 px-1 text-sm font-medium ${
-                location.pathname === '/admin/company-settings' 
+            </button>
+            <button 
+              onClick={() => setActiveTab('company-settings')}
+              className={`border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
+                activeTab === 'company-settings'
                   ? 'border-primary text-primary' 
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
               }`}
             >
               Company Settings
-            </Link>
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Routes>
-          <Route path="/" element={
-            <>
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
-                  <div className="flex items-center">
-                    <Building2 className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-muted-foreground">Total Restaurants</p>
-                      <p className="text-2xl font-bold text-foreground">0</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
-                  <div className="flex items-center">
-                    <Users className="h-8 w-8 text-accent-foreground" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--accent) / 0.3))' }} />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-muted-foreground">Active Connections</p>
-                      <p className="text-2xl font-bold text-foreground">0</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl p-6 border border-border hover:shadow-2xl transition-all duration-300">
-                  <div className="flex items-center">
-                    <Activity className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.3))' }} />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-muted-foreground">Recent Activity</p>
-                      <p className="text-2xl font-bold text-foreground">0</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Restaurant Management Section */}
-              <div className="bg-card/80 backdrop-blur-md rounded-lg shadow-xl border border-border">
-                <div className="px-6 py-4 border-b border-border">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-lg font-medium text-foreground">Restaurants</h2>
-                    <Button 
-                      onClick={() => setShowAddDialog(true)} 
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
-                      style={{ boxShadow: 'var(--glow-primary)' }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Restaurant
-                    </Button>
-                  </div>
-                </div>
-                <RestaurantList />
-              </div>
-            </>
-          } />
-          <Route path="/database-monitoring" element={<DatabaseMonitoring />} />
-          <Route path="/company-settings" element={<CompanySettings />} />
-        </Routes>
+        {renderTabContent()}
       </main>
 
       <AddRestaurantDialog 

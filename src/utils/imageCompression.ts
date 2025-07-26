@@ -11,9 +11,9 @@ export const compressImage = async (
   options: CompressionOptions = {}
 ): Promise<Blob> => {
   const {
-    maxWidth = 1200,
-    maxHeight = 1200,
-    quality = 0.85,
+    maxWidth = 800,
+    maxHeight = 800,
+    quality = 0.6,
     format = 'webp'
   } = options;
 

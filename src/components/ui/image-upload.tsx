@@ -57,23 +57,13 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
 
     setIsUploading(true);
     try {
-      // Show compression progress
-      toast({
-        title: 'Duke kompresuar...',
-        description: 'Imazhi po kompresohet për të reduktuar madhësinë',
-      });
-
       // Compress the image
       const compressedBlob = await compressImage(file, {
-        maxWidth: 1200,
-        maxHeight: 1200,
-        quality: 0.85,
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 0.6,
         format: 'webp'
       });
-
-      console.log(`Original size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Compressed size: ${(compressedBlob.size / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Compression ratio: ${((1 - compressedBlob.size / file.size) * 100).toFixed(1)}%`);
 
       const restaurantSupabase = getRestaurantSupabase();
       const fileName = getOptimizedFileName(file.name, 'webp');
@@ -92,7 +82,7 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
 
       toast({
         title: 'Sukses',
-        description: `Imazhi u ngarkua me sukses (kompresuar ${((1 - compressedBlob.size / file.size) * 100).toFixed(1)}%)`,
+        description: 'Imazhi u ngarkua me sukses',
       });
     } catch (error: any) {
       console.error('Error uploading image:', error);
@@ -177,7 +167,7 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
         </div>
         
         <p className="text-xs text-muted-foreground">
-          Imazhet kompresohen automatikisht në WebP për të reduktuar madhësinë (max 1200px, 85% cilësi)
+          Formatet e mbështetura: JPG, PNG, WebP (max 10MB)
         </p>
       </div>
     </div>

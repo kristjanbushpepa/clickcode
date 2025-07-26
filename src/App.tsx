@@ -34,7 +34,7 @@ const App = () => (
             <Route path="/calendar-booking" element={<CalendarBooking />} />
             <Route path="/restaurant/login" element={<RestaurantLogin />} />
             <Route path="/restaurant/dashboard" element={<RestaurantDashboard />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/dashboard/*" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

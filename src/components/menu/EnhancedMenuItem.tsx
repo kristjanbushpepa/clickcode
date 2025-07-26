@@ -65,6 +65,7 @@ const LazyImage = ({ src, alt, className, onLoad }: {
 }) => {
   const [loaded, setLoaded] = useState(false);
   const [inView, setInView] = useState(false);
+  const [error, setError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -75,7 +76,10 @@ const LazyImage = ({ src, alt, className, onLoad }: {
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.1,
+        rootMargin: '50px' // Start loading 50px before visible
+      }
     );
 
     if (imgRef.current) {
@@ -85,20 +89,55 @@ const LazyImage = ({ src, alt, className, onLoad }: {
     return () => observer.disconnect();
   }, []);
 
+  // Preload image when in view
+  useEffect(() => {
+    if (inView && src) {
+      const img = new Image();
+      img.onload = () => {
+        setLoaded(true);
+        onLoad?.();
+      };
+      img.onerror = () => setError(true);
+      img.src = src;
+    }
+  }, [inView, src, onLoad]);
+
   const handleLoad = () => {
     setLoaded(true);
     onLoad?.();
   };
 
+  const handleError = () => {
+    setError(true);
+  };
+
   return (
-    <div ref={imgRef} className={`${className} bg-muted overflow-hidden flex items-center justify-center`}>
-      {inView && (
+    <div ref={imgRef} className={`${className} bg-muted overflow-hidden flex items-center justify-center relative`}>
+      {/* Loading skeleton */}
+      {inView && !loaded && !error && (
+        <div className="absolute inset-0 bg-gradient-to-r from-muted via-muted/50 to-muted animate-pulse" />
+      )}
+      
+      {/* Error state */}
+      {error && (
+        <div className="w-full h-full bg-muted flex items-center justify-center">
+          <span className="text-muted-foreground text-xs">No Image</span>
+        </div>
+      )}
+      
+      {/* Actual image */}
+      {inView && !error && (
         <img
           src={src}
           alt={alt}
-          className={`w-full h-full object-cover object-center ${loaded ? 'loaded' : 'blur-load'}`}
+          className={`w-full h-full object-cover object-center transition-opacity duration-300 ${
+            loaded ? 'opacity-100' : 'opacity-0'
+          }`}
           onLoad={handleLoad}
+          onError={handleError}
           loading="lazy"
+          decoding="async"
+          fetchPriority="low"
         />
       )}
     </div>

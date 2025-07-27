@@ -644,8 +644,8 @@ export const EnhancedMenuItem = ({
                 )}
               </div>
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
-                <h3 className="font-semibold text-base mb-1 line-clamp-1">
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
+                <h3 className="font-bold text-lg mb-2 line-clamp-2 leading-tight drop-shadow-lg">
                   {getLocalizedText(item, 'name')}
                 </h3>
                 <div className="flex items-center justify-between">

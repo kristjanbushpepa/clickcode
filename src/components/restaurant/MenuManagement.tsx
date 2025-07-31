@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
@@ -10,14 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { Plus, Edit, Trash2, EyeOff, Tag, Utensils, DollarSign, Languages } from 'lucide-react';
+import { Plus, Edit, Trash2, EyeOff, Tag, Utensils, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { CurrencySettings } from './CurrencySettings';
-import { LanguageSettings } from './LanguageSettings';
-import { TranslationManager } from './TranslationManager';
 
 interface Category {
   id: string;
@@ -61,6 +58,12 @@ interface MenuItem {
   allergens: string[];
   preparation_time?: number;
   display_order: number;
+  sizes?: MenuItemSize[];
+}
+
+interface MenuItemSize {
+  name: string;
+  price: number;
 }
 
 export function MenuManagement() {
@@ -72,6 +75,7 @@ export function MenuManagement() {
   const [showItemDialog, setShowItemDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
 
   // Fetch categories with proper error handling
   const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
@@ -203,16 +207,27 @@ export function MenuManagement() {
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
       const restaurantSupabase = getRestaurantSupabase();
-      const { error } = await restaurantSupabase
+      
+      // First, update all menu items to remove this category (set category_id to null)
+      const { error: updateError } = await restaurantSupabase
+        .from('menu_items')
+        .update({ category_id: null })
+        .eq('category_id', id);
+      
+      if (updateError) throw updateError;
+      
+      // Then delete the category
+      const { error: deleteError } = await restaurantSupabase
         .from('categories')
         .delete()
         .eq('id', id);
       
-      if (error) throw error;
+      if (deleteError) throw deleteError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      toast({ title: 'Kategoria u fshi me sukses' });
+      queryClient.invalidateQueries({ queryKey: ['menu_items'] });
+      toast({ title: 'Kategoria u fshi me sukses. Artikujt duhet të riassignohen.' });
     },
     onError: (error: any) => {
       toast({ title: 'Gabim në fshirjen e kategorisë', description: error.message, variant: 'destructive' });
@@ -251,9 +266,10 @@ export function MenuManagement() {
         .update(updates)
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) throw new Error('Menu item not found');
       return data;
     },
     onSuccess: () => {
@@ -311,6 +327,20 @@ export function MenuManagement() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    // Parse sizes from form data
+    const sizes: MenuItemSize[] = [];
+    const sizeInputs = e.currentTarget.querySelectorAll('[data-size-name]');
+    sizeInputs.forEach((input) => {
+      const nameInput = input as HTMLInputElement;
+      const priceInput = e.currentTarget.querySelector(`[data-size-price="${nameInput.dataset.sizeName}"]`) as HTMLInputElement;
+      if (nameInput.value.trim() && priceInput && priceInput.value) {
+        sizes.push({
+          name: nameInput.value.trim(),
+          price: parseFloat(priceInput.value)
+        });
+      }
+    });
+    
     const itemData: Partial<MenuItem> = {
       category_id: formData.get('category_id') as string,
       name: formData.get('name') as string,
@@ -324,7 +354,8 @@ export function MenuManagement() {
       allergens: (formData.get('allergens') as string)?.split(',').map(a => a.trim()).filter(Boolean) || [],
       preparation_time: parseInt(formData.get('preparation_time') as string) || undefined,
       display_order: parseInt(formData.get('display_order') as string) || 0,
-      image_path: formData.get('image_path') as string || null
+      image_path: formData.get('image_path') as string || null,
+      sizes: sizes.length > 0 ? sizes : undefined
     };
 
     if (editingItem) {
@@ -343,7 +374,7 @@ export function MenuManagement() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Menaxhimi i Menusë</h1>
-          <p className="text-muted-foreground">Menaxho menunë, kategoritë, monedhën dhe gjuhët</p>
+          <p className="text-muted-foreground">Menaxho kategoritë dhe artikujt e menusë së restorantit tuaj</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
@@ -368,6 +399,7 @@ export function MenuManagement() {
               </Button>
             </DialogTrigger>
             <MenuItemDialog
+              key={editingItem?.id || 'new-item'}
               item={editingItem}
               categories={categories}
               onSubmit={handleItemSubmit}
@@ -378,26 +410,22 @@ export function MenuManagement() {
       </div>
 
       <Tabs defaultValue="menu" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="menu" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 h-auto p-1 bg-muted/50 rounded-lg gap-1">
+          <TabsTrigger 
+            value="menu" 
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+          >
             <Utensils className="h-4 w-4" />
-            Artikujt e Menusë
+            <span className="hidden sm:inline">Artikujt e Menusë</span>
+            <span className="sm:hidden">Menu</span>
           </TabsTrigger>
-          <TabsTrigger value="categories" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="categories" 
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-medium"
+          >
             <Tag className="h-4 w-4" />
-            Kategoritë
-          </TabsTrigger>
-          <TabsTrigger value="currency" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Monedha
-          </TabsTrigger>
-          <TabsTrigger value="language" className="flex items-center gap-2">
-            <Languages className="h-4 w-4" />
-            Gjuha
-          </TabsTrigger>
-          <TabsTrigger value="translations" className="flex items-center gap-2">
-            <Languages className="h-4 w-4" />
-            Përkthimet
+            <span className="hidden sm:inline">Kategoritë</span>
+            <span className="sm:hidden">Categories</span>
           </TabsTrigger>
         </TabsList>
 
@@ -411,10 +439,10 @@ export function MenuManagement() {
               Kategoritë
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3 p-4">
             <Button
               variant={selectedCategory === null ? "default" : "ghost"}
-              className="w-full justify-start"
+              className="w-full justify-start h-10"
               onClick={() => setSelectedCategory(null)}
             >
               Të gjitha artikujt
@@ -423,29 +451,35 @@ export function MenuManagement() {
               <div key={category.id} className="flex items-center gap-2">
                 <Button
                   variant={selectedCategory === category.id ? "default" : "ghost"}
-                  className="flex-1 justify-start"
+                  className="flex-1 justify-start h-10 min-w-0"
                   onClick={() => setSelectedCategory(category.id)}
                 >
-                  {category.name_sq || category.name}
-                  {!category.is_active && <EyeOff className="h-4 w-4 ml-2" />}
+                  <span className="truncate">
+                    {category.name_sq || category.name}
+                  </span>
+                  {!category.is_active && <EyeOff className="h-4 w-4 ml-2 flex-shrink-0" />}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setEditingCategory(category);
-                    setShowCategoryDialog(true);
-                  }}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => deleteCategoryMutation.mutate(category.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-1 flex-shrink-0">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => {
+                      setEditingCategory(category);
+                      setShowCategoryDialog(true);
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => deleteCategoryMutation.mutate(category.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </CardContent>
@@ -480,7 +514,10 @@ export function MenuManagement() {
                     setEditingItem(item);
                     setShowItemDialog(true);
                   }}
-                  onDelete={(id) => deleteItemMutation.mutate(id)}
+                  onDelete={(id) => {
+                    const item = menuItems.find(item => item.id === id);
+                    if (item) setItemToDelete(item);
+                  }}
                 />
               ))}
             </div>
@@ -562,18 +599,33 @@ export function MenuManagement() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="currency">
-          <CurrencySettings />
-        </TabsContent>
-
-        <TabsContent value="language">
-          <LanguageSettings />
-        </TabsContent>
-
-        <TabsContent value="translations">
-          <TranslationManager />
-        </TabsContent>
       </Tabs>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!itemToDelete} onOpenChange={() => setItemToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Jeni i sigurt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kjo veprim nuk mund të zhbëhet. Artikulli "{itemToDelete?.name_sq || itemToDelete?.name}" do të fshihet përgjithmonë.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Anulo</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (itemToDelete) {
+                  deleteItemMutation.mutate(itemToDelete.id);
+                  setItemToDelete(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Fshi Artikullin
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -694,7 +746,7 @@ function CategoryDialog({
   );
 }
 
-// Menu Item Dialog Component with Image Upload
+// Menu Item Dialog Component with Size Options
 function MenuItemDialog({ 
   item, 
   categories, 
@@ -707,11 +759,27 @@ function MenuItemDialog({
   onClose: () => void; 
 }) {
   const [imagePath, setImagePath] = useState<string | null>(item?.image_path || null);
+  const [sizes, setSizes] = useState<MenuItemSize[]>(item?.sizes || []);
 
-  // Update imagePath when item changes
+  // Update imagePath and sizes when item changes
   useEffect(() => {
     setImagePath(item?.image_path || null);
+    setSizes(item?.sizes || []);
   }, [item]);
+
+  const addSize = () => {
+    setSizes([...sizes, { name: '', price: 0 }]);
+  };
+
+  const removeSize = (index: number) => {
+    setSizes(sizes.filter((_, i) => i !== index));
+  };
+
+  const updateSize = (index: number, field: keyof MenuItemSize, value: string | number) => {
+    const updatedSizes = [...sizes];
+    updatedSizes[index] = { ...updatedSizes[index], [field]: value };
+    setSizes(updatedSizes);
+  };
 
   return (
     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -744,7 +812,7 @@ function MenuItemDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="price">Çmimi (ALL)</Label>
+            <Label htmlFor="price">Çmimi Bazë (ALL)</Label>
             <Input
               id="price"
               name="price"
@@ -801,6 +869,54 @@ function MenuItemDialog({
               placeholder="Përshkrimi në anglisht"
             />
           </div>
+        </div>
+
+        {/* Size Options Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-medium">Madhësitë e Disponueshme</Label>
+            <Button type="button" onClick={addSize} size="sm" variant="outline">
+              <Plus className="h-4 w-4 mr-1" />
+              Shto Madhësi
+            </Button>
+          </div>
+          
+          {sizes.map((size, index) => (
+            <div key={index} className="flex items-center gap-2 p-3 border rounded-lg">
+              <div className="flex-1">
+                <Input
+                  data-size-name={index}
+                  placeholder="p.sh. Gjysmë, E plotë, 1kg, etc."
+                  value={size.name}
+                  onChange={(e) => updateSize(index, 'name', e.target.value)}
+                />
+              </div>
+              <div className="w-32">
+                <Input
+                  data-size-price={index}
+                  type="number"
+                  step="0.01"
+                  placeholder="Çmimi"
+                  value={size.price || ''}
+                  onChange={(e) => updateSize(index, 'price', parseFloat(e.target.value) || 0)}
+                />
+              </div>
+              <Button 
+                type="button" 
+                onClick={() => removeSize(index)} 
+                size="sm" 
+                variant="ghost"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          
+          {sizes.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Nëse nuk shtoni madhësi, do të përdoret vetëm çmimi bazë.
+            </p>
+          )}
         </div>
 
         <ImageUpload
@@ -872,7 +988,7 @@ function MenuItemDialog({
   );
 }
 
-// Menu Item Card Component with Image Display
+// Menu Item Card Component with Size Display
 function MenuItemCard({ 
   item, 
   categories, 
@@ -922,6 +1038,21 @@ function MenuItemCard({
                 <span className="text-muted-foreground">{item.preparation_time} min</span>
               )}
             </div>
+            
+            {/* Display sizes if available */}
+            {item.sizes && item.sizes.length > 0 && (
+              <div className="mt-2">
+                <p className="text-xs text-muted-foreground mb-1">Madhësitë:</p>
+                <div className="flex flex-wrap gap-1">
+                  {item.sizes.map((size, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {size.name}: {size.price} ALL
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {item.allergens && item.allergens.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {item.allergens.map((allergen) => (

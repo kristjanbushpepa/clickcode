@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
 import { toast } from '@/hooks/use-toast';
+import { compressImage, getOptimizedFileName } from '@/utils/imageCompression';
 
 interface ImageUploadProps {
   currentImagePath?: string;
@@ -44,11 +45,11 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size before compression (max 10MB for original)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: 'Gabim',
-        description: 'Imazhi duhet të jetë më i vogël se 5MB',
+        description: 'Imazhi origjinal duhet të jetë më i vogël se 10MB',
         variant: 'destructive',
       });
       return;
@@ -56,13 +57,22 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
 
     setIsUploading(true);
     try {
+      // Compress the image
+      const compressedBlob = await compressImage(file, {
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 0.6,
+        format: 'webp'
+      });
+
       const restaurantSupabase = getRestaurantSupabase();
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = getOptimizedFileName(file.name, 'webp');
 
       const { error: uploadError } = await restaurantSupabase.storage
         .from('restaurant-images')
-        .upload(fileName, file);
+        .upload(fileName, compressedBlob, {
+          contentType: 'image/webp'
+        });
 
       if (uploadError) throw uploadError;
 
@@ -144,7 +154,7 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
             className="flex-1"
           >
             <Upload className="h-4 w-4 mr-2" />
-            {isUploading ? 'Duke ngarkuar...' : 'Ngarko Imazh'}
+            {isUploading ? 'Duke kompresuar dhe ngarkuar...' : 'Ngarko Imazh'}
           </Button>
           
           <Input
@@ -155,6 +165,10 @@ export function ImageUpload({ currentImagePath, onImageChange, label, className 
             onChange={handleFileSelect}
           />
         </div>
+        
+        <p className="text-xs text-muted-foreground">
+          Formatet e mbështetura: JPG, PNG, WebP (max 10MB)
+        </p>
       </div>
     </div>
   );

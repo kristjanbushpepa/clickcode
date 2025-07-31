@@ -14,6 +14,7 @@ import { EmptyState } from './translation/components/EmptyState';
 export function TranslationManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  // Default to Albanian for viewing
   const [selectedLanguage, setSelectedLanguage] = useState('sq');
   const [editingTranslations, setEditingTranslations] = useState<Record<string, Record<string, string>>>({});
   const [translatingItems, setTranslatingItems] = useState<Set<string>>(new Set());
@@ -27,7 +28,12 @@ export function TranslationManager() {
     ...menuItems.map(item => ({ ...item, type: 'menu_item' as const }))
   ];
 
+  const selectedLangOption = LANGUAGE_OPTIONS.find(lang => lang.code === selectedLanguage);
+  const isReadonlyLanguage = selectedLangOption?.readonly;
+
   const autoTranslateAll = async () => {
+    if (isReadonlyLanguage) return;
+    
     console.log(`Starting bulk translation to ${selectedLanguage}`);
     setBulkTranslating(true);
     
@@ -65,6 +71,8 @@ export function TranslationManager() {
   };
 
   const handleTranslationChange = (itemId: string, field: string, value: string) => {
+    if (isReadonlyLanguage) return;
+    
     setEditingTranslations(prev => ({
       ...prev,
       [itemId]: {
@@ -75,6 +83,8 @@ export function TranslationManager() {
   };
 
   const saveTranslations = (item: TranslatableItem) => {
+    if (isReadonlyLanguage) return;
+    
     const translations = editingTranslations[item.id] || {};
     if (Object.keys(translations).length > 0) {
       const metadata = item.translation_metadata || {};
@@ -137,7 +147,7 @@ export function TranslationManager() {
             editingTranslations={editingTranslations}
             translatingItems={translatingItems}
             onTranslationChange={handleTranslationChange}
-            onAutoTranslateItem={(item, language) => autoTranslateItem(item, language, translatingItems, setTranslatingItems)}
+            onAutoTranslateItem={(item, language) => !isReadonlyLanguage && autoTranslateItem(item, language, translatingItems, setTranslatingItems)}
             onSaveTranslations={saveTranslations}
             isUpdating={updateTranslationMutation.isPending}
           />

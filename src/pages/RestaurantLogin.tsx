@@ -1,23 +1,40 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Building2, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@supabase/supabase-js';
+import { cn } from '@/lib/utils';
 
 const RestaurantLogin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    restaurantId: '',
     email: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPWA, setIsPWA] = useState(false);
+
+  useEffect(() => {
+    // Detect if running in PWA mode
+    const checkPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                     (window.navigator as any).standalone === true;
+    setIsPWA(checkPWA);
+
+    // Handle viewport for PWA
+    if (checkPWA) {
+      const viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+      }
+    }
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -28,65 +45,88 @@ const RestaurantLogin = () => {
     setIsLoading(true);
 
     try {
-      // First, get restaurant details from the main database
+      // First, get all restaurants to find which one this user belongs to
       const mainSupabase = createClient(
         'https://zijfbnubzfonpxngmqqz.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppamZibnViemZvbnB4bmdtcXF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjQwMjcsImV4cCI6MjA2NzQwMDAyN30.8Xa-6lpOYD15W4JLU0BqGBdr1zZF3wL2vjR07yJJZKQ'
       );
 
-      const { data: restaurant, error: restaurantError } = await mainSupabase
+      const { data: restaurants, error: restaurantError } = await mainSupabase
         .from('restaurants')
-        .select('supabase_url, supabase_anon_key, name')
-        .eq('id', formData.restaurantId)
-        .single();
+        .select('*');
 
-      if (restaurantError || !restaurant) {
+      if (restaurantError || !restaurants) {
         toast({
           title: "Error",
-          description: "Restaurant not found. Please check your Restaurant ID.",
+          description: "Failed to fetch restaurant information. Please try again.",
           variant: "destructive",
         });
         return;
       }
 
-      // Create client for restaurant's database
-      const restaurantSupabase = createClient(
-        restaurant.supabase_url,
-        restaurant.supabase_anon_key
-      );
+      // Try to authenticate with each restaurant until we find a match
+      let authenticatedRestaurant = null;
+      let authData = null;
 
-      // Attempt to sign in
-      const { data: authData, error: authError } = await restaurantSupabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+      for (const restaurant of restaurants) {
+        try {
+          const restaurantSupabase = createClient(
+            restaurant.supabase_url,
+            restaurant.supabase_anon_key,
+            {
+              auth: {
+                storage: keepLoggedIn ? localStorage : sessionStorage,
+                persistSession: true,
+                autoRefreshToken: true,
+              }
+            }
+          );
 
-      if (authError) {
+          const { data: authResponse, error: authError } = await restaurantSupabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+          });
+
+          if (!authError && authResponse.user) {
+            authenticatedRestaurant = restaurant;
+            authData = authResponse;
+            break;
+          }
+        } catch (error) {
+          // Continue to next restaurant if authentication fails
+          continue;
+        }
+      }
+
+      if (!authenticatedRestaurant || !authData) {
         toast({
           title: "Login Failed",
-          description: authError.message,
+          description: "Invalid email or password. Please check your credentials and try again.",
           variant: "destructive",
         });
         return;
       }
 
-      if (authData.user) {
-        // Store restaurant info in sessionStorage for the dashboard
-        sessionStorage.setItem('restaurant_info', JSON.stringify({
-          id: formData.restaurantId,
-          name: restaurant.name,
-          supabase_url: restaurant.supabase_url,
-          supabase_anon_key: restaurant.supabase_anon_key,
-          user: authData.user
-        }));
+      // Store restaurant info in the appropriate storage based on keepLoggedIn preference
+      const storage = keepLoggedIn ? localStorage : sessionStorage;
+      storage.setItem('restaurant_info', JSON.stringify({
+        id: authenticatedRestaurant.id,
+        name: authenticatedRestaurant.name,
+        supabase_url: authenticatedRestaurant.supabase_url,
+        supabase_anon_key: authenticatedRestaurant.supabase_anon_key,
+        user: authData.user,
+        keepLoggedIn: keepLoggedIn
+      }));
 
-        toast({
-          title: "Success",
-          description: `Welcome to ${restaurant.name}!`,
-        });
+      // Also store the preference for future logins
+      localStorage.setItem('keep_logged_in_preference', keepLoggedIn.toString());
 
-        navigate('/restaurant/dashboard');
-      }
+      toast({
+        title: "Success",
+        description: `Welcome to ${authenticatedRestaurant.name}!`,
+      });
+
+      navigate('/restaurant/dashboard');
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
@@ -99,35 +139,32 @@ const RestaurantLogin = () => {
     }
   };
 
+  // Load the saved preference on component mount
+  useEffect(() => {
+    const savedPreference = localStorage.getItem('keep_logged_in_preference');
+    if (savedPreference === 'true') {
+      setKeepLoggedIn(true);
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 px-4">
-      <Card className="w-full max-w-md">
+    <div className={cn(
+      "min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden",
+      isPWA && "min-h-[100dvh] pt-safe-top pb-safe-bottom"
+    )}>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"></div>
+      <Card className="w-full max-w-md relative bg-card/80 backdrop-blur-md border-border shadow-2xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Building2 className="h-12 w-12 text-green-600" />
+            <Building2 className="h-12 w-12 text-primary" style={{ filter: 'drop-shadow(0 0 10px hsl(var(--primary) / 0.3))' }} />
           </div>
-          <CardTitle className="text-2xl font-bold">Restaurant Login</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-bold text-foreground">Restaurant Login</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Sign in to access your restaurant's digital menu dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="restaurantId">Restaurant ID</Label>
-              <Input
-                id="restaurantId"
-                type="text"
-                value={formData.restaurantId}
-                onChange={(e) => handleInputChange('restaurantId', e.target.value)}
-                placeholder="Enter your restaurant ID"
-                required
-              />
-              <p className="text-xs text-gray-500">
-                Your Restaurant ID was provided by your administrator
-              </p>
-            </div>
-
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -137,10 +174,12 @@ const RestaurantLogin = () => {
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="Enter your email"
                 required
+                autoComplete="email"
+                inputMode="email"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2">  
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
@@ -150,6 +189,7 @@ const RestaurantLogin = () => {
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   placeholder="Enter your password"
                   required
+                  autoComplete="current-password"
                 />
                 <Button
                   type="button"
@@ -167,10 +207,25 @@ const RestaurantLogin = () => {
               </div>
             </div>
 
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="keep-logged-in"
+                checked={keepLoggedIn}
+                onCheckedChange={(checked) => setKeepLoggedIn(checked as boolean)}
+              />
+              <Label
+                htmlFor="keep-logged-in"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Keep me logged in
+              </Label>
+            </div>
+
             <Button 
               type="submit" 
-              className="w-full bg-green-600 hover:bg-green-700"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
               disabled={isLoading}
+              style={{ boxShadow: 'var(--glow-primary)' }}
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>

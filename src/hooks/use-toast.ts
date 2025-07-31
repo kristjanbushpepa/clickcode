@@ -169,6 +169,16 @@ function toast({ ...props }: Toast) {
 }
 
 function useToast() {
+  // Add safety check for React context
+  if (typeof React.useState !== 'function') {
+    console.warn('useToast called outside of React context')
+    return {
+      toasts: [],
+      toast,
+      dismiss: () => {},
+    }
+  }
+
   const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {
@@ -179,7 +189,7 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [state])
+  }, [])
 
   return {
     ...state,

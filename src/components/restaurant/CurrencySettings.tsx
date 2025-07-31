@@ -1,12 +1,15 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRestaurantSupabase } from '@/utils/restaurantDatabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DollarSign, RefreshCw } from 'lucide-react';
 
 interface CurrencySettings {
@@ -18,66 +21,103 @@ interface CurrencySettings {
   last_updated: string;
 }
 
-const CURRENCY_OPTIONS = [
-  { code: 'ALL', name: 'Albanian Lek', symbol: 'L' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
-  { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'GBP', name: 'British Pound', symbol: '£' },
-  { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF' }
-];
-
 export function CurrencySettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({});
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
 
-  // Fetch currency settings
-  const { data: currencySettings, isLoading } = useQuery({
+  // Default currency configuration - this would come from admin database in the future
+  const CURRENCY_OPTIONS = [
+    { code: 'ALL', name: 'Albanian Lek', symbol: 'L', flag: '🇦🇱' },
+    { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺' },
+    { code: 'USD', name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
+    { code: 'GBP', name: 'British Pound', symbol: '£', flag: '🇬🇧' },
+    { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', flag: '🇨🇭' }
+  ];
+
+  // Fetch restaurant's currency settings from individual restaurant database
+  const { data: currencySettings, isLoading, error: queryError } = useQuery({
     queryKey: ['currency_settings'],
     queryFn: async () => {
       const restaurantSupabase = getRestaurantSupabase();
+      console.log('Fetching currency settings...');
+      
       const { data, error } = await restaurantSupabase
         .from('currency_settings')
         .select('*')
-        .maybeSingle();
+        .limit(1)
+        .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Currency settings query error:', error);
+        throw error;
+      }
+      
+      console.log('Currency settings fetched:', data);
       return data as CurrencySettings | null;
-    }
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 3
   });
 
   // Update currency settings mutation
   const updateSettingsMutation = useMutation({
     mutationFn: async (updates: Partial<CurrencySettings>) => {
       const restaurantSupabase = getRestaurantSupabase();
+      console.log('Updating currency settings:', updates);
       
-      // First try to update existing record
-      const { data: updateData, error: updateError } = await restaurantSupabase
-        .from('currency_settings')
-        .update({ ...updates, last_updated: new Date().toISOString() })
-        .eq('id', currencySettings?.id || '00000000-0000-0000-0000-000000000000')
-        .select()
-        .maybeSingle();
-      
-      if (updateData) {
-        return updateData;
+      if (currencySettings?.id) {
+        // Update existing record
+        const { data, error } = await restaurantSupabase
+          .from('currency_settings')
+          .update({ ...updates, last_updated: new Date().toISOString() })
+          .eq('id', currencySettings.id)
+          .select()
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
+        console.log('Updated currency settings:', data);
+        return data;
+      } else {
+        // Insert new record with default values
+        const defaultValues = {
+          default_currency: 'ALL',
+          supported_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+          enabled_currencies: ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
+          exchange_rates: {
+            'ALL': 1,
+            'EUR': 95,   // 1 EUR = 95 ALL
+            'USD': 90,   // 1 USD = 90 ALL  
+            'GBP': 115,  // 1 GBP = 115 ALL
+            'CHF': 100   // 1 CHF = 100 ALL
+          },
+          ...updates
+        };
+        
+        const { data, error } = await restaurantSupabase
+          .from('currency_settings')
+          .insert([{ ...defaultValues, last_updated: new Date().toISOString() }])
+          .select()
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
+        console.log('Inserted currency settings:', data);
+        return data;
       }
-      
-      // If no existing record, insert new one
-      const { data: insertData, error: insertError } = await restaurantSupabase
-        .from('currency_settings')
-        .insert([{ ...updates, last_updated: new Date().toISOString() }])
-        .select()
-        .maybeSingle();
-      
-      if (insertError) throw insertError;
-      return insertData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currency_settings'] });
       toast({ title: 'Cilësimet e monedhës u përditësuan me sukses' });
     },
     onError: (error: any) => {
+      console.error('Mutation error:', error);
       toast({ 
         title: 'Gabim në përditësimin e cilësimeve', 
         description: error.message, 
@@ -89,6 +129,12 @@ export function CurrencySettings() {
   React.useEffect(() => {
     if (currencySettings?.exchange_rates) {
       setExchangeRates(currencySettings.exchange_rates);
+      // Initialize input values with the actual exchange rates
+      const initialInputValues: Record<string, string> = {};
+      Object.entries(currencySettings.exchange_rates).forEach(([currency, rate]) => {
+        initialInputValues[currency] = rate.toString();
+      });
+      setInputValues(initialInputValues);
     }
   }, [currencySettings]);
 
@@ -115,25 +161,66 @@ export function CurrencySettings() {
     });
   };
 
-  const handleExchangeRateChange = (currency: string, rate: string) => {
-    const numericRate = parseFloat(rate);
-    if (isNaN(numericRate)) return;
+  const handleExchangeRateInputChange = (currency: string, value: string) => {
+    // Update the input value immediately for better UX
+    setInputValues(prev => ({ ...prev, [currency]: value }));
     
-    const newRates = { ...exchangeRates, [currency]: numericRate };
-    setExchangeRates(newRates);
+    // Only update the actual exchange rate if it's a valid number
+    const numericRate = parseFloat(value);
+    if (!isNaN(numericRate) && numericRate > 0) {
+      setExchangeRates(prev => ({ ...prev, [currency]: numericRate }));
+    }
   };
 
   const handleSaveRates = () => {
+    // Validate all input values before saving
+    const validatedRates: Record<string, number> = {};
+    let hasInvalidRates = false;
+
+    Object.entries(inputValues).forEach(([currency, value]) => {
+      const numericRate = parseFloat(value);
+      if (!isNaN(numericRate) && numericRate > 0) {
+        validatedRates[currency] = numericRate;
+      } else if (value.trim() !== '') {
+        hasInvalidRates = true;
+        toast({
+          title: 'Gabim në kursin e këmbimit',
+          description: `Kursi për ${currency} duhet të jetë një numër pozitiv`,
+          variant: 'destructive'
+        });
+      }
+    });
+
+    if (hasInvalidRates) return;
+
     updateSettingsMutation.mutate({
       default_currency: currencySettings?.default_currency || 'ALL',
       supported_currencies: currencySettings?.supported_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
       enabled_currencies: currencySettings?.enabled_currencies || ['ALL', 'EUR', 'USD', 'GBP', 'CHF'],
-      exchange_rates: exchangeRates
+      exchange_rates: validatedRates
     });
   };
 
   if (isLoading) {
     return <div className="flex justify-center p-8">Duke ngarkuar...</div>;
+  }
+
+  if (queryError) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-center">
+          <p className="text-destructive">Gabim në ngarkimin e cilësimeve të monedhës</p>
+          <p className="text-sm text-muted-foreground mt-2">{(queryError as Error).message}</p>
+          <Button 
+            variant="outline" 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['currency_settings'] })}
+            className="mt-4"
+          >
+            Provo përsëri
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -176,7 +263,7 @@ export function CurrencySettings() {
             </div>
             
             <div className="text-sm text-muted-foreground">
-              Të gjitha çmimet e menusë ruhen në {currencySettings?.default_currency || 'ALL'} dhe konvertohen automatikisht për monedhat e tjera.
+              Të gjitha çmimet e menusë ruhen në {currencySettings?.default_currency || 'ALL'} dhe shfaqen në monedhat e tjera sipas kurseve të këmbimit.
             </div>
           </CardContent>
         </Card>
@@ -189,20 +276,21 @@ export function CurrencySettings() {
               Kurset e Këmbimit
             </CardTitle>
             <CardDescription>
-              Vendosni kurset manuale të këmbimit për monedhat e mbështetura
+              Vendosni sa lek albanë vlen 1 njësi e secilit monedhë (p.sh. 1 EUR = 95 ALL)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {CURRENCY_OPTIONS.map((currency) => {
               const isBaseCurrency = currency.code === (currencySettings?.default_currency || 'ALL');
               const isEnabled = currencySettings?.enabled_currencies?.includes(currency.code) ?? true;
+              const inputValue = isBaseCurrency ? '1' : (inputValues[currency.code] || '0');
+              
               return (
                 <div key={currency.code} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={isEnabled}
-                      onChange={() => handleCurrencyToggle(currency.code)}
+                      onCheckedChange={() => handleCurrencyToggle(currency.code)}
                       disabled={isBaseCurrency}
                       className="w-4 h-4"
                     />
@@ -213,16 +301,17 @@ export function CurrencySettings() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">1 {currencySettings?.default_currency || 'ALL'} =</span>
+                    <span className="text-sm text-muted-foreground">1 {currency.code} =</span>
                     <Input
-                      type="number"
-                      step="0.000001"
-                      className="w-24"
-                      value={isBaseCurrency ? '1.000000' : (exchangeRates[currency.code] || 0).toString()}
-                      onChange={(e) => handleExchangeRateChange(currency.code, e.target.value)}
+                      type="text"
+                      step="any"
+                      className="w-28"
+                      value={inputValue}
+                      onChange={(e) => handleExchangeRateInputChange(currency.code, e.target.value)}
                       disabled={isBaseCurrency || !isEnabled}
+                      placeholder="1"
                     />
-                    <span className="text-sm font-medium">{currency.code}</span>
+                    <span className="text-sm font-medium">{currencySettings?.default_currency || 'ALL'}</span>
                   </div>
                 </div>
               );

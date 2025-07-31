@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Languages, Wand2, Loader2, Save, Edit3, CheckCircle } from 'lucide-react';
-import { TranslatableItem, TranslationStatus, LANGUAGE_OPTIONS } from '../types';
+import { Label } from '@/components/ui/label';
+import { Loader2, Languages, Save } from 'lucide-react';
+import { TranslatableItem, LANGUAGE_OPTIONS } from '../types';
 
 interface TranslationCardProps {
   item: TranslatableItem;
@@ -30,125 +30,173 @@ export function TranslationCard({
   onSaveTranslations,
   isUpdating
 }: TranslationCardProps) {
-  const getTranslationStatus = (item: TranslatableItem, field: string): TranslationStatus | null => {
-    return item.translation_metadata?.[field] || null;
-  };
+  const currentTranslations = editingTranslations[item.id] || {};
+  const isTranslating = translatingItems.has(item.id);
+  const languageData = LANGUAGE_OPTIONS.find(l => l.code === selectedLanguage);
+  const isReadonlyLanguage = languageData?.readonly;
 
-  const getTranslationValue = (item: TranslatableItem, field: string) => {
-    const editingValue = editingTranslations[item.id]?.[field];
-    if (editingValue !== undefined) return editingValue;
-    return (item as any)[field] || '';
-  };
+  const nameField = `name_${selectedLanguage}` as keyof TranslatableItem;
+  const descField = `description_${selectedLanguage}` as keyof TranslatableItem;
+  const sizesField = `sizes_${selectedLanguage}` as keyof TranslatableItem;
 
-  const renderTranslationStatus = (item: TranslatableItem, field: string) => {
-    const status = getTranslationStatus(item, field);
-    const value = getTranslationValue(item, field);
-    
-    if (!value || !status) return null;
-    
-    switch (status.status) {
-      case 'auto_translated':
-        return <Badge variant="secondary" className="text-xs"><Wand2 className="h-3 w-3 mr-1" />Auto</Badge>;
-      case 'manually_edited':
-        return <Badge variant="default" className="text-xs"><Edit3 className="h-3 w-3 mr-1" />Manual</Badge>;
-      case 'approved':
-        return <Badge variant="default" className="text-xs bg-green-500"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
-      default:
-        return null;
+  const currentName = currentTranslations[`name_${selectedLanguage}`] ?? (item[nameField] as string) ?? '';
+  const currentDesc = currentTranslations[`description_${selectedLanguage}`] ?? (item[descField] as string) ?? '';
+  
+  // Parse sizes from translations or get existing localized sizes
+  let currentSizes: any[] = [];
+  try {
+    if (currentTranslations[`sizes_${selectedLanguage}`]) {
+      currentSizes = typeof currentTranslations[`sizes_${selectedLanguage}`] === 'string' 
+        ? JSON.parse(currentTranslations[`sizes_${selectedLanguage}`])
+        : currentTranslations[`sizes_${selectedLanguage}`];
+    } else {
+      currentSizes = (item[sizesField] as any[]) || [];
     }
-  };
+  } catch (error) {
+    console.error('Error parsing sizes:', error);
+    currentSizes = [];
+  }
 
-  const selectedLanguageInfo = LANGUAGE_OPTIONS.find(l => l.code === selectedLanguage);
+  const hasUnsavedChanges = Object.keys(currentTranslations).length > 0;
+
+  const handleSizeChange = (index: number, name: string) => {
+    if (isReadonlyLanguage) return;
+    
+    const updatedSizes = [...currentSizes];
+    if (!updatedSizes[index]) {
+      // If size doesn't exist, create it with price from original sizes
+      const originalSize = item.sizes?.[index];
+      updatedSizes[index] = {
+        name: name,
+        price: originalSize?.price || 0
+      };
+    } else {
+      updatedSizes[index] = {
+        ...updatedSizes[index],
+        name: name
+      };
+    }
+    onTranslationChange(item.id, `sizes_${selectedLanguage}`, JSON.stringify(updatedSizes));
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Languages className="h-5 w-5" />
-            <span>{item.name} ({item.type === 'category' ? 'Kategori' : 'Artikull'})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onAutoTranslateItem(item, selectedLanguage)}
-              disabled={translatingItems.has(item.id)}
-            >
-              {translatingItems.has(item.id) ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Wand2 className="h-4 w-4" />
-              )}
-            </Button>
+            <CardTitle className="text-lg">{item.name}</CardTitle>
             <Badge variant={item.type === 'category' ? 'default' : 'secondary'}>
-              {item.type === 'category' ? 'Kategori' : 'Artikull Menuje'}
+              {item.type === 'category' ? 'Kategori' : 'Artikull'}
             </Badge>
           </div>
-        </CardTitle>
-        <CardDescription>
-          Redaktoni përkthimin për gjuhën e zgjedhur
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Emri në Anglisht (Burimi)</Label>
-            <Input
-              value={item.name}
-              disabled
-              className="bg-muted"
-            />
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Emri në {selectedLanguageInfo?.name}</Label>
-              {renderTranslationStatus(item, `name_${selectedLanguage}`)}
-            </div>
-            <Input
-              value={getTranslationValue(item, `name_${selectedLanguage}`)}
-              onChange={(e) => onTranslationChange(item.id, `name_${selectedLanguage}`, e.target.value)}
-              placeholder={`Përktheni "${item.name}" në ${selectedLanguageInfo?.name}`}
-            />
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="flex items-center gap-1">
+              {languageData?.flag} {languageData?.name}
+            </Badge>
+            {!isReadonlyLanguage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onAutoTranslateItem(item, selectedLanguage)}
+                disabled={isTranslating || isUpdating}
+              >
+                {isTranslating ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Languages className="h-4 w-4 mr-2" />
+                )}
+                Përkthe Automatikisht
+              </Button>
+            )}
           </div>
         </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Name Translation */}
+        <div className="space-y-2">
+          <Label htmlFor={`name-${item.id}`}>Emri në {languageData?.name}</Label>
+          <Input
+            id={`name-${item.id}`}
+            value={currentName}
+            onChange={(e) => !isReadonlyLanguage && onTranslationChange(item.id, `name_${selectedLanguage}`, e.target.value)}
+            placeholder={isReadonlyLanguage ? '' : `Shkruani emrin në ${languageData?.name}...`}
+            readOnly={isReadonlyLanguage}
+            className={isReadonlyLanguage ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}
+          />
+          {item.name && !isReadonlyLanguage && (
+            <p className="text-xs text-muted-foreground">
+              Origjinali: {item.name}
+            </p>
+          )}
+        </div>
 
+        {/* Description Translation */}
         {item.description && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Përshkrimi në Anglisht (Burimi)</Label>
-              <Textarea
-                value={item.description}
-                disabled
-                className="bg-muted"
-                rows={3}
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Përshkrimi në {selectedLanguageInfo?.name}</Label>
-                {renderTranslationStatus(item, `description_${selectedLanguage}`)}
-              </div>
-              <Textarea
-                value={getTranslationValue(item, `description_${selectedLanguage}`)}
-                onChange={(e) => onTranslationChange(item.id, `description_${selectedLanguage}`, e.target.value)}
-                placeholder={`Përktheni përshkrimin në ${selectedLanguageInfo?.name}`}
-                rows={3}
-              />
+          <div className="space-y-2">
+            <Label htmlFor={`desc-${item.id}`}>Përshkrimi në {languageData?.name}</Label>
+            <Textarea
+              id={`desc-${item.id}`}
+              value={currentDesc}
+              onChange={(e) => !isReadonlyLanguage && onTranslationChange(item.id, `description_${selectedLanguage}`, e.target.value)}
+              placeholder={isReadonlyLanguage ? '' : `Shkruani përshkrimin në ${languageData?.name}...`}
+              rows={3}
+              readOnly={isReadonlyLanguage}
+              className={isReadonlyLanguage ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}
+            />
+            {!isReadonlyLanguage && (
+              <p className="text-xs text-muted-foreground">
+                Origjinali: {item.description}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Sizes Translation */}
+        {item.type === 'menu_item' && item.sizes && item.sizes.length > 0 && (
+          <div className="space-y-2">
+            <Label>Madhësitë në {languageData?.name}</Label>
+            <div className="grid grid-cols-1 gap-3">
+              {item.sizes.map((originalSize, index) => {
+                const translatedSize = currentSizes[index];
+                return (
+                  <div key={index} className="border rounded-lg p-3 space-y-2">
+                    {!isReadonlyLanguage && (
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Origjinali: <strong>{originalSize.name}</strong></span>
+                        <span>{originalSize.price} ALL</span>
+                      </div>
+                    )}
+                    <Input
+                      value={translatedSize?.name || ''}
+                      onChange={(e) => handleSizeChange(index, e.target.value)}
+                      placeholder={isReadonlyLanguage ? '' : `Përktheni "${originalSize.name}" në ${languageData?.name}`}
+                      className={`text-sm ${isReadonlyLanguage ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}`}
+                      readOnly={isReadonlyLanguage}
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      Çmimi: {originalSize.price} ALL
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {editingTranslations[item.id] && Object.keys(editingTranslations[item.id]).length > 0 && (
-          <div className="flex justify-end">
-            <Button 
-              onClick={() => onSaveTranslations(item)}
-              disabled={isUpdating}
-            >
+        {/* Save Button */}
+        {hasUnsavedChanges && !isReadonlyLanguage && (
+          <Button
+            onClick={() => onSaveTranslations(item)}
+            disabled={isUpdating}
+            className="w-full"
+          >
+            {isUpdating ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
               <Save className="h-4 w-4 mr-2" />
-              {isUpdating ? 'Duke ruajtur...' : 'Ruaj Përkthimet'}
-            </Button>
-          </div>
+            )}
+            Ruaj Përkthimet
+          </Button>
         )}
       </CardContent>
     </Card>

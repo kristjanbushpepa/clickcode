@@ -48,15 +48,20 @@ export function RestaurantManagement() {
   const [newPassword, setNewPassword] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: restaurants, isLoading } = useQuery({
+  const { data: restaurants, isLoading, error } = useQuery({
     queryKey: ['restaurants'],
     queryFn: async () => {
+      console.log('Fetching restaurants...');
       const { data, error } = await supabase
         .from('restaurants')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching restaurants:', error);
+        throw error;
+      }
+      console.log('Restaurants fetched:', data);
       return data as Restaurant[];
     },
   });
@@ -139,6 +144,28 @@ export function RestaurantManagement() {
     return (
       <div className="flex items-center justify-center p-8">
         <RefreshCw className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">Error loading restaurants:</p>
+          <p className="text-sm text-gray-600">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!restaurants || restaurants.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <p className="text-gray-600 mb-2">No restaurants found</p>
+          <p className="text-sm text-gray-500">Add your first restaurant to get started</p>
+        </div>
       </div>
     );
   }

@@ -1,155 +1,400 @@
-
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Globe, RefreshCw } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-interface Restaurant {
-  id: string;
-  name: string;
-  owner_email: string;
-  owner_full_name: string;
-  city: string;
-  country: string;
-  connection_status: string;
-  created_at: string;
-}
-
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowRight, Zap, Shield, Cpu, Sparkles, ChevronDown, Monitor, Smartphone, Settings, BarChart3 } from 'lucide-react';
+import { ImageCarousel } from '@/components/ImageCarousel';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 const Index = () => {
-  const { data: restaurants, isLoading } = useQuery({
-    queryKey: ['public-restaurants'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('restaurants')
-        .select('id, name, owner_full_name, city, country, connection_status, created_at')
-        .eq('connection_status', 'connected')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as Restaurant[];
-    },
+  const [mousePosition, setMousePosition] = useState({
+    x: 0,
+    y: 0
   });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'connected': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+  useEffect(() => {
+    const updateMousePosition = (ev: MouseEvent) => {
+      setMousePosition({
+        x: ev.clientX,
+        y: ev.clientY
+      });
+    };
+    window.addEventListener('mousemove', updateMousePosition);
+    return () => {
+      window.removeEventListener('mousemove', updateMousePosition);
+    };
+  }, []);
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById('features-section');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+  };
+  const scrollToDemo = () => {
+    const demoSection = document.getElementById('demo-section');
+    if (demoSection) {
+      demoSection.scrollIntoView({
+        behavior: 'smooth'
+      });
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+  // Placeholder images - these will be replaced with your uploaded images
+  const mobileImages = [{
+    src: "/lovable-uploads/36e1cb40-c662-4f71-b6de-5d764404f504.png",
+    title: "Profile Management",
+    description: "Mobile-optimized profile management interface"
+  }, {
+    src: "/lovable-uploads/b3f03c08-8343-4600-8bb8-c11b5543f234.png",
+    title: "Menu Management",
+    description: "Touch-friendly menu editing on mobile"
+  }, {
+    src: "/placeholder.svg",
+    title: "Settings",
+    description: "Mobile settings panel"
+  }, {
+    src: "/placeholder.svg",
+    title: "Analytics",
+    description: "Mobile dashboard analytics"
+  }, {
+    src: "/placeholder.svg",
+    title: "QR Generator",
+    description: "Generate QR codes on mobile"
+  }];
+  const desktopImages = [{
+    src: "/placeholder.svg",
+    title: "Profile Management",
+    description: "Comprehensive desktop profile management"
+  }, {
+    src: "/placeholder.svg",
+    title: "Menu Management",
+    description: "Full-featured desktop menu editor"
+  }, {
+    src: "/placeholder.svg",
+    title: "Dashboard Overview",
+    description: "Complete desktop dashboard"
+  }, {
+    src: "/placeholder.svg",
+    title: "Translation Manager",
+    description: "Multi-language management system"
+  }, {
+    src: "/placeholder.svg",
+    title: "Analytics Suite",
+    description: "Advanced desktop analytics"
+  }];
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white relative overflow-hidden">
+      {/* Modern Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-40 w-80 h-80 bg-cyan-400/5 rounded-full blur-3xl animate-pulse" style={{
+        animationDelay: '1s'
+      }}></div>
+        <div className="absolute bottom-20 left-40 w-72 h-72 bg-blue-600/5 rounded-full blur-3xl animate-pulse" style={{
+        animationDelay: '2s'
+      }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-r from-blue-500/3 via-transparent to-cyan-400/3 rotate-45"></div>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-primary/10 to-background py-16 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6 text-foreground">Digital Menu Solutions</h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Discover our partner restaurants and their digital menus. Modern dining experiences with QR code technology.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/contact">
-              <Button size="lg" className="text-lg px-8 py-3">
-                Get Your Menu
+      {/* Floating Geometric Shapes */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(15)].map((_, i) => <div key={i} className="absolute w-2 h-2 bg-blue-400/20 rounded-full animate-pulse" style={{
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 3}s`,
+        animationDuration: `${2 + Math.random() * 3}s`
+      }}></div>)}
+      </div>
+
+      {/* Mouse Follower Effect */}
+      <div className="fixed pointer-events-none z-0 w-96 h-96 bg-gradient-radial from-blue-400/3 to-transparent rounded-full blur-3xl transition-all duration-300" style={{
+      left: mousePosition.x - 192,
+      top: mousePosition.y - 192
+    }}></div>
+
+      {/* Navigation */}
+      <nav className="relative z-10 bg-white/90 backdrop-blur-md border-b border-blue-100/50 shadow-sm">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Click Code</span>
+            </div>
+            <div className="flex items-center space-x-4 md:space-x-6">
+              <Button variant="ghost" className="text-slate-700 hover:text-blue-600 hover:bg-blue-50 hidden md:block" onClick={scrollToFeatures}>
+                Features
               </Button>
-            </Link>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-3">
-              Learn More
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Restaurants Section */}
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-foreground">Our Partner Restaurants</h2>
-          <p className="text-lg text-muted-foreground">
-            Click on any restaurant to view their digital menu
-          </p>
-        </div>
-
-        {restaurants && restaurants.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {restaurants.map((restaurant) => (
-              <Link key={restaurant.id} to={`/menu/${encodeURIComponent(restaurant.name.toLowerCase().replace(/\s+/g, '-'))}`}>
-                <Card className="h-full hover:shadow-lg transition-shadow duration-200 cursor-pointer border-2 hover:border-primary/20">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl mb-2 text-foreground">{restaurant.name}</CardTitle>
-                        <CardDescription className="flex items-center gap-1 text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          {restaurant.city}, {restaurant.country}
-                        </CardDescription>
-                      </div>
-                      <Badge className={getStatusColor(restaurant.connection_status)}>
-                        Online
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <p className="text-sm text-muted-foreground">
-                        Owner: {restaurant.owner_full_name}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          Since {new Date(restaurant.created_at).getFullYear()}
-                        </span>
-                        <div className="flex items-center gap-1 text-primary">
-                          <Globe className="h-4 w-4" />
-                          <span className="text-sm font-medium">View Menu</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="bg-muted/50 rounded-lg p-8 max-w-md mx-auto">
-              <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2 text-foreground">No Restaurants Yet</h3>
-              <p className="text-muted-foreground mb-4">
-                We're working with restaurants to bring you amazing digital menu experiences.
-              </p>
-              <Link to="/contact">
-                <Button>Contact Us</Button>
-              </Link>
+              <Button variant="ghost" className="text-slate-700 hover:text-blue-600 hover:bg-blue-50" onClick={() => window.location.href = '/restaurant/login'}>
+                Login
+              </Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white border-0 shadow-lg" onClick={() => window.location.href = '/contact'}>
+                Sign Up
+              </Button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 py-20 text-center">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
+            {/* Animated Logo */}
+            <div className="mb-8 relative">
+              <div className="w-24 h-24 mx-auto bg-white rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/25 animate-bounce p-4">
+                <img src="/lovable-uploads/47736fb9-9e34-42c1-8aad-be2772515362.png" alt="Click Code Logo" className="w-full h-full object-contain animate-pulse" />
+              </div>
+              <div className="absolute inset-0 w-24 h-24 mx-auto bg-gradient-to-r from-blue-600 to-cyan-500 rounded-3xl blur-xl opacity-30 animate-ping"></div>
+            </div>
+
+            {/* Main Heading */}
+            <h1 className="md:text-6xl lg:text-8xl font-bold text-slate-800 mb-6 leading-tight text-2xl">
+              Restaurant{' '}
+              <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent animate-pulse bg-[length:200%_100%] animate-[shimmer_3s_ease-in-out_infinite]">
+                Management
+              </span>{' '}
+              <br />Made Simple
+            </h1>
+
+            
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 px-4">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white border-0 shadow-xl px-6 md:px-8 py-4 text-lg font-semibold group" onClick={() => window.location.href = '/restaurant/login'}>
+                Login
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button variant="outline" size="lg" className="border-blue-200 text-blue-700 hover:bg-blue-50 backdrop-blur-sm px-6 md:px-8 py-4 text-lg" onClick={() => window.location.href = '/contact'}>
+                Contact Us
+              </Button>
+            </div>
+
+            {/* Scroll Indicator */}
+            <div className="flex flex-col items-center animate-bounce cursor-pointer" onClick={scrollToFeatures}>
+              <span className="text-slate-500 text-sm mb-2">Discover Features</span>
+              <ChevronDown className="h-6 w-6 text-slate-500" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features-section" className="relative z-10 py-20 bg-white/50 backdrop-blur-sm">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+              Powerful Admin Features
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Everything you need to manage your restaurant efficiently
+            </p>
+          </div>
+
+          {/* Features Carousel */}
+          <div className="relative px-4 md:px-12">
+            <Carousel className="w-full max-w-5xl mx-auto">
+              <CarouselContent>
+                {/* Feature Card 1 */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/70 backdrop-blur-md border border-blue-100 hover:bg-white/90 transition-all duration-300 group hover:scale-105 hover:shadow-xl h-full">
+                    <CardContent className="p-8 text-center h-full flex flex-col">
+                      <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                        <Zap className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-slate-800 mb-4">Real-time Updates</h3>
+                      <p className="text-slate-600 leading-relaxed flex-grow">
+                        Instantly update your menu, prices, and availability across all platforms with our real-time synchronization.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+
+                {/* Feature Card 2 */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/70 backdrop-blur-md border border-blue-100 hover:bg-white/90 transition-all duration-300 group hover:scale-105 hover:shadow-xl h-full">
+                    <CardContent className="p-8 text-center h-full flex flex-col">
+                      <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                        <Shield className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-slate-800 mb-4">Multi-language Support</h3>
+                      <p className="text-slate-600 leading-relaxed flex-grow">
+                        Reach global customers with automatic translations and multi-currency support for international markets.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+
+                {/* Feature Card 3 */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/70 backdrop-blur-md border border-blue-100 hover:bg-white/90 transition-all duration-300 group hover:scale-105 hover:shadow-xl h-full">
+                    <CardContent className="p-8 text-center h-full flex flex-col">
+                      <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                        <BarChart3 className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-slate-800 mb-4">Analytics Dashboard</h3>
+                      <p className="text-slate-600 leading-relaxed flex-grow">
+                        Track performance with detailed analytics, customer insights, and business intelligence tools.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              </CarouselContent>
+              <CarouselPrevious className="bg-white/80 backdrop-blur-md border-blue-200 hover:bg-white/90" />
+              <CarouselNext className="bg-white/80 backdrop-blur-md border-blue-200 hover:bg-white/90" />
+            </Carousel>
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Section with Image Carousel */}
+      <section id="demo-section" className="relative z-10 py-20">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+              See It In Action
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Experience our responsive admin panel on both mobile and desktop
+            </p>
+          </div>
+
+          <ImageCarousel mobileImages={mobileImages} desktopImages={desktopImages} />
+        </div>
+      </section>
+
+      {/* Restaurant Testimonials Section */}
+      <section className="relative z-10 py-20 bg-gradient-to-br from-blue-50/50 via-white/50 to-cyan-50/50 backdrop-blur-sm">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+              Trusted by Leading Restaurants
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Discover how top restaurants are transforming their digital presence and boosting customer engagement
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Oliveta Restaurant */}
+            <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group cursor-pointer" onClick={() => window.location.href = '/menu/oliveta'}>
+              <CardContent className="p-8">
+                <div className="flex items-center mb-6">
+                  <img 
+                    src="/lovable-uploads/55ee0c88-6f17-4014-b17f-0a98a9315f48.png" 
+                    alt="Oliveta Restaurant logo"
+                    className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100"
+                  />
+                  <div>
+                    <h3 className="font-bold text-xl text-slate-800">Oliveta Restaurant</h3>
+                    <p className="text-slate-600 text-sm">Greek Modern Cuisine</p>
+                  </div>
+                </div>
+                
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                    </svg>
+                  ))}
+                </div>
+                
+                <blockquote className="text-slate-600 italic leading-relaxed mb-6">
+                  "Our partnership with this platform has transformed how we present our authentic Greek dishes. The beautiful menu design perfectly captures the essence of our modern cuisine, and our customers love the seamless digital experience."
+                </blockquote>
+                
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white border-0 shadow-lg group-hover:scale-105 transition-transform">
+                  View Menu <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Iumentis Steakhouse */}
+            <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-6">
+                  <img 
+                    src="/lovable-uploads/80ee67c9-bb51-4df6-a2e5-aee683f09915.png" 
+                    alt="Iumentis Steakhouse logo"
+                    className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100"
+                  />
+                  <div>
+                    <h3 className="font-bold text-xl text-slate-800">Iumentis Steakhouse</h3>
+                    <p className="text-slate-600 text-sm">Premium Steakhouse</p>
+                  </div>
+                </div>
+                
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                    </svg>
+                  ))}
+                </div>
+                
+                <blockquote className="text-slate-600 italic leading-relaxed">
+                  "The sophisticated menu presentation has elevated our steakhouse brand. Our premium cuts and wine selection are now showcased beautifully, resulting in a 40% increase in online orders and improved customer engagement."
+                </blockquote>
+              </CardContent>
+            </Card>
+
+            {/* Omoi Restaurant */}
+            <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group">
+              <CardContent className="p-8">
+                <div className="flex items-center mb-6">
+                  <img 
+                    src="/lovable-uploads/fba8d78e-2101-4df7-8e0b-f207f3964add.png" 
+                    alt="Omoi Restaurant logo"
+                    className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100"
+                  />
+                  <div>
+                    <h3 className="font-bold text-xl text-slate-800">Omoi Restaurant</h3>
+                    <p className="text-slate-600 text-sm">Contemporary Dining</p>
+                  </div>
+                </div>
+                
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                    </svg>
+                  ))}
+                </div>
+                
+                <blockquote className="text-slate-600 italic leading-relaxed">
+                  "The elegant design system perfectly matches our restaurant's aesthetic. Our guests appreciate the intuitive menu navigation and the seamless ordering experience. It's been a game-changer for our business."
+                </blockquote>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-16">
+            <Card className="bg-white/60 backdrop-blur-md border border-blue-100/50 max-w-2xl mx-auto">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold mb-4 text-slate-800">Join These Success Stories</h3>
+                <p className="text-slate-600 mb-6">
+                  Transform your restaurant's digital presence with our beautiful, modern menu solutions
+                </p>
+                <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white border-0 shadow-lg px-8 py-3 text-lg font-semibold">
+                  Get Started Today
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-muted/30 border-t py-8 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-muted-foreground mb-4">
-            Transform your restaurant with digital menus
-          </p>
-          <Link to="/contact">
-            <Button variant="outline">
-              Get started today
-            </Button>
-          </Link>
+      <footer className="relative z-10 bg-white/90 backdrop-blur-md border-t border-blue-100 py-12">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-3 mb-4 md:mb-0">
+              <img src="/lovable-uploads/47736fb9-9e34-42c1-8aad-be2772515362.png" alt="Click Code Logo" className="w-10 h-10 object-contain" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Click Code</span>
+            </div>
+            <p className="text-slate-600 text-center md:text-right">
+              © 2024 Click Code. Built for the future of dining.
+            </p>
+          </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;

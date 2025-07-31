@@ -2,7 +2,7 @@
 import React from 'react';
 import { UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { ImageUpload } from '@/components/ui/image-upload';
 
 interface RestaurantProfile {
@@ -44,6 +44,16 @@ export function MediaUpload({ register, setValue, watch }: MediaUploadProps) {
   const logoPath = watch('logo_path');
   const bannerPath = watch('banner_path');
 
+  const handleRemoveLogo = () => {
+    setValue('logo_path', '');
+    setValue('logo_url', '');
+  };
+
+  const handleRemoveBanner = () => {
+    setValue('banner_path', '');
+    setValue('banner_url', '');
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -57,17 +67,41 @@ export function MediaUpload({ register, setValue, watch }: MediaUploadProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ImageUpload
-            currentImagePath={logoPath}
-            onImageChange={(path) => setValue('logo_path', path)}
-            label="Logoja e Restorantit"
-          />
+          <div className="space-y-2">
+            <ImageUpload
+              currentImagePath={logoPath}
+              onImageChange={(path) => setValue('logo_path', path || '')}
+              label="Logoja e Restorantit"
+            />
+            {logoPath && (
+              <button
+                type="button"
+                onClick={handleRemoveLogo}
+                className="flex items-center gap-1 text-sm text-destructive hover:text-destructive/80 transition-colors"
+              >
+                <X className="h-3 w-3" />
+                Hiq logon
+              </button>
+            )}
+          </div>
 
-          <ImageUpload
-            currentImagePath={bannerPath}
-            onImageChange={(path) => setValue('banner_path', path)}
-            label="Banneri i Restorantit"
-          />
+          <div className="space-y-2">
+            <ImageUpload
+              currentImagePath={bannerPath}
+              onImageChange={(path) => setValue('banner_path', path || '')}
+              label="Banneri i Restorantit"
+            />
+            {bannerPath && (
+              <button
+                type="button"
+                onClick={handleRemoveBanner}
+                className="flex items-center gap-1 text-sm text-destructive hover:text-destructive/80 transition-colors"
+              >
+                <X className="h-3 w-3" />
+                Hiq bannerin
+              </button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

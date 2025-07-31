@@ -114,7 +114,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {hasContactInfo && (
                   <Collapsible open={isContactOpen} onOpenChange={setIsContactOpen}>
                     <CollapsibleTrigger 
-                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium rounded-lg transition-colors"
                       style={{ color: customTheme?.contactSectionTitleColor }}
                     >
                       <span>Contact Information</span>
@@ -178,7 +178,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {hasWorkingHours && (
                   <Collapsible open={isHoursOpen} onOpenChange={setIsHoursOpen}>
                     <CollapsibleTrigger 
-                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium rounded-lg transition-colors"
                       style={{ color: customTheme?.openingHoursSectionTitleColor }}
                     >
                       <span>Opening Hours</span>
@@ -216,7 +216,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 {hasSocialLinks && (
                   <Collapsible open={isSocialOpen} onOpenChange={setIsSocialOpen}>
                     <CollapsibleTrigger 
-                      className="flex items-center justify-between w-full p-2 text-xs font-medium hover:bg-muted/50 rounded-lg transition-colors"
+                      className="flex items-center justify-between w-full p-2 text-xs font-medium rounded-lg transition-colors"
                       style={{ color: customTheme?.socialMediaSectionTitleColor }}
                     >
                       <span>Follow Us</span>
@@ -228,10 +228,15 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                           if (!url) return null;
                           const IconComponent = getSocialIcon(platform);
                           
+                          // Format WhatsApp URL to send message directly
+                          const linkUrl = platform === 'whatsapp' 
+                            ? `https://wa.me/${url.replace(/[^\d]/g, '')}` 
+                            : url;
+                          
                           return (
                             <a
                               key={platform}
-                              href={url}
+                              href={linkUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 text-xs hover:text-foreground transition-colors"
@@ -288,7 +293,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
 
           {/* Footer Text */}
           <div className="text-center pt-3 space-y-2">
-            {/* CodeClick.cc Branding */}
+            {/* ClickCode Branding */}
             <div className="pt-2 border-t border-border/10">
               <a 
                 href="/" 
@@ -296,7 +301,7 @@ export function MenuFooter({ profile, customTheme, showFullContent = false }: Me
                 style={{ color: customTheme?.footerBrandingColor || '#3b82f6' }}
               >
                 <span>Powered by</span>
-                <span className="font-semibold group-hover:text-primary/80">CodeClick.cc</span>
+                <span className="font-semibold group-hover:text-primary/80">ClickCode</span>
                 <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100" />
               </a>
               <p 

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -43,14 +43,20 @@ interface CurrencySwitchProps {
   restaurantSupabase: any;
   currentCurrency: string;
   onCurrencyChange: (currency: string) => void;
+  customTheme?: {
+    currencySwitchBackground?: string;
+    currencySwitchBorder?: string;
+    currencySwitchText?: string;
+  };
 }
 
 export function CurrencySwitch({
   restaurantSupabase,
   currentCurrency,
-  onCurrencyChange
+  onCurrencyChange,
+  customTheme
 }: CurrencySwitchProps) {
-  // Fetch currency settings
+  // Fetch currency settings with shorter stale time for better reactivity
   const {
     data: currencySettings
   } = useQuery({
@@ -67,11 +73,21 @@ export function CurrencySwitch({
       }
       return data as CurrencySettings | null;
     },
-    enabled: !!restaurantSupabase
+    enabled: !!restaurantSupabase,
+    staleTime: 30 * 1000, // Reduced to 30 seconds for faster updates
+    refetchInterval: 60 * 1000 // Refetch every minute to catch dashboard changes
   });
 
   const enabledCurrencies = currencySettings?.enabled_currencies || ['ALL', 'EUR'];
   const currentCurrencyData = CURRENCY_OPTIONS.find(curr => curr.code === currentCurrency);
+
+  // Auto-switch to default currency if current currency is not enabled
+  useEffect(() => {
+    if (currencySettings?.default_currency && 
+        !enabledCurrencies.includes(currentCurrency)) {
+      onCurrencyChange(currencySettings.default_currency);
+    }
+  }, [currencySettings, enabledCurrencies, currentCurrency, onCurrencyChange]);
 
   return (
     <Popover>
@@ -79,7 +95,12 @@ export function CurrencySwitch({
         <Button 
           variant="outline" 
           size="sm" 
-          className="h-8 px-2 bg-gray-800 border-gray-600 hover:bg-gray-700 text-white rounded-md flex items-center gap-1"
+          className="h-8 px-2 rounded-md flex items-center gap-1"
+          style={{
+            backgroundColor: customTheme?.currencySwitchBackground,
+            borderColor: customTheme?.currencySwitchBorder,
+            color: customTheme?.currencySwitchText
+          }}
         >
           <span className="text-sm">{currentCurrencyData?.flag}</span>
           <span className="text-xs font-medium">{currentCurrency}</span>

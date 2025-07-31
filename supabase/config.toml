@@ -1,0 +1,58 @@
+
+project_id = "zijfbnubzfonpxngmqqz"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[realtime]
+enabled = true
+port = 54323
+tenant_id = "realtime-dev"
+
+[studio]
+enabled = true
+port = 54324
+
+[inbucket]
+enabled = true
+port = 54325
+smtp_port = 54326
+pop3_port = 54327
+
+[storage]
+enabled = true
+port = 54326
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+port = 54327
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://zijfbnubzfonpxngmqqz.supabase.co"]
+jwt_expiry = 3600
+refresh_token_rotation_enabled = true
+security_refresh_token_reuse_interval = 10
+enable_signup = true
+
+[functions.get-restaurants-for-ping]
+verify_jwt = false
+
+[functions.keep-alive-restaurant]
+verify_jwt = false
+
+[functions.auto-translate]
+verify_jwt = false

@@ -1,5 +1,4 @@
-
-# Welcome to your ClickCode project
+# Welcome to your Lovable project
 
 ## Project info Albania
 
@@ -9,15 +8,15 @@
 
 There are several ways of editing your application.
 
-**Use ClickCode**
+**Use Lovable**
 
-Simply visit the [ClickCode Project](https://lovable.dev/projects/d68d6feb-97b1-4947-a9c1-94cf489226b0) and start prompting.
+Simply visit the [Lovable Project](https://lovable.dev/projects/d68d6feb-97b1-4947-a9c1-94cf489226b0) and start prompting.
 
-Changes made via ClickCode will be committed automatically to this repo.
+Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in ClickCode.
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -63,9 +62,9 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [ClickCode](https://lovable.dev/projects/d68d6feb-97b1-4947-a9c1-94cf489226b0) and click on Share -> Publish.
+Simply open [Lovable](https://lovable.dev/projects/d68d6feb-97b1-4947-a9c1-94cf489226b0) and click on Share -> Publish.
 
-## Can I connect a custom domain to my ClickCode project?
+## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
 

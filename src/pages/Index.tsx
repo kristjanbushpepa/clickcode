@@ -137,20 +137,14 @@ const Index = () => {
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2"
-              >
+              <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2">
                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
             </div>
           </div>
 
           {/* Mobile Menu Dropdown */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden mt-4 pb-4 border-t border-blue-100/50">
+          {isMobileMenuOpen && <div className="md:hidden mt-4 pb-4 border-t border-blue-100/50">
               <div className="flex flex-col space-y-3 pt-4">
                 <LanguageSwitch />
                 <Button variant="ghost" className="text-slate-700 hover:text-blue-600 hover:bg-blue-50 justify-start" onClick={() => window.location.href = '/restaurant/login'}>
@@ -160,8 +154,7 @@ const Index = () => {
                   {t('nav.contact')}
                 </Button>
               </div>
-            </div>
-          )}
+            </div>}
         </div>
       </nav>
 
@@ -292,6 +285,72 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Menu Examples Section */}
+      <section className="relative z-10 py-20 bg-gradient-to-br from-slate-50/50 via-blue-50/50 to-white/50 backdrop-blur-sm">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+              Shembuj të menuve tona
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              Jemi krenarë të punojmë me <span className="font-bold text-blue-600">20+ restorante</span> dhe të prezantojmë shembuj nga përzgjedhja jonë e larmishme të menuve. Kjo është vetëm një pjesë - shumë përvojë të tjera kulinarë ju presin!
+            </p>
+          </div>
+
+          {/* Menu Examples Carousel */}
+          <div className="relative px-4 md:px-12 mb-12">
+            <Carousel className="w-full max-w-5xl mx-auto">
+              <CarouselContent>
+                {/* Iumentis Steakhouse */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/95 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group cursor-pointer overflow-hidden h-full">
+                    <div className="relative h-full overflow-hidden">
+                      <img src="/lovable-uploads/3dbaa494-3111-489e-95e1-557c7e7215bf.png" alt="Iumentis Steakhouse Menu" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                        <h3 className="font-bold text-xl text-white">IUMENTIS STEAKHOUSE</h3>
+                      </div>
+                    </div>
+                  </Card>
+                </CarouselItem>
+
+                {/* Omoi Restaurant */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/95 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group cursor-pointer overflow-hidden h-full">
+                    <div className="relative h-full overflow-hidden">
+                      <img src="/lovable-uploads/35dc9657-4a92-4c5f-8929-5a758c03b6d7.png" alt="Omoi Restaurant Menu" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                        <h3 className="font-bold text-xl text-white">OMOI</h3>
+                      </div>
+                    </div>
+                  </Card>
+                </CarouselItem>
+
+                {/* Oliveta Restaurant */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/95 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group cursor-pointer overflow-hidden h-full">
+                    <div className="relative h-full overflow-hidden">
+                      <img src="/lovable-uploads/3eca7e2e-53a9-4d5d-b8f4-0aaecc82a077.png" alt="Oliveta Restaurant Menu" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                        <h3 className="font-bold text-xl text-white">OLIVETA RESTAURANT</h3>
+                      </div>
+                    </div>
+                  </Card>
+                </CarouselItem>
+              </CarouselContent>
+              <CarouselPrevious className="bg-white/80 backdrop-blur-md border-blue-200 hover:bg-white/90" />
+              <CarouselNext className="bg-white/80 backdrop-blur-md border-blue-200 hover:bg-white/90" />
+            </Carousel>
+          </div>
+
+          <div className="text-center">
+            <p className="text-lg text-slate-600 mb-6">
+              ...dhe shumë <span className="font-bold text-blue-600">më tepër</span> restorante të mrekullueshme!
+            </p>
+            
+          </div>
+        </div>
+      </section>
+
       {/* Restaurant Testimonials Section */}
       <section className="relative z-10 py-20 bg-gradient-to-br from-blue-50/50 via-white/50 to-cyan-50/50 backdrop-blur-sm">
         <div className="container mx-auto px-6">
@@ -299,97 +358,100 @@ const Index = () => {
             <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
               {t('testimonials.title')}
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              {t('testimonials.subtitle')}
-            </p>
+            
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Oliveta Restaurant */}
-            <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group cursor-pointer" onClick={() => window.location.href = '/menu/oliveta'}>
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <img src="/lovable-uploads/55ee0c88-6f17-4014-b17f-0a98a9315f48.png" alt="Oliveta Restaurant logo" className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100" />
-                  <div>
-                    <h3 className="font-bold text-xl text-slate-800">Oliveta Restaurant</h3>
-                    <p className="text-slate-600 text-sm">Greek Modern Cuisine</p>
-                  </div>
-                </div>
-                
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>)}
-                </div>
-                
-                <blockquote className="text-slate-600 italic leading-relaxed mb-6">
-                  {t('testimonials.oliveta')}
-                </blockquote>
-                
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white border-0 shadow-lg group-hover:scale-105 transition-transform">
-                  {t('testimonials.view_menu')} <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+          {/* Testimonials Carousel */}
+          <div className="relative px-4 md:px-12">
+            <Carousel className="w-full max-w-5xl mx-auto">
+              <CarouselContent>
+                {/* Oliveta Restaurant */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group cursor-pointer h-full" onClick={() => window.location.href = '/menu/oliveta'}>
+                    <CardContent className="p-8 h-full flex flex-col">
+                      <div className="flex items-center mb-6">
+                        <img src="/lovable-uploads/55ee0c88-6f17-4014-b17f-0a98a9315f48.png" alt="Oliveta Restaurant logo" className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100" />
+                        <div>
+                          <h3 className="font-bold text-xl text-slate-800">Oliveta Restaurant</h3>
+                          <p className="text-slate-600 text-sm">Greek Modern Cuisine</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex mb-4">
+                        {[...Array(5)].map((_, i) => <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                          </svg>)}
+                      </div>
+                      
+                      <blockquote className="text-slate-600 italic leading-relaxed mb-6 flex-grow">
+                        "Që kur implementuam sistemin e menusë QR të Click Code, kemi parë një rritje prej 40% në vlerësimet e klientëve! Mundësia për të përditësuar menjëherë menunë dhe çmimet ka qenë një ndryshim i vërtetë për operacionet e restorantit tonë."
+                      </blockquote>
+                      
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white border-0 shadow-lg group-hover:scale-105 transition-transform">
+                        {t('testimonials.view_menu')} <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
 
-            {/* Iumentis Steakhouse */}
-            <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <img src="/lovable-uploads/80ee67c9-bb51-4df6-a2e5-aee683f09915.png" alt="Iumentis Steakhouse logo" className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100" />
-                  <div>
-                    <h3 className="font-bold text-xl text-slate-800">Iumentis Steakhouse</h3>
-                    <p className="text-slate-600 text-sm">Premium Steakhouse</p>
-                  </div>
-                </div>
-                
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>)}
-                </div>
-                
-                <blockquote className="text-slate-600 italic leading-relaxed">
-                  {t('testimonials.iumentis')}
-                </blockquote>
-              </CardContent>
-            </Card>
+                {/* Iumentis Steakhouse */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group h-full">
+                    <CardContent className="p-8 h-full flex flex-col">
+                      <div className="flex items-center mb-6">
+                        <img src="/lovable-uploads/80ee67c9-bb51-4df6-a2e5-aee683f09915.png" alt="Iumentis Steakhouse logo" className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100" />
+                        <div>
+                          <h3 className="font-bold text-xl text-slate-800">Iumentis Steakhouse</h3>
+                          <p className="text-slate-600 text-sm">Premium Steakhouse</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex mb-4">
+                        {[...Array(5)].map((_, i) => <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                          </svg>)}
+                      </div>
+                      
+                      <blockquote className="text-slate-600 italic leading-relaxed flex-grow">
+                        "Lehtësia e përditësimit të menusë në kohë reale ka transformuar mënyrën se si operojmë. Klientët tanë e duan përvojën interaktive QR dhe kemi marrë shumë më tepër vlerësime pozitive që prej lancimit."
+                      </blockquote>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
 
-            {/* Omoi Restaurant */}
-            <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <img src="/lovable-uploads/fba8d78e-2101-4df7-8e0b-f207f3964add.png" alt="Omoi Restaurant logo" className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100" />
-                  <div>
-                    <h3 className="font-bold text-xl text-slate-800">Omoi Restaurant</h3>
-                    <p className="text-slate-600 text-sm">Contemporary Dining</p>
-                  </div>
-                </div>
-                
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>)}
-                </div>
-                
-                <blockquote className="text-slate-600 italic leading-relaxed">
-                  {t('testimonials.omoi')}
-                </blockquote>
-              </CardContent>
-            </Card>
+                {/* Omoi Restaurant */}
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 hover:bg-white/90 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group h-full">
+                    <CardContent className="p-8 h-full flex flex-col">
+                      <div className="flex items-center mb-6">
+                        <img src="/lovable-uploads/fba8d78e-2101-4df7-8e0b-f207f3964add.png" alt="Omoi Restaurant logo" className="w-16 h-16 rounded-full object-cover mr-4 shadow-lg ring-2 ring-blue-100" />
+                        <div>
+                          <h3 className="font-bold text-xl text-slate-800">Omoi Restaurant</h3>
+                          <p className="text-slate-600 text-sm">Contemporary Dining</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex mb-4">
+                        {[...Array(5)].map((_, i) => <svg key={i} className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                          </svg>)}
+                      </div>
+                      
+                      <blockquote className="text-slate-600 italic leading-relaxed flex-grow">
+                        "Sistemi i menusë së Click Code e ka bërë kaq të thjeshtë të mbajmë ofertat tona të përditësuara. Mund të përditësojmë çmimet dhe përshkrimet menjëherë, dhe komentimi i klientëve ka përmirësuar dramatikisht me përvojën moderne të menusë QR."
+                      </blockquote>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              </CarouselContent>
+              <CarouselPrevious className="bg-white/80 backdrop-blur-md border-blue-200 hover:bg-white/90" />
+              <CarouselNext className="bg-white/80 backdrop-blur-md border-blue-200 hover:bg-white/90" />
+            </Carousel>
           </div>
 
           <div className="text-center mt-16">
             <Card className="bg-white/60 backdrop-blur-md border border-blue-100/50 max-w-2xl mx-auto">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold mb-4 text-slate-800">{t('cta.title')}</h3>
-                <p className="text-slate-600 mb-6">
-                  {t('cta.subtitle')}
-                </p>
-                <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white border-0 shadow-lg px-8 py-3 text-lg font-semibold">
-                  {t('cta.get_started')}
-                </Button>
-              </CardContent>
+              
             </Card>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { ImageCarousel } from '@/components/ImageCarousel';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitch from '@/components/LanguageSwitch';
+import { Link } from 'react-router-dom';
 const Index = () => {
   const {
     t
@@ -293,7 +294,7 @@ const Index = () => {
               Shembuj të menuve tona
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Jemi krenarë të punojmë me <span className="font-bold text-blue-600">20+ restorante</span> dhe të prezantojmë shembuj nga përzgjedhja jonë e larmishme të menuve. Kjo është vetëm një pjesë - shumë përvojë të tjera kulinarë ju presin!
+              Jemi krenarë të punojmë me <span className="font-bold text-blue-600">20+ restorante</span> dhe të prezantojmë shembuj nga përzgjedhja jonë e larmishme të menuve.
             </p>
           </div>
 
@@ -450,8 +451,20 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-16">
-            <Card className="bg-white/60 backdrop-blur-md border border-blue-100/50 max-w-2xl mx-auto">
-              
+            <Card className="bg-white/80 backdrop-blur-md border border-blue-100/50 max-w-2xl mx-auto">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-slate-800 mb-4">
+                  Gati për të filluar?
+                </h3>
+                <p className="text-slate-600 mb-6">
+                  Na kontaktoni që të filloni sot dhe transformoni përvojën e menusë së restorantit tuaj.
+                </p>
+                <Link to="/contact">
+                  <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                    Kontaktoni
+                  </Button>
+                </Link>
+              </CardContent>
             </Card>
           </div>
         </div>

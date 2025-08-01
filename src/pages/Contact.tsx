@@ -125,27 +125,36 @@ const Contact = () => {
           filter: 'drop-shadow(0 0 15px hsl(var(--primary) / 0.3))'
         }} />
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            {t('contact.title')} <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('contact.pricing')}</span>
+            {t('contact.get_in_touch')}
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('contact.subtitle')}
-          </p>
         </div>
 
         {/* Contact Information */}
-        <div className="text-center mb-8">
-          <div className="bg-card/80 backdrop-blur-md border border-border rounded-lg p-6 max-w-md mx-auto shadow-lg">
-            <h2 className="text-lg font-semibold text-foreground mb-4">{t('contact.get_in_touch')}</h2>
-            <div className="space-y-2">
-              <p className="text-muted-foreground">
-                <span className="font-medium">Email:</span> clickcodemenu@gmail.com
-              </p>
-              <p className="text-muted-foreground">
-                <span className="font-medium">Phone:</span> +355 68 587 0595
-              </p>
-              <p className="text-muted-foreground">
-                <span className="font-medium">Phone:</span> +355 68 243 8222
-              </p>
+        <div className="flex justify-center">
+          <div className="bg-card/80 backdrop-blur-md border border-border rounded-xl p-8 max-w-lg shadow-xl">
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <MessageCircle className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-lg font-medium text-foreground">clickcodemenu@gmail.com</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <MessageCircle className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Telefon</p>
+                  <div className="space-y-1">
+                    <p className="text-lg font-medium text-foreground">+355 68 587 0595</p>
+                    <p className="text-lg font-medium text-foreground">+355 68 243 8222</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

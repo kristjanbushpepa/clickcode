@@ -19,8 +19,17 @@ const translations = {
     
     // Hero Section
     'hero.welcome': 'Welcome to',
+    'hero.title': 'Digital Restaurant Platform',
     'hero.description': 'Transform your restaurant with our cutting-edge digital menu platform. Create stunning QR code menus, manage your profile with ease, and boost your online presence with our powerful admin panel.',
     'hero.restaurant_login': 'Restaurant Login',
+    'hero.explore_features': 'Explore Features',
+    'hero.see_demo': 'See Demo',
+    
+    // Stats Section  
+    'stats.restaurants': 'Active Restaurants',
+    'stats.scans': 'Monthly QR Scans',
+    'stats.satisfaction': 'Customer Satisfaction',
+    'stats.uptime': 'Platform Uptime',
     
     // Features Section
     'features.title': 'Powerful Features for Modern Restaurants',
@@ -37,6 +46,28 @@ const translations = {
     'features.social_growth_desc': 'Boost your social media followers with integrated campaigns and engagement tools.',
     'features.qr_code_menus': 'QR Code Menus',
     'features.qr_code_menus_desc': 'Generate beautiful QR codes for contactless menu access with real-time updates and analytics.',
+    
+    // Demo Section
+    'demo.title': 'See Our Platform in Action',
+    'demo.subtitle': 'Experience the power of our digital menu system with real restaurant examples',
+    'demo.mobile_experience': 'Mobile Experience',
+    'demo.mobile_desc': 'Optimized for seamless mobile interactions and touch-friendly navigation.',
+    'demo.desktop_experience': 'Desktop Experience', 
+    'demo.desktop_desc': 'Full-featured management dashboard for comprehensive restaurant control.',
+    
+    // Testimonials Section
+    'testimonials.title': 'Trusted by Restaurants Worldwide',
+    'testimonials.subtitle': 'See how our platform has transformed dining experiences',
+    'testimonials.view_menu': 'View Menu',
+    'testimonials.oliveta': '"The digital menu has revolutionized our customer experience. Orders increased by 35% and our staff can focus more on service quality."',
+    'testimonials.iumentis': '"The sophisticated menu presentation has elevated our steakhouse brand. Our premium cuts and wine selection are now showcased beautifully, resulting in a 40% increase in online orders and improved customer engagement."',
+    'testimonials.omoi': '"The elegant design system perfectly matches our restaurant\'s aesthetic. Our guests appreciate the intuitive menu navigation and the seamless ordering experience. It\'s been a game-changer for our business."',
+    
+    // Call to Action
+    'cta.title': 'Ready to Transform Your Restaurant?',
+    'cta.subtitle': 'Join hundreds of restaurants already using our platform to enhance their customer experience.',
+    'cta.get_started': 'Get Started Today',
+    'cta.contact_sales': 'Contact Sales',
     
     // Restaurants Section
     'restaurants.title': 'Our Partner Restaurants',
@@ -110,8 +141,17 @@ const translations = {
     
     // Hero Section
     'hero.welcome': 'Mirë se vini në',
+    'hero.title': 'Platformën Digjitale të Restoranteve',
     'hero.description': 'Transformoni restorantin tuaj me platformën tonë të avancuar të menusë digjitale. Krijoni meny QR të mahnitshme, menaxhoni profilin tuaj me lehtësi dhe rrisni prezencën tuaj online me panelin tonë të fuqishëm administrativ.',
     'hero.restaurant_login': 'Hyrja e Restorantit',
+    'hero.explore_features': 'Eksploro Karakteristikat',
+    'hero.see_demo': 'Shiko Demonstrimin',
+    
+    // Stats Section
+    'stats.restaurants': 'Restorante Aktive',
+    'stats.scans': 'Skanime Mujore QR',
+    'stats.satisfaction': 'Kënaqësia e Klientëve',
+    'stats.uptime': 'Koha e Disponueshmërisë',
     
     // Features Section
     'features.title': 'Karakteristika të Fuqishme për Restorantet Moderne',
@@ -128,6 +168,28 @@ const translations = {
     'features.social_growth_desc': 'Rrisni ndjekësit tuaj në mediat sociale me kampanja të integruara dhe mjete angazhimi.',
     'features.qr_code_menus': 'Menutë QR Code',
     'features.qr_code_menus_desc': 'Gjeneroni kode QR të bukura për qasje në meny pa kontakt me përditësime në kohë reale dhe analiza.',
+    
+    // Demo Section
+    'demo.title': 'Shikoni Platformën tonë në Veprim',
+    'demo.subtitle': 'Përjetoni fuqinë e sistemit tonë të menysë digjitale me shembuj realë restorantesh',
+    'demo.mobile_experience': 'Përvoja Mobile',
+    'demo.mobile_desc': 'E optimizuar për ndërveprime të përsosura mobile dhe navigim të thjeshtë me prekje.',
+    'demo.desktop_experience': 'Përvoja Desktop',
+    'demo.desktop_desc': 'Dashboard i plotë me karakteristika për kontroll gjithëpërfshirës të restorantit.',
+    
+    // Testimonials Section
+    'testimonials.title': 'I Besuar nga Restorante Anembanë Botës',
+    'testimonials.subtitle': 'Shikoni se si platforma jonë ka transformuar përvojat e të ngrënit',
+    'testimonials.view_menu': 'Shiko Menynë',
+    'testimonials.oliveta': '"Menya digjitale ka revolucionarizuar përvojën e klientëve tanë. Porositë u rritën me 35% dhe stafi ynë mund të fokusohet më shumë në cilësinë e shërbimit."',
+    'testimonials.iumentis': '"Prezantimi i sofistikuar i menysë ka ngritur markën tonë të steakhouse. Copëtimi i premium dhe zgjedhja e verërave tona tani janë shfaqur bukur, duke rezultuar në një rritje 40% të porosive online dhe angazhim të përmirësuar të klientëve."',
+    'testimonials.omoi': '"Sistemi elegant i dizajnit përputhet përfekt me estetikën e restorantit tonë. Mysafirët tanë vlerësojnë navigimin intuitiv të menysë dhe përvojën e qetë të porosisë. Ka qenë një ndryshues loje për biznesin tonë."',
+    
+    // Call to Action
+    'cta.title': 'Gati të Transformoni Restorantin Tuaj?',
+    'cta.subtitle': 'Bashkohuni me qindra restorante që tashmë përdorin platformën tonë për të përmirësuar përvojën e klientëve të tyre.',
+    'cta.get_started': 'Filloni Sot',
+    'cta.contact_sales': 'Kontaktoni Shitjet',
     
     // Restaurants Section
     'restaurants.title': 'Restorantet Tona Partnere',
@@ -200,7 +262,7 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('sq');
 
   const t = (key: string): string => {
     return translations[language][key] || key;
